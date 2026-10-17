@@ -10,7 +10,6 @@ Environment:
   SKILLTREE_GIST      id of the private gist holding skilltree.json (the page saves unlocks there)
   SKILLTREE_JSON      fallback: the Skill Tree app's export (JSON text)
   SKILLTREE_FILE      or a path to that export, for local builds
-  GITHUB_TOKEN        optional, only to raise the API rate limit when reading the gist
 
 Usage:
   python build.py site            build from Notion
@@ -197,9 +196,8 @@ def diagnose() -> None:
 
 # ---------------------------------------------------------------- Skill Tree
 def read_gist(gist_id: str) -> dict | None:
+    # A secret gist is readable by id without signing in (the Actions GITHUB_TOKEN gets 403 on gists).
     headers = {"Accept": "application/vnd.github+json", "User-Agent": "life-dashboard-build"}
-    if os.environ.get("GITHUB_TOKEN"):
-        headers["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
     try:
         with urllib.request.urlopen(urllib.request.Request(f"https://api.github.com/gists/{gist_id}", headers=headers), timeout=30) as res:
             g = json.load(res)
