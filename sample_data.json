@@ -270,6 +270,38 @@
      ]
     }
    ]
+  },
+  "plan": {
+   "url": "https://app.notion.com/p/sampleplan",
+   "budgets": [],
+   "tables": [
+    {
+     "heading": "Tracking",
+     "header": true,
+     "rows": [
+      [
+       "Checkpoint",
+       "Net worth",
+       "Emergency fund"
+      ],
+      [
+       "Oct 2026 (baseline)",
+       "12K",
+       "2000€"
+      ],
+      [
+       "Start (Jan)",
+       "",
+       ""
+      ],
+      [
+       "Q4 / target",
+       "20K",
+       "1000€ + 2000€"
+      ]
+     ]
+    }
+   ]
   }
  },
  "skilltree": {

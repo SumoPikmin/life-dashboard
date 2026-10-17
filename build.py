@@ -39,6 +39,7 @@ PBKDF2_ITERATIONS = 600_000
 
 # The Life Wiki page and its databases: (name, database id, data source id).
 LIFE_WIKI_PAGE = "e52fc193f0954ba88c24c996b20e6182"
+PLAN_PAGE = "3fb328fe8334816ba515f1944627f287"      # Finance Plan 2027 (Tracking table: net worth, emergency fund)
 FINANCE_PAGE = "37b328fe83348121831ddc036d0fa17c"   # Life Wiki / Active Projects / Finance Plan 2027 / Finance
 PROJECTS = ("Active Projects", "99ac0a23807847ef911c4647ec92f2da", "d7e2eda4-a2e7-4373-80b0-c09440a11edb")
 GOALS = ("Impossible List", "b4cc061661b3469ab576f5e2facb9693", "3cdebe34-6799-462f-82c9-a1507dca1647")
@@ -311,6 +312,7 @@ def collect(sample: bool) -> dict:
             "wiki": {"text": page_text(LIFE_WIKI_PAGE)},
             "savings": query_rows(SAVINGS),
             "finance": finance_page(FINANCE_PAGE),
+            "plan": finance_page(PLAN_PAGE),
         }
     except NotionError as e:
         print(e)

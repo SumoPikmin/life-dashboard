@@ -82,12 +82,21 @@
   .sk-tip { position: absolute; pointer-events: none; z-index: 5; max-width: 18rem; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); }
   .sk-tip-h { color: var(--cds-text-secondary); }
 
-  .sk-bucket { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--cds-gap-sm); }
-  .sk-pick { font: inherit; color: inherit; cursor: pointer; text-align: left; display: flex; align-items: center; gap: var(--cds-gap-sm); padding: var(--cds-pad-sm) var(--cds-pad-md); border-radius: 10px; border: 1px solid var(--color-border-line); background: var(--color-panel); min-width: 0; }
-  .sk-pick:hover { border-color: var(--a-bucket); }
-  .sk-pick.is-on { background: color-mix(in oklab, var(--a-bucket) 12%, var(--color-panel)); border-color: color-mix(in oklab, var(--a-bucket) 45%, var(--color-border-line)); }
+  .sk-lists { display: grid; gap: var(--cds-gap-lg); }
+  .sk-list { display: grid; gap: var(--cds-gap-sm); }
+  .sk-list-head { display: flex; align-items: center; gap: var(--cds-gap-sm); }
+  .sk-list-head strong { font-weight: var(--cds-font-weight-medium); }
+  .sk-list-head .sk-sub { margin-left: auto; }
+  .sk-list-meter { height: .3rem; border-radius: 999px; background: color-mix(in oklab, var(--a) 15%, transparent); overflow: hidden; }
+  .sk-list-meter > span { display: block; height: 100%; background: var(--a); border-radius: 999px; }
+  .sk-bucket { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: var(--cds-gap-xs); }
+  .sk-pick { font: inherit; color: inherit; text-decoration: none; cursor: pointer; text-align: left; display: flex; align-items: center; gap: var(--cds-gap-sm); padding: var(--cds-pad-sm) var(--cds-pad-md); border-radius: 10px; border: 1px solid var(--color-border-line); background: var(--color-panel); min-width: 0; }
+  .sk-pick:hover { border-color: var(--a, var(--a-bucket)); }
+  .sk-pick.is-on { background: color-mix(in oklab, var(--a, var(--a-bucket)) 12%, var(--color-panel)); border-color: color-mix(in oklab, var(--a, var(--a-bucket)) 45%, var(--color-border-line)); }
+  .sk-pick.is-active { border-color: var(--a, var(--a-bucket)); }
   .sk-box { width: 1.2rem; height: 1.2rem; flex: none; border-radius: 6px; border: 1.5px solid var(--color-border-line); display: grid; place-items: center; font-size: .75rem; color: var(--color-panel); }
-  .sk-pick.is-on .sk-box { background: var(--a-bucket); border-color: var(--a-bucket); }
+  .sk-pick.is-on .sk-box { background: var(--a, var(--a-bucket)); border-color: var(--a, var(--a-bucket)); }
+  .sk-pick.is-active .sk-box { border-color: var(--a, var(--a-bucket)); color: var(--a, var(--a-bucket)); font-size: 1rem; }
   .sk-pick-body { display: grid; min-width: 0; }
   .sk-pick-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
 </style>
@@ -191,10 +200,13 @@ window.SkillTree = (() => {
       const s = stateOf(t, n);
       if (s === 'done') { done++; xp += nodeXp(n); } else if (s === 'open') ready++;
     }
-    const bucketDone = Object.keys(st.bucket || {}).length;
-    xp += bucketDone * XP_BUCKET;
-    return { xp, done, total, ready, bucketDone, bucketTotal: (config.bucket || []).length, level: Math.floor(xp / LEVEL_STEP) + 1, into: xp % LEVEL_STEP };
+    const list = impossible();
+    return { xp, done, total, ready, listDone: list.filter((g) => g.status === 'Done').length, listTotal: list.length, level: Math.floor(xp / LEVEL_STEP) + 1, into: xp % LEVEL_STEP };
   }
+  /* The Impossible List replaces the app's built-in bucket list: read from Notion, edited there. */
+  const AREAS = ['Health & Fitness', 'Travel & Adventure', 'Finance', 'Social', 'Career', 'Learning', 'Home & Admin'];
+  const AREA_HUE = { 'Health & Fitness': 'var(--a-health)', 'Travel & Adventure': 'var(--a-travel)', Finance: 'var(--a-finance)', Social: 'var(--a-social)', Career: 'var(--a-career)', Learning: 'var(--a-learning)', 'Home & Admin': 'var(--a-home)' };
+  const impossible = () => (window.dash && dash.data('items').status === 'ok' ? dash.data('items').data.filter((x) => x.kind === 'goal' && x.status !== 'Archived') : []);
 
   // ---------- GitHub gist
   const api = (method, body) => fetch('https://api.github.com/gists/' + gistId, {
@@ -341,19 +353,21 @@ window.SkillTree = (() => {
     $('#sk-xp').textContent = d3.format(',')(s.xp) + ' XP';
     $('#sk-xpbar').style.width = (s.into / LEVEL_STEP) * 100 + '%';
     $('#sk-next').textContent = s.into + ' of ' + LEVEL_STEP + ' XP towards level ' + (s.level + 1);
-    $('#sk-counts').textContent = s.done + ' of ' + s.total + ' skills · ' + s.ready + ' ready · bucket list ' + s.bucketDone + ' of ' + s.bucketTotal;
+    $('#sk-counts').textContent = s.done + ' of ' + s.total + ' skills · ' + s.ready + ' ready' + (s.listTotal ? ' · Impossible List ' + s.listDone + ' of ' + s.listTotal + ' done' : '');
     const tabs = $('#sk-tabs'); tabs.replaceChildren();
     const ids = [...config.branches.map((b) => b.id), 'bucket'];
     if (!ids.includes(branchSel)) branchSel = ids[0];
-    for (const b of [...config.branches, { id: 'bucket', name: 'Bucket list', tracks: [] }]) {
+    for (const b of [...config.branches, { id: 'bucket', name: 'Impossible List', tracks: [] }]) {
       const tab = el('button', 'sk-tab'); tab.type = 'button'; tab.setAttribute('role', 'tab');
       tab.setAttribute('aria-selected', String(b.id === branchSel)); tab.dataset.branch = b.id;
       tab.style.setProperty('--a', hue(b));
       const nm = el('span', 'sk-tab-name'); nm.append(el('span', 'sk-dot'), el('span', '', b.name));
       let sub, pips = el('span', 'sk-pips');
       if (b.id === 'bucket') {
-        sub = (Object.keys(st.bucket).length) + ' of ' + (config.bucket || []).length + ' done';
-        for (const it of config.bucket || []) pips.append(el('i', st.bucket[it.id] ? 'is-done' : ''));
+        const list = impossible();
+        sub = list.filter((g) => g.status === 'Done').length + ' of ' + list.length + ' done';
+        for (const g of list.slice().sort((a, b) => (a.status === 'Done' ? 0 : a.status === 'Active' ? 1 : 2) - (b.status === 'Done' ? 0 : b.status === 'Active' ? 1 : 2)).slice(0, 40))
+          pips.append(el('i', g.status === 'Done' ? 'is-done' : g.status === 'Active' ? 'is-open' : ''));
       } else {
         let d = 0, n = 0, xp = 0;
         for (const t of b.tracks) for (const x of t.nodes) {
@@ -375,23 +389,39 @@ window.SkillTree = (() => {
   function renderBucket() {
     const body = $('#sk-body'), card = $('#sk-card');
     card.style.setProperty('--a', 'var(--a-bucket)');
-    $('#sk-card-title').textContent = 'Bucket list';
-    $('#sk-hint').textContent = 'One-off experiences. Tick one when it is done (' + XP_BUCKET + ' XP each).';
+    $('#sk-card-title').textContent = 'Impossible List';
+    $('#sk-hint').textContent = 'Your Impossible List from Notion, by category. Change an item’s status in Notion; it shows here after the next sync.';
     $('#sk-legend').hidden = true;
     $('#sk-ready').replaceChildren();
-    const grid = el('div', 'sk-bucket');
-    for (const it of config.bucket || []) {
-      const on = !!st.bucket[it.id];
-      const b = el('button', 'sk-pick' + (on ? ' is-on' : '')); b.type = 'button';
-      b.setAttribute('aria-pressed', String(on));
-      const box = el('span', 'sk-box', on ? '✓' : '');
-      const txt = el('span', 'sk-pick-body');
-      txt.append(el('span', '', it.label), el('span', 'sk-pick-sub', (it.tag || '') + (on ? ' · done ' + (st.bucket[it.id] === '?' ? 'earlier' : st.bucket[it.id]) : '')));
-      b.append(box, txt);
-      b.addEventListener('click', () => bucketClick(it.id));
-      grid.append(b);
+    const list = impossible();
+    if (!list.length) { body.replaceChildren(el('p', 'sk-note', 'The Impossible List hasn’t loaded yet.')); return; }
+    const RANK = { Done: 0, Active: 1, 'On Hold': 2, Idea: 3 };
+    const SCOPE = { 'Next Year': 0, 'In 5 years': 1, 'Big Vision': 2 };
+    const wrap = el('div', 'sk-lists');
+    for (const area of [...AREAS, ...new Set(list.map((g) => g.area).filter((a) => !AREAS.includes(a)))]) {
+      const goals = list.filter((g) => g.area === area)
+        .sort((a, b) => (RANK[a.status] ?? 9) - (RANK[b.status] ?? 9) || (SCOPE[a.scope] ?? 9) - (SCOPE[b.scope] ?? 9) || a.name.localeCompare(b.name));
+      if (!goals.length) continue;
+      const done = goals.filter((g) => g.status === 'Done').length;
+      const sec = el('section', 'sk-list'); sec.style.setProperty('--a', AREA_HUE[area] || 'var(--a-bucket)');
+      const head = el('div', 'sk-list-head');
+      head.append(el('span', 'sk-dot'), el('strong', '', area), el('span', 'sk-sub', done + ' of ' + goals.length + ' done'));
+      const meter = el('div', 'sk-list-meter'); const fill = el('span'); fill.style.width = (done / goals.length) * 100 + '%'; meter.append(fill);
+      const grid = el('div', 'sk-bucket');
+      for (const g of goals) {
+        const on = g.status === 'Done';
+        const a = el('a', 'sk-pick' + (on ? ' is-on' : '') + (g.status === 'Active' ? ' is-active' : ''));
+        if (/^https:\/\//.test(g.url || '')) { a.href = g.url; a.target = '_blank'; a.rel = 'noopener'; }
+        const box = el('span', 'sk-box', on ? '✓' : g.status === 'Active' ? '•' : '');
+        const txt = el('span', 'sk-pick-body');
+        txt.append(el('span', '', g.name), el('span', 'sk-pick-sub', [g.status, g.scope, g.budget ? '€' + d3.format(',')(g.budget) : ''].filter(Boolean).join(' · ')));
+        a.append(box, txt);
+        grid.append(a);
+      }
+      sec.append(head, meter, grid);
+      wrap.append(sec);
     }
-    body.replaceChildren(grid);
+    body.replaceChildren(wrap);
   }
 
   function renderTree(b) {

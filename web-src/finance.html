@@ -1,26 +1,44 @@
   </section>
   <section class="view" id="view-finance" data-view="finance" hidden>
 <style>
-  .fi { --fi: #3a9b68; --a-health: #e0614f; --a-travel: #e3923a; --a-finance: #3a9b68; --a-social: #d25d93; --a-career: #4a7fd0; --a-learning: #8a66d1; --a-home: #7f8a9b;
+  /* Finance: where you stand → three pillars (saving & investing, travel, other goals) → the monthly budget → details. */
+  .fi { --fi: #3a9b68; --p-save: #3a9b68; --p-travel: #e3923a; --p-other: #8a66d1;
+    --a-health: #e0614f; --a-travel: #e3923a; --a-finance: #3a9b68; --a-social: #d25d93; --a-career: #4a7fd0; --a-learning: #8a66d1; --a-home: #7f8a9b;
     display: grid; gap: var(--cds-gap-xl); min-width: 0; }
   .fi a { color: inherit; text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 25%, transparent); text-underline-offset: 3px; }
   .fi a:hover { text-decoration-color: currentColor; }
   .fi-head { display: grid; gap: var(--cds-gap-sm); }
   .fi-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: calc(var(--cds-font-size-title) * 1.35); line-height: 1.05; }
-  .fi-lead { margin: 0; max-width: 64ch; line-height: 1.55; }
+  .fi-lead { margin: 0; max-width: 66ch; line-height: 1.55; }
   .fi-links { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
-  .fi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
-  .fi-fig { padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: 2px; align-content: start; box-shadow: -1px 0 0 var(--color-border-line), 0 -1px 0 var(--color-border-line); }
+  .fi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
+  .fi-fig { padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: 3px; align-content: start; box-shadow: -1px 0 0 var(--color-border-line), 0 -1px 0 var(--color-border-line); }
   .fi-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .fi-big { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); line-height: 1.15; font-variant-numeric: tabular-nums; }
   .fi-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
   .fi-sub.is-ok { color: var(--color-ok); } .fi-sub.is-warn { color: var(--color-warn); }
+  .fi-mini { height: .3rem; border-radius: 999px; background: color-mix(in oklab, var(--color-fg) 7%, transparent); overflow: hidden; margin-top: 2px; }
+  .fi-mini > span { display: block; height: 100%; border-radius: 999px; background: var(--a, var(--fi)); }
+
+  .fi-pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: var(--cds-gap-md); align-items: start; }
+  .fi-pillar { border-radius: var(--cds-radius); overflow: hidden; border: 1px solid color-mix(in oklab, var(--p) 28%, var(--color-border-line)); background: var(--color-panel); display: grid; align-content: start; min-width: 0; }
+  .fi-pillar-head { padding: var(--cds-pad-lg); display: grid; gap: 2px; background: color-mix(in oklab, var(--p) 13%, var(--color-panel)); border-bottom: 1px solid color-mix(in oklab, var(--p) 25%, var(--color-border-line)); }
+  .fi-pillar-head h2 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); display: flex; align-items: center; gap: var(--cds-gap-sm); }
+  .fi-pillar-head h2::before { content: ""; width: .7rem; height: .7rem; border-radius: 3px; background: var(--p); }
+  .fi-pillar-amt { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .fi-pillar-body { padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-lg); }
+  .fi-block { display: grid; gap: var(--cds-gap-sm); }
+  .fi-block h3 { margin: 0; font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); letter-spacing: .03em; }
+  .fi-verdict { margin: 0; font-size: var(--cds-font-size-caption); line-height: 1.5; padding: var(--cds-pad-sm) var(--cds-pad-md); border-radius: 8px; background: color-mix(in oklab, var(--color-fg) 4%, transparent); }
+  .fi-verdict.is-ok { color: var(--color-ok); background: color-mix(in oklab, var(--color-ok) 9%, transparent); }
+  .fi-verdict.is-warn { color: var(--color-warn); background: color-mix(in oklab, var(--color-warn) 10%, transparent); }
+
   .fi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: var(--cds-gap-md); align-items: start; }
   .fi-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-md); align-content: start; min-width: 0; }
   .fi-card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-xs) var(--cds-gap-md); }
   .fi-card h2 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
   .fi-note { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.5; }
-  .fi-empty { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); padding: var(--cds-pad-md) 0; }
+  .fi-empty { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .fi-bars { display: grid; gap: var(--cds-gap-sm); }
   .fi-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px var(--cds-gap-sm); align-items: baseline; }
   .fi-bar-name { display: flex; align-items: baseline; gap: var(--cds-gap-sm); min-width: 0; overflow-wrap: anywhere; }
@@ -28,7 +46,17 @@
   .fi-track { grid-column: 1 / -1; height: .5rem; border-radius: 999px; background: color-mix(in oklab, var(--color-fg) 6%, transparent); overflow: hidden; }
   .fi-track > span { display: block; height: 100%; border-radius: 999px; background: var(--a, var(--fi)); }
   .fi-dot { width: .6rem; height: .6rem; border-radius: 50%; flex: none; background: var(--a, var(--fi)); transform: translateY(-1px); }
-  .fi-total { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); padding-top: var(--cds-pad-sm); border-top: 1px solid var(--color-border-line); font-weight: var(--cds-font-weight-medium); font-variant-numeric: tabular-nums; }
+  .fi-total { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); padding-top: var(--cds-pad-sm); border-top: 1px solid var(--color-border-line); font-weight: var(--cds-font-weight-medium); font-variant-numeric: tabular-nums; font-size: var(--cds-font-size-caption); }
+  .fi-progress { display: grid; gap: 4px; }
+  .fi-progress-top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--cds-gap-sm); }
+  .fi-progress-top strong { font-weight: var(--cds-font-weight-medium); }
+  .fi-progress-top span { font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .fi-progress .fi-track { height: .65rem; }
+  .fi-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .fi-pill { font-size: var(--cds-font-size-caption); line-height: 1.7; padding: 0 var(--cds-pad-sm); border-radius: 999px; white-space: nowrap; color: var(--color-fg-muted); background: color-mix(in oklab, var(--color-fg) 6%, transparent); }
+  .fi-pill[data-level="ok"] { color: var(--color-ok); background: color-mix(in oklab, var(--color-ok) 12%, transparent); }
+  .fi-trip { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) auto; gap: 2px var(--cds-gap-sm); align-items: baseline; font-size: var(--cds-font-size-caption); }
+  .fi-trip-when { color: var(--color-fg-muted); }
   .fi-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
   .fi-tab { font: inherit; font-size: var(--cds-font-size-caption); cursor: pointer; padding: .15rem .7rem; border-radius: 999px; border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg-muted); }
   .fi-tab[aria-selected="true"] { color: var(--color-fg); border-color: var(--color-fg-muted); background: color-mix(in oklab, var(--color-fg) 6%, var(--color-panel)); }
@@ -39,53 +67,38 @@
   .fi-group-head { display: flex; align-items: baseline; gap: var(--cds-gap-sm); font-weight: var(--cds-font-weight-medium); }
   .fi-group-head span:last-child { margin-left: auto; font-variant-numeric: tabular-nums; }
   .fi-row { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
-  .fi-trip { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) auto; gap: 3px var(--cds-gap-sm); align-items: baseline; }
-  .fi-trip-when { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
-  .fi-trip .fi-track { grid-column: 2 / -1; }
-  .fi-pill { font-size: var(--cds-font-size-caption); line-height: 1.7; padding: 0 var(--cds-pad-sm); border-radius: 999px; white-space: nowrap; color: var(--color-fg-muted); background: color-mix(in oklab, var(--color-fg) 6%, transparent); }
-  .fi-pill[data-level="ok"] { color: var(--color-ok); background: color-mix(in oklab, var(--color-ok) 12%, transparent); }
-  .fi-fail { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .fi-row.is-pillar { color: var(--color-fg); }
+  .fi-row.is-pillar span:first-child::before { content: ""; display: inline-block; width: .45rem; height: .45rem; border-radius: 2px; margin-right: .35rem; background: var(--p); }
 </style>
 
 <div class="fi">
   <header class="fi-head">
     <h1 class="fi-title">Finance</h1>
-    <p class="fi-lead" id="fi-lead">Loading your Finance page…</p>
+    <p class="fi-lead" id="fi-lead">Loading your Finance pages…</p>
     <div class="fi-links" id="fi-links"></div>
   </header>
 
-  <section class="fi-strip" id="fi-strip" aria-label="Finance figures"></section>
+  <section class="fi-strip" id="fi-strip" aria-label="Where you stand"></section>
 
-  <div class="fi-grid">
-    <section class="fi-card" id="fi-goals">
-      <div class="fi-card-head"><h2>Next-year goals to fund</h2><span class="fi-note">Budgets from the Impossible List</span></div>
-      <div class="fi-bars" id="fi-goal-bars"></div>
-    </section>
-    <section class="fi-card" id="fi-budget">
-      <div class="fi-card-head"><h2>Monthly budget</h2><div class="fi-tabs" id="fi-budget-tabs" role="tablist" aria-label="Budget version"></div></div>
-      <div id="fi-budget-body"></div>
-    </section>
+  <div class="fi-pillars">
+    <article class="fi-pillar" id="fi-save" style="--p: var(--p-save)"></article>
+    <article class="fi-pillar" id="fi-travel" style="--p: var(--p-travel)"></article>
+    <article class="fi-pillar" id="fi-other" style="--p: var(--p-other)"></article>
   </div>
+
+  <section class="fi-card" id="fi-budget">
+    <div class="fi-card-head"><h2>Monthly budget</h2><div class="fi-tabs" id="fi-budget-tabs" role="tablist" aria-label="Budget version"></div></div>
+    <div id="fi-budget-body"></div>
+  </section>
 
   <div class="fi-grid">
     <section class="fi-card" id="fi-savings">
-      <div class="fi-card-head"><h2>Savings goals</h2><span class="fi-note">Saved vs target</span></div>
+      <div class="fi-card-head"><h2>Savings goals</h2><span class="fi-note">Saved vs target, from your Savings Goals database</span></div>
       <div class="fi-bars" id="fi-saving-bars"></div>
     </section>
-    <section class="fi-card" id="fi-travel">
-      <div class="fi-card-head"><h2 id="fi-travel-title">Travel budget</h2><span class="fi-note" id="fi-travel-note"></span></div>
-      <div class="fi-bars" id="fi-trips"></div>
-    </section>
-  </div>
-
-  <div class="fi-grid">
     <section class="fi-card" id="fi-subs">
       <div class="fi-card-head"><h2>Subscriptions</h2><span class="fi-note" id="fi-subs-note"></span></div>
       <div class="fi-bars" id="fi-sub-list"></div>
-    </section>
-    <section class="fi-card" id="fi-fin-goals">
-      <div class="fi-card-head"><h2>Finance goals</h2><span class="fi-note">Impossible List · Finance</span></div>
-      <div class="fi-bars" id="fi-fin-list"></div>
     </section>
   </div>
 </div>
@@ -98,13 +111,26 @@
   const GROUP_HUE = ['#4a7fd0', '#e3923a', '#3a9b68', '#8a66d1', '#d25d93', '#7f8a9b', '#c9922e'];
   const eur = (n) => '€' + d3.format(',.0f')(n);
   const eur2 = (n) => '€' + d3.format(',.2~f')(n);
+  const eurK = (n) => (Math.abs(n) >= 10000 ? '€' + d3.format(',.1~f')(n / 1000) + 'k' : eur(n));
   const pct = d3.format('.0%');
+  const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
   const link = (text, url) => {
     if (!/^https:\/\//.test(url || '')) return el('span', '', text);
     const a = el('a', '', text); a.href = url; a.target = '_blank'; a.rel = 'noopener'; return a;
   };
-  const num = (s) => { const m = String(s || '').replace(/\*/g, '').replace(/(\d),(\d{3})/g, '$1$2').match(/-?\d+(?:[.,]\d+)?/); return m ? Number(m[0].replace(',', '.')) : null; };
   const clean = (s) => String(s || '').replace(/\*\*/g, '').trim();
+  const num = (s) => { const m = String(s || '').replace(/\*/g, '').replace(/(\d),(\d{3})/g, '$1$2').match(/-?\d+(?:[.,]\d+)?/); return m ? Number(m[0].replace(',', '.')) : null; };
+  /* "26K" → 26000, "5000€" → 5000, "3000€ + 5000€" → 8000 */
+  const amount = (s) => {
+    const t = clean(s);
+    if (!t) return null;
+    const parts = [...t.matchAll(/(\d{1,3}(?:[.,]\d{3})+|\d+(?:[.,]\d+)?)\s*([kK])?/g)].map((m) => {
+      const raw = /^\d{1,3}([.,]\d{3})+$/.test(m[1]) ? m[1].replace(/[.,]/g, '') : m[1].replace(',', '.');
+      return Number(raw) * (m[2] ? 1000 : 1);
+    });
+    if (!parts.length) return null;
+    return t.includes('+') ? d3.sum(parts) : parts[0];
+  };
   const ok = (id) => dash.data(id).status === 'ok';
   let budgetIdx = null;
 
@@ -119,31 +145,68 @@
     row.append(nm, el('span', 'fi-bar-val', opts.label || eur(value)), track);
     return row;
   };
-  const fig = (label, big, sub, cls) => {
+  const progress = (name, value, target, color, note) => {
+    const box = el('div', 'fi-progress'); box.style.setProperty('--a', color);
+    const top = el('div', 'fi-progress-top');
+    top.append(el('strong', '', name), el('span', '', value == null ? 'not tracked yet' : eur(value) + (target ? ' of ' + eur(target) + ' · ' + pct(value / target) : '')));
+    const track = el('div', 'fi-track'); const f = el('span'); f.style.width = (target && value != null ? Math.min(1, value / target) * 100 : 0) + '%'; track.append(f);
+    box.append(top, track);
+    if (note) box.append(el('span', 'fi-note', note));
+    return box;
+  };
+  const fig = (label, big, sub, opts = {}) => {
     const f = el('div', 'fi-fig');
     f.append(el('span', 'fi-label', label), el('span', 'fi-big', big));
-    if (sub) f.append(el('span', 'fi-sub' + (cls ? ' ' + cls : ''), sub));
+    if (sub) f.append(el('span', 'fi-sub' + (opts.cls ? ' ' + opts.cls : ''), sub));
+    if (opts.share != null) { const m = el('div', 'fi-mini'); m.style.setProperty('--a', opts.color || 'var(--fi)'); const s = el('span'); s.style.width = Math.min(1, opts.share) * 100 + '%'; m.append(s); f.append(m); }
     return f;
   };
-  const tableFor = (fin, re) => (fin.tables || []).find((t) => re.test(t.heading || ''));
+  const pillarHead = (box, title, amountText, sub) => {
+    const h = el('header', 'fi-pillar-head');
+    h.append(el('h2', '', title), el('span', 'fi-pillar-amt', amountText));
+    if (sub) h.append(el('span', 'fi-sub', sub));
+    const body = el('div', 'fi-pillar-body');
+    box.replaceChildren(h, body);
+    return body;
+  };
+  const block = (body, title) => { const b = el('section', 'fi-block'); b.append(el('h3', '', title)); body.append(b); return b; };
+  const months = (n) => (n <= 0 ? 'already there' : n < 1.5 ? 'about a month' : '≈ ' + Math.ceil(n) + ' months');
 
+  const tableFor = (pages, re) => pages.flatMap((p) => p.tables || []).find((t) => re.test(t.heading || '') || (t.rows[0] || []).some((h) => re.test(h)));
+  function tracking(plan) {
+    const t = tableFor([plan], /net worth|nettoverm/i);
+    if (!t) return null;
+    const [head, ...rows] = t.rows;
+    const iNW = head.findIndex((h) => /net worth|nettoverm/i.test(h)), iEF = head.findIndex((h) => /emergency|notgroschen|notfall/i.test(h));
+    const isTarget = (r) => /target|ziel/i.test(r[0] || '');
+    const latest = (i) => { for (const r of rows.slice().reverse()) if (!isTarget(r) && amount(r[i]) != null) return { value: amount(r[i]), at: clean(r[0]) }; return null; };
+    const target = rows.find(isTarget);
+    return {
+      netWorth: iNW >= 0 ? latest(iNW) : null, netWorthTarget: target && iNW >= 0 ? amount(target[iNW]) : null,
+      emergency: iEF >= 0 ? latest(iEF) : null, emergencyTarget: target && iEF >= 0 ? amount(target[iEF]) : null,
+    };
+  }
   function travelRows(fin) {
-    const t = tableFor(fin, /travel/i);
+    const t = tableFor([fin], /travel/i);
     if (!t) return null;
     const [head, ...rows] = t.header ? t.rows : [[], ...t.rows];
     const col = (re, fallback) => { const i = head.findIndex((h) => re.test(h)); return i >= 0 ? i : fallback; };
     const iWhen = col(/when|wann|date/i, 0), iTrip = col(/trip|reise/i, 1), iCost = col(/estimate|cost|kosten|€/i, 2);
-    const trips = [], total = { value: null };
+    const trips = []; let total = null;
     for (const r of rows) {
       const name = clean(r[iTrip]), value = num(r[iCost]);
-      if (/total|summe|gesamt/i.test(clean(r[iWhen]) + ' ' + name)) { total.value = value; continue; }
+      if (/total|summe|gesamt/i.test(clean(r[iWhen]) + ' ' + name)) { total = value; continue; }
       if (name) trips.push({ when: clean(r[iWhen]), name, value: value || 0, raw: clean(r[iCost]) });
     }
-    return { heading: t.heading, trips, total: total.value ?? d3.sum(trips, (x) => x.value) };
+    const span = (t.heading || '').match(/([A-Za-z]{3})[a-z]*\.?\s+(\d{4})\s*[–—-]\s*([A-Za-z]{3})[a-z]*\.?\s+(\d{4})/);
+    const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, mai: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, okt: 9, nov: 10, dec: 11, dez: 11 };
+    let n = 0;
+    if (span && MON[span[1].toLowerCase()] != null && MON[span[3].toLowerCase()] != null) n = (+span[4] - +span[2]) * 12 + MON[span[3].toLowerCase()] - MON[span[1].toLowerCase()] + 1;
+    return { heading: clean(t.heading).replace(/^[^\w]+/u, ''), trips, total: total ?? d3.sum(trips, (x) => x.value), months: n };
   }
   function subRows(fin) {
-    const t = tableFor(fin, /subscri|abo/i);
-    if (!t) return null;
+    const t = tableFor([fin], /subscri|abo/i);
+    if (!t) return [];
     const [head, ...rows] = t.header ? t.rows : [[], ...t.rows];
     const col = (re, fallback) => { const i = head.findIndex((h) => re.test(h)); return i >= 0 ? i : fallback; };
     const iName = col(/posten|item|name/i, 1), iMonth = col(/monat|month/i, 2), iTurn = col(/turnus|cycle/i, 0), iDue = col(/fällig|due/i, 5);
@@ -151,53 +214,122 @@
   }
 
   function render() {
-    const ready = ok('summary') && ok('items');
-    if (!ready) return;
-    const sum = dash.data('summary').data[0];
+    if (!(ok('summary') && ok('items'))) return;
     const items = dash.data('items').data;
     const fin = ok('finance') ? dash.data('finance').data : { budgets: [], tables: [] };
+    const plan = ok('plan') ? dash.data('plan').data : { budgets: [], tables: [] };
     const savings = ok('savings') ? dash.data('savings').data : [];
     const budgets = fin.budgets || [];
     if (budgetIdx == null || budgetIdx >= budgets.length) budgetIdx = Math.max(0, budgets.length - 1);
     const budget = budgets[budgetIdx];
+    const lineItems = budget ? budget.groups.flatMap((g) => g.items.map((x) => ({ ...x, group: g.name }))) : [];
+    const lines = (re) => lineItems.filter((x) => re.test(x.name));
     const saveGroup = budget ? budget.groups.find((g) => /spar|sav/i.test(g.name)) : null;
-    // Goals are mostly trips: they are paid from the Travel line of the budget, not from saving (emergency fund + ETF).
-    const travelLine = budget ? d3.sum(budget.groups.flatMap((g) => g.items).filter((x) => /travel|reise|urlaub/i.test(x.name)), (x) => x.value) : 0;
+    const saving = saveGroup ? saveGroup.value : 0;
+    const efLine = d3.sum(lines(/notgroschen|emergency|notfall/i), (x) => x.value);
+    const travelLine = d3.sum(lines(/travel|reise|urlaub/i), (x) => x.value);
+    const otherLines = lines(/hobb|sport|race|event/i);
+    const otherLine = d3.sum(otherLines, (x) => x.value);
+    const track = tracking(plan);
     const travel = travelRows(fin);
-    const subs = subRows(fin) || [];
-    const saved = d3.sum(savings, (s) => s.Saved || 0), target = d3.sum(savings, (s) => s.Target || 0);
+    const subs = subRows(fin);
 
-    // Lead and links
-    const need = sum.monthly_saving;
-    const gap = need - travelLine;
-    $('#fi-lead').textContent = 'Next year’s goals add up to ' + eur(sum.next_year_budget) + ', about ' + eur(need) + ' a month. ' +
-      (travelLine ? 'They are mostly trips, paid from the Travel line of your budget: ' + eur(travelLine) + ' a month, ' +
-        (gap > 0 ? eur(gap) + ' short.' : 'which covers them.') : 'Your budget has no Travel line to pay for them yet.') +
-      (saveGroup ? ' Your ' + eur(saveGroup.value) + ' of monthly saving (' + saveGroup.items.map((x) => x.name).join(' + ') + ') is kept separate.' : '');
+    // Next-year goals, split into the three pillars by life area.
+    const nextYear = items.filter((g) => g.kind === 'goal' && g.scope === 'Next Year' && g.status !== 'Done' && g.status !== 'Archived');
+    const pillarOf = (g) => (g.area === 'Travel & Adventure' ? 'travel' : g.area === 'Finance' ? 'save' : 'other');
+    const travelGoals = nextYear.filter((g) => pillarOf(g) === 'travel').sort((a, b) => b.budget - a.budget);
+    const otherGoals = nextYear.filter((g) => pillarOf(g) === 'other').sort((a, b) => b.budget - a.budget);
+    const travelNeed = d3.sum(travelGoals, (g) => g.budget), otherNeed = d3.sum(otherGoals, (g) => g.budget);
+    const travelGap = travelNeed / 12 - travelLine, otherGap = otherNeed / 12 - otherLine;
+
+    // Lead + links
+    const nw = track && track.netWorth, ef = track && track.emergency;
+    $('#fi-lead').textContent = [
+      saving ? 'You put ' + eur(saving) + ' a month into saving and investing' + (saveGroup.items.length ? ' (' + saveGroup.items.map((x) => x.name + ' ' + eur(x.value)).join(', ') + ')' : '') + '.' : '',
+      travelLine ? eur(travelLine) + ' a month goes to travel' + (travelNeed ? (travelGap > 0 ? ', ' + eur(travelGap) + ' a month short of next year’s travel goals.' : ', enough for next year’s travel goals.') : '.') : '',
+      otherNeed ? 'Your other goals (' + otherGoals.map((g) => g.name.replace(/\s*\(.*?\)\s*/g, ' ').trim()).slice(0, 3).join(', ') + ') need ' + eur(otherNeed / 12) + ' a month' + (otherLine ? '.' : ', and no budget line pays for them yet.') : '',
+    ].filter(Boolean).join(' ');
     const links = $('#fi-links'); links.replaceChildren();
-    const plan = items.find((i) => i.kind === 'project' && i.area === 'Finance');
+    const planProject = items.find((i) => i.kind === 'project' && i.area === 'Finance');
     if (fin.url) links.append(link('Finance page in Notion ↗', fin.url));
-    if (plan) links.append(link(plan.name + ' ↗', plan.url));
+    if (planProject) links.append(link(planProject.name + ' ↗', planProject.url));
 
-    // Figures
+    // Where you stand
     const strip = $('#fi-strip'); strip.replaceChildren();
-    strip.append(fig('Next-year goal budget', eur(sum.next_year_budget), plural(sum.next_year_goals, 'goal') + ' planned'));
-    strip.append(fig('Needed per month', eur(need), 'to fund them over 12 months'));
-    if (budget) strip.append(fig('Travel line in budget', eur(travelLine) + '/mo', travelLine ? (gap > 0 ? eur(gap) + '/mo short for the goals' : 'covers the goals') : 'no Travel line', travelLine && gap <= 0 ? 'is-ok' : 'is-warn'));
-    if (saveGroup) strip.append(fig('Saving & investing', eur(saveGroup.value) + '/mo', saveGroup.items.map((x) => x.name + ' ' + eur(x.value)).join(' · ')));
-    if (travel) strip.append(fig('Travel budget', eur(travel.total), plural(travel.trips.length, 'trip') + ' planned'));
-    if (target) strip.append(fig('Savings goals', pct(saved / target), eur(saved) + ' of ' + eur(target)));
+    strip.append(fig('Net worth', nw ? eurK(nw.value) : '—', nw ? (track.netWorthTarget ? pct(nw.value / track.netWorthTarget) + ' of ' + eurK(track.netWorthTarget) + ' goal' : nw.at) : 'add it to the Tracking table', { share: nw && track.netWorthTarget ? nw.value / track.netWorthTarget : null, color: 'var(--p-save)' }));
+    strip.append(fig('Emergency fund', ef ? eur(ef.value) : '—', ef ? (track.emergencyTarget ? pct(ef.value / track.emergencyTarget) + ' of ' + eur(track.emergencyTarget) : ef.at) : 'add it to the Tracking table', { share: ef && track.emergencyTarget ? ef.value / track.emergencyTarget : null, color: 'var(--p-save)' }));
+    if (saving) strip.append(fig('Saved per month', eur(saving), saveGroup.items.map((x) => x.name + ' ' + eur(x.value)).join(' · ')));
+    if (budget) strip.append(fig('Travel per month', eur(travelLine), travelNeed ? (travelGap > 0 ? eur(travelGap) + '/mo short' : 'covers travel goals') : '', { cls: travelNeed ? (travelGap > 0 ? 'is-warn' : 'is-ok') : '' }));
+    if (otherNeed) strip.append(fig('Other goals', eur(otherNeed), eur(otherNeed / 12) + '/mo · ' + (otherLine ? eur(otherLine) + '/mo budgeted' : 'no budget line'), { cls: otherLine >= otherNeed / 12 ? 'is-ok' : 'is-warn' }));
 
-    // Next-year goals to fund
-    const gb = $('#fi-goal-bars'); gb.replaceChildren();
-    const goals = items.filter((g) => g.kind === 'goal' && g.scope === 'Next Year' && g.status !== 'Done' && g.status !== 'Archived')
-      .sort((a, b) => b.budget - a.budget);
-    const maxG = d3.max(goals, (g) => g.budget) || 1;
-    for (const g of goals) gb.append(bar(g.name, g.budget, maxG, { area: g.area, url: g.url, label: g.budget ? eur(g.budget) + (g.status === 'Idea' ? ' · idea' : '') : 'no budget yet' }));
-    if (!goals.length) gb.append(el('p', 'fi-empty', 'No next-year goals on the Impossible List.'));
-    else {
-      const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Total'), el('span', '', eur(sum.next_year_budget) + ' · ' + eur(need) + '/month')); gb.append(tot);
-      if (travelLine) gb.append(el('p', 'fi-note', 'Paid from the Travel line: ' + eur(travelLine) + '/month, ' + eur(travelLine * 12) + ' a year' + (gap > 0 ? ', ' + eur(gap * 12) + ' short over the year.' : ', enough for the year.')));
+    // Pillar 1: saving & investing
+    {
+      const body = pillarHead($('#fi-save'), 'Saving & investing', saving ? eur(saving) + '/month' : 'No saving line', saveGroup ? saveGroup.items.map((x) => x.name + ' ' + eur(x.value)).join(' · ') : 'Add a saving group to your budget link');
+      const b = block(body, 'Where you are');
+      const efTarget = track && track.emergencyTarget;
+      b.append(progress('Emergency fund', ef ? ef.value : null, efTarget, 'var(--p-save)',
+        ef && efTarget ? (efLine ? months((efTarget - ef.value) / efLine) + ' to the target at ' + eur(efLine) + '/month' : 'No emergency-fund line in the budget') + ' · as of ' + ef.at : 'Fill in the Tracking table on Finance Plan 2027'));
+      const nwTarget = track && track.netWorthTarget;
+      b.append(progress('Net worth', nw ? nw.value : null, nwTarget, 'var(--p-save)',
+        nw && nwTarget ? (saving ? months((nwTarget - nw.value) / saving) + ' to the target saving ' + eur(saving) + '/month, before market returns' : '') + ' · as of ' + nw.at : 'Fill in the Tracking table on Finance Plan 2027'));
+      const goals = items.filter((g) => g.kind === 'goal' && g.area === 'Finance' && g.status !== 'Archived')
+        .sort((a, b) => ({ Active: 0, Idea: 1, 'On Hold': 2, Done: 3 }[a.status] ?? 4) - ({ Active: 0, Idea: 1, 'On Hold': 2, Done: 3 }[b.status] ?? 4));
+      if (goals.length) {
+        const gb = block(body, 'Finance goals');
+        for (const g of goals) {
+          const row = el('div', 'fi-bar-name'); row.style.setProperty('--a', 'var(--p-save)');
+          const pill = el('span', 'fi-pill', g.status + (g.scope ? ' · ' + g.scope : '')); pill.style.marginLeft = 'auto';
+          if (g.status === 'Active' || g.status === 'Done') pill.dataset.level = 'ok';
+          row.append(el('span', 'fi-dot'), link(g.name, g.url), pill);
+          gb.append(row);
+        }
+      }
+    }
+
+    // Pillar 2: travel
+    {
+      const body = pillarHead($('#fi-travel'), 'Travel', budget ? eur(travelLine) + '/month' : '—', budget ? eur(travelLine * 12) + ' a year from the Travel line' : '');
+      const gb = block(body, 'Next year’s travel goals');
+      const maxG = d3.max(travelGoals, (g) => g.budget) || 1;
+      for (const g of travelGoals) gb.append(bar(g.name, g.budget, maxG, { color: 'var(--p-travel)', url: g.url, label: g.budget ? eur(g.budget) + (g.status === 'Idea' ? ' · idea' : '') : 'no budget yet' }));
+      if (!travelGoals.length) gb.append(el('p', 'fi-empty', 'No next-year travel goals.'));
+      else {
+        const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Needed'), el('span', '', eur(travelNeed) + ' · ' + eur(travelNeed / 12) + '/month')); gb.append(tot);
+        if (budget) gb.append(el('p', 'fi-verdict ' + (travelGap > 0 ? 'is-warn' : 'is-ok'), travelGap > 0
+          ? eur(travelGap) + ' a month short, about ' + eur(travelGap * 12) + ' over the year.'
+          : 'The Travel line covers these, with ' + eur(-travelGap * 12) + ' to spare over the year.'));
+      }
+      if (travel && travel.trips.length) {
+        const tb = block(body, travel.heading || 'Trip plan');
+        for (const x of travel.trips) {
+          const row = el('div', 'fi-trip');
+          row.append(el('span', 'fi-trip-when', x.when), el('span', '', x.name), el('span', 'fi-bar-val', x.raw || eur(x.value)));
+          tb.append(row);
+        }
+        const tot = el('div', 'fi-total');
+        tot.append(el('span', '', 'Trip plan total'), el('span', '', eur(travel.total) + (travel.months ? ' · ' + eur(travel.total / travel.months) + '/month over ' + travel.months + ' months' : '')));
+        tb.append(tot);
+      }
+    }
+
+    // Pillar 3: other goals (races, triathlon, visits …)
+    {
+      const body = pillarHead($('#fi-other'), 'Other goals', otherNeed ? eur(otherNeed / 12) + '/month' : '—',
+        otherNeed ? eur(otherNeed) + ' for next year · ' + (otherLine ? otherLines.map((x) => x.name + ' ' + eur(x.value) + '/mo').join(', ') + ' budgeted' : 'no budget line yet') : '');
+      const gb = block(body, 'Next year’s other goals');
+      const maxG = d3.max(otherGoals, (g) => g.budget) || 1;
+      for (const g of otherGoals) gb.append(bar(g.name, g.budget, maxG, { area: g.area, url: g.url, label: g.budget ? eur(g.budget) + (g.status === 'Idea' ? ' · idea' : '') : 'no budget yet' }));
+      if (!otherGoals.length) gb.append(el('p', 'fi-empty', 'No other next-year goals with a budget.'));
+      else {
+        const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Needed'), el('span', '', eur(otherNeed) + ' · ' + eur(otherNeed / 12) + '/month')); gb.append(tot);
+        gb.append(el('p', 'fi-verdict ' + (otherGap > 0 ? 'is-warn' : 'is-ok'), otherLine
+          ? (otherGap > 0 ? eur(otherGap) + ' a month short of what these need.' : 'Your budget lines cover these.')
+          : 'Nothing in your budget is set aside for these. ' + eur(otherNeed / 12) + ' a month, or a sinking fund, would cover them.'));
+        const byArea = d3.rollups(otherGoals, (v) => d3.sum(v, (g) => g.budget), (g) => g.area).sort((a, b) => b[1] - a[1]);
+        const chips = el('div', 'fi-chips');
+        for (const [area, v] of byArea) { const c = el('span', 'fi-pill', area + ' ' + eur(v)); chips.append(c); }
+        gb.append(chips);
+      }
     }
 
     // Monthly budget
@@ -213,56 +345,40 @@
     else {
       const income = d3.sum(budget.income, (x) => x.value);
       const spent = d3.sum(budget.groups, (g) => g.value);
-      bb.append(el('p', 'fi-note', 'Income ' + eur(income) + ' a month (' + budget.income.map((x) => x.name + ' ' + eur(x.value)).join(', ') + ')' + (income - spent > 1 ? ' · ' + eur(income - spent) + ' unassigned' : '')));
+      bb.append(el('p', 'fi-note', 'Income ' + eur(income) + ' a month (' + budget.income.map((x) => x.name + ' ' + eur(x.value)).join(', ') + ')' + (income - spent > 1 ? ' · ' + eur(income - spent) + ' unassigned' : '') + '. Lines that feed the three pillars above are marked.'));
       const split = el('div', 'fi-split');
       budget.groups.forEach((g, i) => {
         const s = el('span', '', g.name + ' ' + pct(g.value / income));
         s.style.flex = String(g.value); s.style.background = GROUP_HUE[i % GROUP_HUE.length];
         split.append(s);
       });
+      const pillarFor = (x) => (/spar|sav/i.test(x.group) ? 'var(--p-save)' : /travel|reise|urlaub/i.test(x.name) ? 'var(--p-travel)' : /hobb|sport|race|event/i.test(x.name) ? 'var(--p-other)' : null);
       const groups = el('div', 'fi-groups');
       budget.groups.forEach((g, i) => {
         const box = el('div', 'fi-group');
         const h = el('div', 'fi-group-head'); const d = el('span', 'fi-dot'); d.style.background = GROUP_HUE[i % GROUP_HUE.length];
         h.append(d, el('span', '', g.name), el('span', '', eur2(g.value)));
         box.append(h);
-        for (const it of g.items) { const r = el('div', 'fi-row'); r.append(el('span', '', it.name), el('span', '', eur2(it.value))); box.append(r); }
+        for (const it of g.items) {
+          const p = pillarFor({ ...it, group: g.name });
+          const r = el('div', 'fi-row' + (p ? ' is-pillar' : '')); if (p) r.style.setProperty('--p', p);
+          r.append(el('span', '', it.name), el('span', '', eur2(it.value))); box.append(r);
+        }
         groups.append(box);
       });
       bb.append(split, groups);
     }
 
-    // Savings goals
+    // Savings goals database
     const sb = $('#fi-saving-bars'); sb.replaceChildren();
-    if (!ok('savings')) sb.append(el('p', 'fi-fail', dash.data('savings').status === 'error' ? 'Savings Goals didn’t load.' : 'Loading…'));
+    if (!ok('savings')) sb.append(el('p', 'fi-empty', dash.data('savings').status === 'error' ? 'Savings Goals didn’t load.' : 'Loading…'));
     else if (!savings.length) sb.append(el('p', 'fi-empty', 'No savings goals yet.'));
-    const byCat = d3.groups(savings.slice().sort((a, b) => (b.Target || 0) - (a.Target || 0)), (s) => s.Category || 'Other');
-    const catHue = { 'Emergency Fund': '#e0614f', Travel: '#e3923a', 'Big Expense': '#4a7fd0' };
-    for (const [cat, list] of byCat) {
+    const catHue = { 'Emergency Fund': 'var(--p-save)', Travel: 'var(--p-travel)', 'Big Expense': '#4a7fd0' };
+    for (const [cat, list] of d3.groups(savings.slice().sort((a, b) => (b.Target || 0) - (a.Target || 0)), (s) => s.Category || 'Other')) {
       sb.append(el('span', 'fi-label', cat));
       for (const s of list) {
         const t = s.Target || 0, v = s.Saved || 0;
         sb.append(bar(s.Goal || 'Untitled', v, t, { url: s.url, color: catHue[cat] || 'var(--fi)', label: eur(v) + ' of ' + eur(t) + (t ? ' · ' + pct(v / t) : '') }));
-      }
-    }
-
-    // Travel budget
-    const tb = $('#fi-trips'); tb.replaceChildren();
-    if (!travel) { $('#fi-travel-note').textContent = ''; tb.append(el('p', 'fi-empty', 'No travel budget table found on your Finance page.')); }
-    else {
-      $('#fi-travel-title').textContent = travel.heading.replace(/^[^\w]+/u, '') || 'Travel budget';
-      // The heading names the period ("Oct 2026 – Dec 2027"): spread the total over it, as the Finance page does.
-      const span = travel.heading.match(/([A-Za-z]{3})[a-z]*\.?\s+(\d{4})\s*[–—-]\s*([A-Za-z]{3})[a-z]*\.?\s+(\d{4})/);
-      const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, mai: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, okt: 9, nov: 10, dec: 11, dez: 11 };
-      let months = 0;
-      if (span && MON[span[1].toLowerCase()] != null && MON[span[3].toLowerCase()] != null) months = (+span[4] - +span[2]) * 12 + MON[span[3].toLowerCase()] - MON[span[1].toLowerCase()] + 1;
-      $('#fi-travel-note').textContent = 'Total ' + eur(travel.total) + (months > 0 ? ' · ≈ ' + eur(travel.total / months) + '/month over ' + months + ' months' + (travelLine ? ' vs ' + eur(travelLine) + ' in your budget' : '') : '');
-      const maxT = d3.max(travel.trips, (x) => x.value) || 1;
-      for (const x of travel.trips) {
-        const row = el('div', 'fi-trip'); row.style.setProperty('--a', 'var(--a-travel)');
-        const track = el('div', 'fi-track'); const f = el('span'); f.style.width = (x.value / maxT) * 100 + '%'; track.append(f);
-        row.append(el('span', 'fi-trip-when', x.when), el('span', 'fi-bar-name', x.name), el('span', 'fi-bar-val', x.raw || eur(x.value)), track);
-        tb.append(row);
       }
     }
 
@@ -275,21 +391,7 @@
       const maxS = d3.max(subs, (x) => x.monthly) || 1;
       for (const x of subs.sort((a, b) => b.monthly - a.monthly)) sl.append(bar(x.name, x.monthly, maxS, { color: '#7f8a9b', label: eur2(x.monthly) + '/mo' + (x.cycle && !/monat|month/i.test(x.cycle) ? ' · ' + x.cycle + (x.due ? ', ' + x.due : '') : '') }));
     }
-
-    // Finance goals from the Impossible List
-    const fl = $('#fi-fin-list'); fl.replaceChildren();
-    const fgoals = items.filter((g) => g.kind === 'goal' && g.area === 'Finance' && g.status !== 'Archived')
-      .sort((a, b) => ({ Active: 0, Idea: 1, 'On Hold': 2, Done: 3 }[a.status] ?? 4) - ({ Active: 0, Idea: 1, 'On Hold': 2, Done: 3 }[b.status] ?? 4));
-    for (const g of fgoals) {
-      const row = el('div', 'fi-bar-name'); row.style.setProperty('--a', 'var(--a-finance)');
-      const pill = el('span', 'fi-pill', g.status + (g.scope ? ' · ' + g.scope : '')); if (g.status === 'Active' || g.status === 'Done') pill.dataset.level = 'ok';
-      row.append(el('span', 'fi-dot'), link(g.name, g.url), pill);
-      pill.style.marginLeft = 'auto';
-      fl.append(row);
-    }
-    if (!fgoals.length) fl.append(el('p', 'fi-empty', 'No Finance goals on the Impossible List.'));
   }
-  const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
   dash.onData(render);
 })();
 </script>

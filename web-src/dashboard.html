@@ -75,6 +75,31 @@
   .lw-more { font-size: .6875rem; color: var(--color-fg-muted); margin-left: 2px; }
   .lw-legend .lw-m { --a: var(--color-fg-muted); }
   .lw-row .lw-marks { grid-column: 1 / -1; }
+  .lw-row-note { grid-column: 1 / -1; display: flex; align-items: baseline; gap: .4rem; font-size: var(--cds-font-size-caption); line-height: 1.4; }
+  .lw-row-note::before { content: ""; flex: none; width: .45rem; height: .45rem; border-radius: 50%; background: var(--cds-chart-muted); transform: translateY(-1px); }
+  .lw-row-note[data-level="warn"] { color: var(--color-warn); } .lw-row-note[data-level="warn"]::before { background: var(--color-warn); }
+  .lw-row-note[data-level="ok"]::before { background: var(--color-ok); }
+  .lw-row-note[data-level="info"]::before { background: var(--a, var(--cds-chart-muted)); }
+  .lw-row .lw-row-note { grid-row: 1; grid-column: 2; justify-self: end; text-align: right; max-width: 12rem; }
+  .lw-detail-notes { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin-top: .25rem; }
+  .lw-detail-notes .lw-row-note { grid-column: auto; }
+  .lw-tasks { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: var(--cds-gap-md); align-items: start; }
+  .lw-task-col { display: grid; gap: var(--cds-gap-sm); align-content: start; }
+  .lw-task-col-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-sm); padding-bottom: var(--cds-pad-xs); border-bottom: 1px solid var(--color-border-line); }
+  .lw-task-col-head strong { font-weight: var(--cds-font-weight-medium); }
+  .lw-task { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 2px var(--cds-gap-sm); align-items: baseline; padding: var(--cds-pad-sm) 0; border-bottom: 1px dashed var(--color-border-line); }
+  .lw-task:last-child { border-bottom: 0; }
+  .lw-task .lw-dot { transform: translateY(-1px); }
+  .lw-task-meta { grid-column: 2 / -1; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); overflow-wrap: anywhere; }
+  .lw-task-area { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); white-space: nowrap; }
+  .lw-later { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .lw-later summary { cursor: pointer; }
+  .lw-later ul { list-style: none; margin: .4rem 0 0; padding: 0; display: grid; gap: 3px; }
+  .lw-groups { display: grid; gap: var(--cds-gap-md); }
+  .lw-group { display: grid; gap: var(--cds-gap-sm); }
+  .lw-group-head { display: flex; align-items: center; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); letter-spacing: .03em; color: var(--color-fg-muted); }
+  .lw-group-head::after { content: ""; flex: 1; height: 1px; background: var(--color-border-line); }
+  .lw-group-head i { width: .55rem; height: .55rem; border-radius: 2px; background: var(--g, var(--cds-chart-muted)); flex: none; }
   .lw-row-sum { grid-column: 1 / -1; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
 
   /* Area detail */
@@ -191,6 +216,14 @@
       </div>
       <article class="lw-detail" id="lw-detail" aria-live="polite"></article>
     </div>
+  </section>
+
+  <section class="lw-section" id="tasks">
+    <div class="lw-section-head">
+      <h2 class="lw-h2">Daily &amp; weekly</h2>
+      <span class="lw-note">From your Task Planner, P1 first. Review these before the week starts.</span>
+    </div>
+    <div class="lw-card"><div class="lw-tasks" id="lw-tasks"></div></div>
   </section>
 
   <div class="lw-grid2">
@@ -330,34 +363,34 @@ dash.calc('insights', {
   inputs: ['items', 'areas'],
   fn: (items, areas) => {
     const out = [];
-    const add = (level, area, text) => out.push({ id: 'i' + out.length, level, area, text });
+    const add = (level, area, text, theme) => out.push({ id: 'i' + out.length, level, area, text, theme });
     const s = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
     const main = areas.filter((a) => a.area !== 'Unassigned');
     for (const a of main) {
       const waiting = a.goals_idea + a.goals_hold;
-      if (a.goals_active > 0 && a.projects === 0) add('warn', a.area, a.area + ' has ' + s(a.goals_active, 'active goal') + ' but no project carrying it.');
-      else if (a.projects === 0 && a.goals_active === 0 && waiting > 0) add('info', a.area, a.area + ' has nothing active, with ' + s(waiting, 'idea') + ' waiting on the Impossible List.');
+      if (a.goals_active > 0 && a.projects === 0) add('warn', a.area, a.area + ' has ' + s(a.goals_active, 'active goal') + ' but no project carrying it.', 'Plans');
+      else if (a.projects === 0 && a.goals_active === 0 && waiting > 0) add('info', a.area, a.area + ' has nothing active, with ' + s(waiting, 'idea') + ' waiting on the Impossible List.', 'Balance');
     }
     const goals = items.filter((i) => i.kind === 'goal');
-    for (const g of goals.filter((g) => g.status === 'Active' && g.links === 0)) add('warn', g.area, g.name + ' is an active goal with no project linked.');
+    for (const g of goals.filter((g) => g.status === 'Active' && g.links === 0)) add('warn', g.area, g.name + ' is an active goal with no project linked.', 'Plans');
     const nyIdeas = goals.filter((g) => g.scope === 'Next Year' && g.status === 'Idea');
     if (nyIdeas.length) {
       const one = new Set(nyIdeas.map((g) => g.area)).size === 1 ? nyIdeas[0].area : '';
-      add('warn', one, s(nyIdeas.length, 'next-year goal') + ' still marked Idea: ' + nyIdeas.map((g) => g.name).join('; ') + '.');
+      add('warn', one, s(nyIdeas.length, 'next-year goal') + ' still marked Idea: ' + nyIdeas.map((g) => g.name).join('; ') + '.', 'Plans');
     }
     const projects = items.filter((i) => i.kind === 'project');
-    for (const p of projects.filter((p) => !p.next)) add('warn', p.area, p.name + ' has no next action.');
-    for (const p of projects.filter((p) => p.area === 'Unassigned')) add('info', '', p.name + ' has no life area on the projects board.');
+    for (const p of projects.filter((p) => !p.next)) add('warn', p.area, p.name + ' has no next action.', 'Housekeeping');
+    for (const p of projects.filter((p) => p.area === 'Unassigned')) add('info', '', p.name + ' has no life area on the projects board.', 'Housekeeping');
     const tasks = items.filter((i) => i.kind === 'task' && i.status !== 'Done');
     const unsorted = tasks.filter((t) => t.area === 'Unassigned').length;
-    if (unsorted) add('info', '', unsorted + ' of ' + tasks.length + ' open tasks have no life area.');
+    if (unsorted) add('info', '', unsorted + ' of ' + tasks.length + ' open tasks have no life area.', 'Housekeeping');
     const capture = tasks.filter((t) => t.status === 'Capture').length;
-    if (capture >= 5) add('info', '', capture + ' items are sitting in Capture, waiting to be sorted.');
+    if (capture >= 5) add('info', '', capture + ' items are sitting in Capture, waiting to be sorted.', 'Housekeeping');
     const ideas = main.map((a) => [a.area, a.goals_idea]).sort((x, y) => y[1] - x[1]);
     const allIdeas = main.reduce((t, a) => t + a.goals_idea, 0);
-    if (ideas[0] && ideas[0][1]) add('info', ideas[0][0], ideas[0][0] + ' holds ' + ideas[0][1] + ' of your ' + allIdeas + ' Impossible List ideas.');
+    if (ideas[0] && ideas[0][1]) add('info', ideas[0][0], ideas[0][0] + ' holds ' + ideas[0][1] + ' of your ' + allIdeas + ' Impossible List ideas.', 'Balance');
     const budget = goals.filter((g) => g.scope === 'Next Year' && g.status !== 'Done' && g.status !== 'Archived').reduce((t, g) => t + g.budget, 0);
-    if (budget) add('ok', 'Finance', 'Next-year goals add up to €' + budget.toLocaleString('en') + ' in budgets, about €' + Math.round(budget / 12).toLocaleString('en') + ' a month to set aside.');
+    if (budget) add('ok', 'Finance', 'Next-year goals add up to €' + budget.toLocaleString('en') + ' in budgets, about €' + Math.round(budget / 12).toLocaleString('en') + ' a month to set aside.', 'Money');
     const rank = { warn: 0, info: 1, ok: 2 };
     return out.sort((a, b) => rank[a.level] - rank[b.level]);
   },
@@ -453,6 +486,7 @@ dash.calc('dates', {
   let selected = null;
   const score = (r) => r.projects * 3 + r.goals_active * 2 + r.tasks_open;
   const currentArea = (rows) => {
+    rows = rows.filter((r) => r.area !== 'Unassigned');
     if (selected && rows.some((r) => r.area === selected)) return selected;
     return rows.slice().sort((a, b) => score(b) - score(a))[0]?.area || null;
   };
@@ -487,14 +521,33 @@ dash.calc('dates', {
     });
   }
 
-  function statusOf(r) {
-    if (r.area === 'Unassigned') return ['quiet', 'Needs an area'];
-    if (r.goals_active > 0 && r.projects === 0) return ['warn', 'Goal without project'];
-    if (r.projects > 0 && r.goals_active > 0) return ['ok', 'Moving'];
-    if (r.projects > 0) return ['ok', 'Upkeep'];
-    if (r.goals_idea + r.goals_hold > 0) return ['quiet', 'Dreaming'];
-    return ['quiet', 'Quiet'];
+  /* What is worth knowing about one area right now, most pressing first: [level, text]. */
+  const inDays = (n) => (n === 0 ? 'today' : n === 1 ? 'tomorrow' : 'in ' + n + ' days');
+  function areaInsights(r) {
+    const items = dash.data('items').data.filter((x) => x.area === r.area);
+    const out = [];
+    if (r.area === 'Unassigned') out.push(['warn', plural(items.length, 'item has', 'items have') + ' no life area']);
+    for (const g of items.filter((x) => x.kind === 'goal' && x.status === 'Active' && !x.links)) out.push(['warn', g.name + ' has no project']);
+    for (const p of items.filter((x) => x.kind === 'project' && !x.next)) out.push(['warn', p.name + ' has no next action']);
+    if (dash.data('dates').status === 'ok') {
+      const next = dash.data('dates').data.map((d) => ({ ...d, d: parseDay(d.date) }))
+        .filter((d) => d.area === r.area && d.d && d.d >= t && daysBetween(t, d.d) <= 30)[0];
+      if (next) out.push(['info', next.label + ' ' + inDays(daysBetween(t, next.d))]);
+    }
+    const proj = items.find((x) => x.kind === 'project' && x.next);
+    if (proj) out.push(['info', 'Next: ' + proj.next.split(' · ')[0]]);
+    const p1 = items.filter((x) => x.kind === 'task' && x.scope === 'P1' && (x.status === 'Daily' || x.status === 'Weekly'));
+    if (p1.length) out.push(['info', plural(p1.length, 'P1 task', 'P1 tasks') + ' this week']);
+    const nyIdeas = items.filter((x) => x.kind === 'goal' && x.scope === 'Next Year' && x.status === 'Idea');
+    if (nyIdeas.length) out.push(['info', plural(nyIdeas.length, 'next-year goal', 'next-year goals') + ' not started yet']);
+    const budget = d3.sum(items.filter((x) => x.kind === 'goal' && x.scope === 'Next Year' && x.status !== 'Done' && x.status !== 'Archived'), (x) => x.budget);
+    if (budget) out.push(['quiet', FMT.eur(budget) + ' budgeted for next year']);
+    const total = r.goals_done + r.goals_active + r.goals_idea + r.goals_hold;
+    if (r.goals_done) out.push(['ok', r.goals_done + ' of ' + total + ' Impossible List items done']);
+    if (!out.length) out.push(['quiet', r.goals_idea ? plural(r.goals_idea, 'idea', 'ideas') + ' waiting, nothing started' : 'Nothing planned here yet']);
+    return out;
   }
+  const insightLine = (level, text) => { const s = el('span', 'lw-row-note', text); s.dataset.level = level; return s; };
 
   let foldOpen = false;
   try { foldOpen = localStorage.getItem('life-fold-open') === '1'; } catch (_) {}
@@ -510,7 +563,7 @@ dash.calc('dates', {
     const folded = rows.filter(isFolded);
     if (selected && folded.some((r) => r.area === selected)) foldOpen = true;
     const later = [];
-    rows.forEach((r, i) => {
+    rows.filter((r) => r.area !== 'Unassigned').forEach((r, i) => {
       const of = (f) => items.filter((x) => x.area === r.area && f(x));
       const row = paint(el('button', 'lw-row lw-in'), r.area);
       row.type = 'button';
@@ -518,8 +571,8 @@ dash.calc('dates', {
       row.dataset.area = r.area;
       row.setAttribute('aria-pressed', String(r.area === cur));
       const name = el('span', 'lw-row-name'); name.append(dot(r.area), el('span', '', r.area));
-      const [level, label] = statusOf(r);
-      const pill = el('span', 'lw-pill', label); pill.dataset.level = level;
+      const [level, label] = areaInsights(r)[0];
+      const note = insightLine(level, label);
 
       const marks = el('span', 'lw-marks');
       const add = (list, cls, kind) => list.forEach((x) => {
@@ -541,7 +594,7 @@ dash.calc('dates', {
 
       const sum = el('span', 'lw-row-sum', [plural(r.projects, 'project', 'projects'), plural(r.goals_active, 'active goal', 'active goals'),
         plural(r.tasks_open, 'task', 'tasks'), plural(r.goals_idea + r.goals_hold, 'idea', 'ideas'), r.goals_done + ' done'].join(' · '));
-      row.append(name, marks, pill, sum);
+      row.append(name, marks, note, sum);
       if (isFolded(r)) later.push(row); else box.append(row);
     });
     if (folded.length) {
@@ -589,10 +642,9 @@ dash.calc('dates', {
     const head = el('div', 'lw-detail-head');
     const title = el('div', 'lw-detail-title');
     title.append(el('h3', '', area));
-    const [level, label] = statusOf(r);
-    const pill = el('span', 'lw-pill', label); pill.dataset.level = level;
-    title.append(pill);
-    head.append(title, el('span', 'lw-sub', [plural(r.projects, 'active project', 'active projects'), plural(r.goals_active, 'active goal', 'active goals'), plural(r.tasks_open, 'task this week', 'tasks this week')].join(' · ')));
+    const notes = el('div', 'lw-detail-notes');
+    for (const [level, text] of areaInsights(r).slice(0, 5)) notes.append(insightLine(level, text));
+    head.append(title, el('span', 'lw-sub', [plural(r.projects, 'active project', 'active projects'), plural(r.goals_active, 'active goal', 'active goals'), plural(r.tasks_open, 'task this week', 'tasks this week')].join(' · ')), notes);
     const body = el('div', 'lw-detail-body');
     box.append(head, body);
     const block = (heading) => { const b = el('section', 'lw-block'); b.append(el('h4', 'lw-h4', heading)); body.append(b); return b; };
@@ -742,14 +794,60 @@ dash.calc('dates', {
     box.classList.remove('dash-skeleton');
     const rows = dash.data('insights').data;
     if (!rows.length) { box.append(el('li', 'lw-note', 'Nothing flagged.')); return; }
-    for (const r of rows) {
-      const li = el('li', 'lw-insight');
-      const f = el('span', 'lw-flag'); f.dataset.level = r.level;
-      const body = el('div');
-      body.append(el('div', '', r.text));
-      if (r.area) { const a = el('div', 'lw-insight-area'); a.append(dot(r.area), document.createTextNode(r.area)); body.append(a); }
-      li.append(f, body);
-      box.append(li);
+    // Grouped by theme: what to plan, what to tidy, how your areas balance, money.
+    const THEMES = [['Plans', 'Plans to firm up', 'var(--color-warn)'], ['Housekeeping', 'Housekeeping', 'var(--cds-chart-axis)'],
+      ['Balance', 'Balance across areas', 'var(--a-learning)'], ['Money', 'Money', 'var(--a-finance)']];
+    for (const [key, label, color] of THEMES) {
+      const list = rows.filter((r) => (r.theme || 'Housekeeping') === key);
+      if (!list.length) continue;
+      const group = el('li', 'lw-group');
+      const head = el('div', 'lw-group-head'); head.style.setProperty('--g', color);
+      head.append(el('i'), document.createTextNode(label + ' · ' + list.length));
+      group.append(head);
+      for (const r of list) {
+        const row = el('div', 'lw-insight');
+        const f = el('span', 'lw-flag'); f.dataset.level = r.level;
+        const body = el('div');
+        body.append(el('div', '', r.text));
+        if (r.area) { const a = el('div', 'lw-insight-area'); a.append(dot(r.area), document.createTextNode(r.area)); body.append(a); }
+        row.append(f, body);
+        group.append(row);
+      }
+      box.append(group);
+    }
+  }
+
+  function tasks() {
+    const box = $('#lw-tasks');
+    if (hold(box, state('items'))) return;
+    box.classList.remove('dash-skeleton');
+    const all = dash.data('items').data.filter((x) => x.kind === 'task' && x.status !== 'Done');
+    const rankP = { P1: 0, P2: 1, P3: 2 };
+    for (const [status, label, note] of [['Daily', 'Daily', 'every day'], ['Weekly', 'This week', 'before Sunday']]) {
+      const list = all.filter((x) => x.status === status).sort((a, b) => (rankP[a.scope] ?? 9) - (rankP[b.scope] ?? 9) || a.name.localeCompare(b.name));
+      const col = el('div', 'lw-task-col');
+      const head = el('div', 'lw-task-col-head');
+      head.append(el('strong', '', label + ' · ' + list.length), el('span', 'lw-note', note));
+      col.append(head);
+      if (!list.length) col.append(el('p', 'lw-note', 'Nothing here.'));
+      for (const x of list) {
+        const row = paint(el('div', 'lw-task'), x.area);
+        row.append(dot(x.area), link(x.name, x.url),
+          el('span', 'lw-tag' + (x.scope === 'P1' ? ' is-p1' : ''), [x.scope, x.area !== 'Unassigned' ? x.area : 'no area'].filter(Boolean).join(' · ')));
+        const meta = [x.next ? 'Next: ' + x.next : '', x.start ? 'last worked on ' + fmtShort(parseDay(x.start)) : ''].filter(Boolean).join(' · ');
+        if (meta) row.append(el('div', 'lw-task-meta', meta));
+        col.append(row);
+      }
+      box.append(col);
+    }
+    const later = all.filter((x) => x.status === 'Capture' || x.status === 'On-Hold');
+    if (later.length) {
+      const d = el('details', 'lw-later');
+      d.append(el('summary', '', 'Capture ' + all.filter((x) => x.status === 'Capture').length + ' · On hold ' + all.filter((x) => x.status === 'On-Hold').length + ' · show'));
+      const ul = el('ul');
+      for (const x of later) { const li = el('li', 'lw-item'); li.append(dot(x.area), link(x.name, x.url), el('span', 'lw-tag', x.status)); ul.append(li); }
+      d.append(ul);
+      box.append(d);
     }
   }
 
@@ -760,11 +858,23 @@ dash.calc('dates', {
     const rows = dash.data('dates').data
       .map((r) => ({ ...r, d: parseDay(r.date) }))
       .filter((r) => r.d && r.d >= t && daysBetween(t, r.d) <= 90)
-      .slice(0, 8);
+      .slice(0, 12);
     if (!rows.length) { box.append(el('li', 'lw-note', 'Nothing dated in the next 90 days.')); return; }
+    // Grouped by how soon.
+    const bucket = (n) => (n <= 7 ? 'This week' : n <= 31 ? 'Next 30 days' : 'Later');
+    const colors = { 'This week': 'var(--color-warn)', 'Next 30 days': 'var(--a-career)', Later: 'var(--cds-chart-axis)' };
+    let current = null, group = null;
     for (const r of rows) {
       const days = daysBetween(t, r.d);
-      const li = el('li', 'lw-date');
+      if (bucket(days) !== current) {
+        current = bucket(days);
+        group = el('li', 'lw-group');
+        const head = el('div', 'lw-group-head'); head.style.setProperty('--g', colors[current]);
+        head.append(el('i'), document.createTextNode(current));
+        group.append(head);
+        box.append(group);
+      }
+      const li = el('div', 'lw-date');
       const cal = paint(el('div', 'lw-cal'), r.area);
       cal.append(el('span', 'lw-cal-m', d3.utcFormat('%b')(r.d)), el('span', 'lw-cal-d', d3.utcFormat('%-d')(r.d)));
       const body = el('div', 'lw-date-body');
@@ -773,10 +883,10 @@ dash.calc('dates', {
       if (days <= 3) rel.classList.add('is-soon');
       body.append(rel);
       li.append(cal, body);
-      box.append(li);
+      group.append(li);
     }
   }
 
-  dash.onData(() => { header(); figures(); donut(); map(); detail(); insights(); dates(); });
+  dash.onData(() => { header(); figures(); donut(); map(); detail(); tasks(); insights(); dates(); });
 })();
 </script>
