@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Life Wiki Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+  /* Tokens the dashboard page is written against (same names as the claude.ai Dashboard type). */
+  :root {
+    color-scheme: light;
+    --font-anthropic-sans: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-anthropic-serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --cds-font-size-caption: .8125rem; --cds-font-size-body: .9375rem; --cds-font-size-heading: 1.125rem; --cds-font-size-title: 1.75rem;
+    --cds-font-weight-medium: 600;
+    --cds-gap-xs: .25rem; --cds-gap-sm: .5rem; --cds-gap-md: .875rem; --cds-gap-lg: 1.25rem; --cds-gap-xl: 2rem;
+    --cds-pad-xs: .25rem; --cds-pad-sm: .5rem; --cds-pad-md: .75rem; --cds-pad-lg: 1rem; --cds-pad-xl: 1.5rem;
+    --cds-radius: 12px; --cds-dur-slow: .35s; --cds-ease-out: cubic-bezier(.2, .8, .2, 1);
+    --color-bg: #f5f4f0; --color-panel: #ffffff; --color-fg: #1d1f23; --color-fg-muted: #676b74; --color-border-line: #e3e1db;
+    --color-ok: #2c8452; --color-warn: #a8640f; --color-bad: #c03f36;
+    --cds-chart-grid: #ebe9e3; --cds-chart-axis: #a6a59f; --cds-chart-muted: #c8c6bf; --cds-chart-reference: #85847f;
+    --cds-surface-popover: #ffffff; --cds-border: #e3e1db; --cds-shadow-popover: 0 8px 28px rgba(20, 20, 20, .12); --cds-text-secondary: #676b74;
+    --skel: #ecebe6; --skel-hi: #f6f5f1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --color-bg: #131417; --color-panel: #1b1c20; --color-fg: #ebebea; --color-fg-muted: #9b9da4; --color-border-line: #2b2d32;
+      --color-ok: #5cc38a; --color-warn: #e4a64e; --color-bad: #ee7a70;
+      --cds-chart-grid: #26282d; --cds-chart-axis: #55585f; --cds-chart-muted: #44474e; --cds-chart-reference: #7a7d84;
+      --cds-surface-popover: #23252a; --cds-border: #33353b; --cds-shadow-popover: 0 8px 28px rgba(0, 0, 0, .5); --cds-text-secondary: #9b9da4;
+      --skel: #222429; --skel-hi: #2b2d33;
+    }
+  }
+  html, body { margin: 0; }
+  body { background: var(--color-bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); line-height: 1.45; -webkit-font-smoothing: antialiased; }
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  button { font: inherit; }
+
+  .shell-bar { position: sticky; top: 0; z-index: 30; background: color-mix(in oklab, var(--color-bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-border-line); padding-top: env(safe-area-inset-top, 0px); }
+  .shell-in { max-width: 1240px; margin: 0 auto; padding-block: .5rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+  .shell-sync { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; align-items: center; gap: .4rem; }
+  .shell-sync::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; background: var(--color-ok); }
+  .shell-sync.is-stale::before { background: var(--color-warn); }
+  .shell-space { flex: 1; }
+  .shell-btn { font-size: var(--cds-font-size-caption); cursor: pointer; color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: 999px; padding: .2rem .75rem; }
+  .shell-btn:hover { border-color: var(--color-fg-muted); }
+  .shell-btn:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  #dash-root { max-width: 1240px; margin: 0 auto; padding-block: 1.75rem 3rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+  .dash-skeleton { color: transparent !important; border-radius: 6px; background: linear-gradient(90deg, var(--skel) 0%, var(--skel-hi) 50%, var(--skel) 100%) 0 0 / 200% 100%; }
+  @media (prefers-reduced-motion: no-preference) { .dash-skeleton { animation: shell-shimmer 1.4s linear infinite; } }
+  @keyframes shell-shimmer { to { background-position: -200% 0; } }
+
+  .lock { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 2rem; }
+  .lock-card { width: min(100%, 24rem); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: 16px; padding: 1.75rem; display: grid; gap: .9rem; box-shadow: var(--cds-shadow-popover); }
+  .lock-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: 1.75rem; line-height: 1.1; }
+  .lock-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .lock-card input[type="password"] { width: 100%; font: inherit; color: var(--color-fg); background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: 10px; padding: .65rem .8rem; }
+  .lock-card input[type="password"]:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 1px; }
+  .lock-row { display: flex; align-items: center; gap: .5rem; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .lock-btn { font-weight: 600; cursor: pointer; color: var(--color-bg); background: var(--color-fg); border: 0; border-radius: 10px; padding: .65rem 1rem; }
+  .lock-btn:disabled { opacity: .6; cursor: progress; }
+  .lock-msg { min-height: 1.2em; margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-bad); }
+  .lock-swatches { display: flex; gap: 4px; }
+  .lock-swatches span { width: 1.25rem; height: .3rem; border-radius: 999px; }
+</style>
+</head>
+<body>
+<div class="lock" id="lock" hidden>
+  <form class="lock-card" id="lock-form" autocomplete="on">
+    <div class="lock-swatches" aria-hidden="true">
+      <span style="background:#e0614f"></span><span style="background:#e3923a"></span><span style="background:#3a9b68"></span><span style="background:#d25d93"></span><span style="background:#4a7fd0"></span><span style="background:#8a66d1"></span><span style="background:#7f8a9b"></span>
+    </div>
+    <h1 class="lock-title">Life Wiki Dashboard</h1>
+    <p class="lock-note">Your data is encrypted. Enter the dashboard password to open it.</p>
+    <input type="text" name="username" value="life-dashboard" autocomplete="username" hidden>
+    <input type="password" id="lock-pw" autocomplete="current-password" placeholder="Password" aria-label="Password" required>
+    <label class="lock-row"><input type="checkbox" id="lock-remember" checked> Remember on this device</label>
+    <button class="lock-btn" id="lock-btn" type="submit">Unlock</button>
+    <p class="lock-msg" id="lock-msg" role="status"></p>
+  </form>
+</div>
+
+<header class="shell-bar" id="shell-bar" hidden>
+  <div class="shell-in">
+    <span class="shell-sync" id="shell-sync">Loading…</span>
+    <span class="shell-space"></span>
+    <button type="button" class="shell-btn" id="shell-refresh">Refresh</button>
+    <button type="button" class="shell-btn" id="shell-lock">Lock</button>
+  </div>
+</header>
+
+<script>
+/* Stand-in for the claude.ai Dashboard runtime: the page below calls dash.data / calc / loader / onData / params. */
+window.dash = (() => {
+  const data = {}, status = {}, loaders = {}, calcs = [], subs = [];
+  let params = { area: null };
+  const run = () => subs.forEach((fn) => { try { fn(); } catch (e) { console.error(e); } });
+  let t = null;
+  window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 150); });
+  return {
+    colors: ['#e0614f', '#e3923a', '#3a9b68', '#d25d93', '#4a7fd0', '#8a66d1', '#7f8a9b', '#a8a29e'],
+    loader(id, o) { loaders[id] = o; },
+    calc(id, o) { calcs.push({ id, ...o }); },
+    data(id) {
+      const s = status[id] || 'loading';
+      return { status: s, data: s === 'ok' ? data[id] : [], refreshing: false, meta: [], message: '' };
+    },
+    onData(fn) { subs.push(fn); try { fn(); } catch (e) { console.error(e); } },
+    params() { return params; },
+    setParams(p) { params = { ...params, ...p }; run(); },
+    resetParams() { params = { area: null }; run(); },
+    refresh() {}, setLink() {},
+    _load(sources) {
+      for (const [id, value] of Object.entries(sources)) {
+        try {
+          data[id] = loaders[id] ? loaders[id].fn({ answer: value, args: {}, read: {} }) : value;
+          status[id] = 'ok';
+        } catch (e) { console.error(id, e); status[id] = 'error'; }
+      }
+      for (const c of calcs) {
+        try {
+          if (c.inputs.some((i) => status[i] !== 'ok')) throw new Error('input missing');
+          data[c.id] = c.fn(...c.inputs.map((i) => data[i]));
+          status[c.id] = 'ok';
+        } catch (e) { console.error(c.id, e); status[c.id] = 'error'; }
+      }
+      run();
+    },
+  };
+})();
+</script>
+
+<main id="dash-root" hidden>

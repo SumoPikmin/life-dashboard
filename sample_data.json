@@ -1,0 +1,250 @@
+{
+ "sources": {
+  "projects": [
+   {
+    "url": "https://app.notion.com/p/samplep1",
+    "Name": "Sample: 10K training block",
+    "Area": "Sports",
+    "Goals": "[\"https://app.notion.com/p/sampleg1\"]",
+    "Next action": "Sample: easy run Tuesday",
+    "date:Period:start": "2026-10-01",
+    "date:Period:end": "2027-02-28",
+    "date:Period:is_datetime": 0
+   },
+   {
+    "url": "https://app.notion.com/p/samplep2",
+    "Name": "Sample: Savings plan",
+    "Area": "Finance",
+    "Goals": "[\"https://app.notion.com/p/sampleg2\"]",
+    "Next action": "Sample: set up standing order",
+    "date:Period:start": "2027-01-01",
+    "date:Period:end": "2027-12-31",
+    "date:Period:is_datetime": 0
+   },
+   {
+    "url": "https://app.notion.com/p/samplep3",
+    "Name": "Sample: Home upkeep",
+    "Area": "Admin",
+    "Next action": "Sample: deep clean 25.10.2026",
+    "date:Period:is_datetime": 0
+   }
+  ],
+  "goals": [
+   {
+    "url": "https://app.notion.com/p/sampleg1",
+    "Name": "Sample: run a 10K",
+    "Category": "Health & Fitness",
+    "Scope": "Next Year",
+    "Status": "Active",
+    "Budget": "€80",
+    "Project": "[\"https://app.notion.com/p/samplep1\"]",
+    "Next action": ""
+   },
+   {
+    "url": "https://app.notion.com/p/sampleg2",
+    "Name": "Sample: build a savings buffer",
+    "Category": "Finance",
+    "Scope": "Next Year",
+    "Status": "Active",
+    "Budget": "",
+    "Project": "[\"https://app.notion.com/p/samplep2\"]",
+    "Next action": ""
+   },
+   {
+    "url": "https://app.notion.com/p/sampleg3",
+    "Name": "Sample: weekend city trip",
+    "Category": "Travel & Adventure",
+    "Scope": "Next Year",
+    "Status": "Idea",
+    "Budget": "€400",
+    "Project": "[]",
+    "Next action": ""
+   },
+   {
+    "url": "https://app.notion.com/p/sampleg4",
+    "Name": "Sample: hike a long trail",
+    "Category": "Travel & Adventure",
+    "Scope": "Big Vision",
+    "Status": "Idea",
+    "Budget": "",
+    "Project": "[]",
+    "Next action": ""
+   },
+   {
+    "url": "https://app.notion.com/p/sampleg5",
+    "Name": "Sample: learn to cook five dishes",
+    "Category": "Learning",
+    "Scope": "In 5 years",
+    "Status": "Idea",
+    "Budget": "",
+    "Project": "[]",
+    "Next action": ""
+   },
+   {
+    "url": "https://app.notion.com/p/sampleg6",
+    "Name": "Sample: first half marathon",
+    "Category": "Health & Fitness",
+    "Status": "Done",
+    "Budget": "",
+    "Project": "[]",
+    "Next action": ""
+   },
+   {
+    "url": "https://app.notion.com/p/sampleg7",
+    "Name": "Sample: host a dinner each month",
+    "Category": "Social",
+    "Scope": "In 5 years",
+    "Status": "Idea",
+    "Budget": "",
+    "Project": "[]",
+    "Next action": ""
+   }
+  ],
+  "tasks": [
+   {
+    "url": "https://app.notion.com/p/samplet1",
+    "Name": "Sample: stretch 10 minutes",
+    "Status": "Daily",
+    "Priority": "P1",
+    "Done": "__NO__",
+    "Life Area": "[\"Health & Fitness\"]",
+    "Next action": "",
+    "date:Last worked on:is_datetime": 0
+   },
+   {
+    "url": "https://app.notion.com/p/samplet2",
+    "Name": "Sample: renew passport 30.10.2026",
+    "Status": "Weekly",
+    "Done": "__NO__",
+    "Life Area": "[\"Home & Admin\"]",
+    "Next action": "",
+    "date:Last worked on:is_datetime": 0
+   },
+   {
+    "url": "https://app.notion.com/p/samplet3",
+    "Name": "Sample: ideas inbox",
+    "Status": "Capture",
+    "Done": "__NO__",
+    "Next action": "",
+    "date:Last worked on:is_datetime": 0
+   }
+  ],
+  "wiki": {
+   "text": "# Life Principles\n---\n1. Sample principle one\n2. Sample principle two\n## Other\n</column>\n# Quotes\n---\nSample quote\n</column>"
+  },
+  "skills": [
+   {
+    "kind": "node",
+    "key": "run#r1",
+    "branch": "fitness",
+    "branch_name": "Health & Fitness",
+    "track": "run",
+    "track_name": "Running",
+    "node": "r1",
+    "title": "Sample: 5K",
+    "tier": "Foundation",
+    "xp": 15,
+    "requires": "",
+    "needs": null,
+    "root": false,
+    "unlocked": "2026-09-01"
+   },
+   {
+    "kind": "node",
+    "key": "run#r2",
+    "branch": "fitness",
+    "branch_name": "Health & Fitness",
+    "track": "run",
+    "track_name": "Running",
+    "node": "r2",
+    "title": "Sample: 10K",
+    "tier": "Intermediate",
+    "xp": 40,
+    "requires": "r1",
+    "needs": null,
+    "root": false,
+    "unlocked": ""
+   },
+   {
+    "kind": "node",
+    "key": "run#r3",
+    "branch": "fitness",
+    "branch_name": "Health & Fitness",
+    "track": "run",
+    "track_name": "Running",
+    "node": "r3",
+    "title": "Sample: Half",
+    "tier": "Advanced",
+    "xp": 100,
+    "requires": "r2",
+    "needs": null,
+    "root": false,
+    "unlocked": ""
+   },
+   {
+    "kind": "node",
+    "key": "str#s1",
+    "branch": "fitness",
+    "branch_name": "Health & Fitness",
+    "track": "str",
+    "track_name": "Strength",
+    "node": "s1",
+    "title": "Sample: 10 push-ups",
+    "tier": "Foundation",
+    "xp": 15,
+    "requires": "",
+    "needs": null,
+    "root": false,
+    "unlocked": ""
+   },
+   {
+    "kind": "node",
+    "key": "str#s2",
+    "branch": "fitness",
+    "branch_name": "Health & Fitness",
+    "track": "str",
+    "track_name": "Strength",
+    "node": "s2",
+    "title": "Sample: pull-up",
+    "tier": "Intermediate",
+    "xp": 40,
+    "requires": "",
+    "needs": null,
+    "root": false,
+    "unlocked": ""
+   },
+   {
+    "kind": "node",
+    "key": "cash#f1",
+    "branch": "finance",
+    "branch_name": "Finance",
+    "track": "cash",
+    "track_name": "Finance",
+    "node": "f1",
+    "title": "Sample: first €1,000 saved",
+    "tier": "Foundation",
+    "xp": 15,
+    "requires": "",
+    "needs": null,
+    "root": false,
+    "unlocked": "?"
+   },
+   {
+    "kind": "bucket",
+    "key": "bucket#b1",
+    "branch": "bucket",
+    "branch_name": "Bucket list",
+    "track": "bucket",
+    "track_name": "Common",
+    "node": "b1",
+    "title": "Sample: sunrise hike",
+    "tier": "Bucket",
+    "xp": 15,
+    "requires": "",
+    "needs": null,
+    "root": true,
+    "unlocked": ""
+   }
+  ]
+ }
+}

@@ -1,0 +1,119 @@
+
+</main>
+
+<script>
+/* Unlock data.enc (AES-GCM, PBKDF2-SHA256), then re-check for a newer sync every 10 minutes while the tab is open. */
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const keySlot = (blob) => 'life-key:' + blob.salt;
+  let key = null, lastGen = null, blobSalt = null;
+
+  async function fetchBlob() {
+    const res = await fetch('data.enc?ts=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('Could not load data.enc (HTTP ' + res.status + ')');
+    return res.json();
+  }
+  async function deriveKey(password, blob) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: b64(blob.salt), iterations: blob.iter },
+      base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']);
+  }
+  async function decrypt(blob, k) {
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(blob.iv) }, k, b64(blob.ct));
+    const text = await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+    return JSON.parse(text);
+  }
+  async function remembered(blob) {
+    try {
+      const raw = localStorage.getItem(keySlot(blob));
+      return raw ? await crypto.subtle.importKey('raw', b64(raw), 'AES-GCM', true, ['decrypt']) : null;
+    } catch (_) { return null; }
+  }
+  function forget() {
+    try { Object.keys(localStorage).filter((k) => k.startsWith('life-key:')).forEach((k) => localStorage.removeItem(k)); } catch (_) {}
+  }
+
+  function ago(iso) {
+    const m = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
+    if (m < 1) return 'just now';
+    if (m < 60) return m + ' min ago';
+    const h = Math.round(m / 60);
+    return h < 48 ? h + (h === 1 ? ' hour ago' : ' hours ago') : Math.round(h / 24) + ' days ago';
+  }
+  function updateSync() {
+    if (!lastGen) return;
+    const el = $('#shell-sync');
+    const hours = (Date.now() - new Date(lastGen)) / 36e5;
+    el.textContent = 'Synced from Notion ' + ago(lastGen) + ' · updates every 3 hours';
+    el.classList.toggle('is-stale', hours > 8);
+  }
+  function show(payload) {
+    lastGen = payload.generated_at;
+    $('#lock').hidden = true;
+    $('#shell-bar').hidden = false;
+    $('#dash-root').hidden = false;
+    window.dash._load(payload.sources);
+    updateSync();
+  }
+  async function refresh(manual) {
+    if (!key) return;
+    const btn = $('#shell-refresh');
+    if (manual) { btn.disabled = true; btn.textContent = 'Checking…'; }
+    try {
+      const blob = await fetchBlob();
+      const payload = await decrypt(blob, key);
+      if (payload.generated_at !== lastGen) show(payload);
+      if (manual) btn.textContent = payload.generated_at !== lastGen ? 'Updated' : 'Up to date';
+    } catch (e) {
+      console.error(e);
+      if (manual) btn.textContent = 'Couldn’t check';
+    } finally {
+      if (manual) setTimeout(() => { btn.disabled = false; btn.textContent = 'Refresh'; }, 1800);
+    }
+  }
+
+  $('#shell-refresh').addEventListener('click', () => refresh(true));
+  $('#shell-lock').addEventListener('click', () => { forget(); location.reload(); });
+  setInterval(updateSync, 60000);
+  setInterval(() => { if (!document.hidden) refresh(false); }, 10 * 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(false); });
+
+  (async () => {
+    let blob;
+    try { blob = await fetchBlob(); } catch (e) {
+      $('#lock').hidden = false; $('#lock-msg').textContent = e.message; $('#lock-btn').disabled = true; return;
+    }
+    blobSalt = blob.salt;
+    const saved = await remembered(blob);
+    if (saved) {
+      try { const p = await decrypt(blob, saved); key = saved; return show(p); } catch (_) { forget(); }
+    }
+    $('#lock').hidden = false;
+    $('#lock-pw').focus();
+    $('#lock-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      $('#lock-btn').disabled = true;
+      $('#lock-msg').textContent = '';
+      $('#lock-btn').textContent = 'Unlocking…';
+      try {
+        const k = await deriveKey($('#lock-pw').value, blob);
+        const p = await decrypt(blob, k);
+        key = k;
+        if ($('#lock-remember').checked) {
+          const raw = new Uint8Array(await crypto.subtle.exportKey('raw', k));
+          try { localStorage.setItem(keySlot(blob), btoa(String.fromCharCode(...raw))); } catch (_) {}
+        }
+        $('#lock-pw').value = '';
+        show(p);
+      } catch (_) {
+        $('#lock-msg').textContent = 'Wrong password.';
+        $('#lock-btn').disabled = false;
+        $('#lock-btn').textContent = 'Unlock';
+      }
+    });
+  })();
+})();
+</script>
+</body>
+</html>
