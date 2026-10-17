@@ -161,14 +161,19 @@
     if (budgetIdx == null || budgetIdx >= budgets.length) budgetIdx = Math.max(0, budgets.length - 1);
     const budget = budgets[budgetIdx];
     const saveGroup = budget ? budget.groups.find((g) => /spar|sav/i.test(g.name)) : null;
+    // Goals are mostly trips: they are paid from the Travel line of the budget, not from saving (emergency fund + ETF).
+    const travelLine = budget ? d3.sum(budget.groups.flatMap((g) => g.items).filter((x) => /travel|reise|urlaub/i.test(x.name)), (x) => x.value) : 0;
     const travel = travelRows(fin);
     const subs = subRows(fin) || [];
     const saved = d3.sum(savings, (s) => s.Saved || 0), target = d3.sum(savings, (s) => s.Target || 0);
 
     // Lead and links
     const need = sum.monthly_saving;
+    const gap = need - travelLine;
     $('#fi-lead').textContent = 'Next year’s goals add up to ' + eur(sum.next_year_budget) + ', about ' + eur(need) + ' a month. ' +
-      (saveGroup ? 'Your budget sets aside ' + eur(saveGroup.value) + ' a month for saving' + (saveGroup.value >= need ? ', which covers it.' : ', ' + eur(need - saveGroup.value) + ' short of it.') : 'Add a budget link to your Finance page to compare.');
+      (travelLine ? 'They are mostly trips, paid from the Travel line of your budget: ' + eur(travelLine) + ' a month, ' +
+        (gap > 0 ? eur(gap) + ' short.' : 'which covers them.') : 'Your budget has no Travel line to pay for them yet.') +
+      (saveGroup ? ' Your ' + eur(saveGroup.value) + ' of monthly saving (' + saveGroup.items.map((x) => x.name).join(' + ') + ') is kept separate.' : '');
     const links = $('#fi-links'); links.replaceChildren();
     const plan = items.find((i) => i.kind === 'project' && i.area === 'Finance');
     if (fin.url) links.append(link('Finance page in Notion ↗', fin.url));
@@ -178,7 +183,8 @@
     const strip = $('#fi-strip'); strip.replaceChildren();
     strip.append(fig('Next-year goal budget', eur(sum.next_year_budget), plural(sum.next_year_goals, 'goal') + ' planned'));
     strip.append(fig('Needed per month', eur(need), 'to fund them over 12 months'));
-    if (saveGroup) strip.append(fig('Saving in your budget', eur(saveGroup.value) + '/mo', saveGroup.value >= need ? 'covers the goals' : eur(need - saveGroup.value) + ' short', saveGroup.value >= need ? 'is-ok' : 'is-warn'));
+    if (budget) strip.append(fig('Travel line in budget', eur(travelLine) + '/mo', travelLine ? (gap > 0 ? eur(gap) + '/mo short for the goals' : 'covers the goals') : 'no Travel line', travelLine && gap <= 0 ? 'is-ok' : 'is-warn'));
+    if (saveGroup) strip.append(fig('Saving & investing', eur(saveGroup.value) + '/mo', saveGroup.items.map((x) => x.name + ' ' + eur(x.value)).join(' · ')));
     if (travel) strip.append(fig('Travel budget', eur(travel.total), plural(travel.trips.length, 'trip') + ' planned'));
     if (target) strip.append(fig('Savings goals', pct(saved / target), eur(saved) + ' of ' + eur(target)));
 
@@ -189,7 +195,10 @@
     const maxG = d3.max(goals, (g) => g.budget) || 1;
     for (const g of goals) gb.append(bar(g.name, g.budget, maxG, { area: g.area, url: g.url, label: g.budget ? eur(g.budget) + (g.status === 'Idea' ? ' · idea' : '') : 'no budget yet' }));
     if (!goals.length) gb.append(el('p', 'fi-empty', 'No next-year goals on the Impossible List.'));
-    else { const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Total'), el('span', '', eur(sum.next_year_budget) + ' · ' + eur(need) + '/month')); gb.append(tot); }
+    else {
+      const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Total'), el('span', '', eur(sum.next_year_budget) + ' · ' + eur(need) + '/month')); gb.append(tot);
+      if (travelLine) gb.append(el('p', 'fi-note', 'Paid from the Travel line: ' + eur(travelLine) + '/month, ' + eur(travelLine * 12) + ' a year' + (gap > 0 ? ', ' + eur(gap * 12) + ' short over the year.' : ', enough for the year.')));
+    }
 
     // Monthly budget
     const tabs = $('#fi-budget-tabs'); tabs.replaceChildren();
@@ -242,7 +251,12 @@
     if (!travel) { $('#fi-travel-note').textContent = ''; tb.append(el('p', 'fi-empty', 'No travel budget table found on your Finance page.')); }
     else {
       $('#fi-travel-title').textContent = travel.heading.replace(/^[^\w]+/u, '') || 'Travel budget';
-      $('#fi-travel-note').textContent = 'Total ' + eur(travel.total);
+      // The heading names the period ("Oct 2026 – Dec 2027"): spread the total over it, as the Finance page does.
+      const span = travel.heading.match(/([A-Za-z]{3})[a-z]*\.?\s+(\d{4})\s*[–—-]\s*([A-Za-z]{3})[a-z]*\.?\s+(\d{4})/);
+      const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, mai: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, okt: 9, nov: 10, dec: 11, dez: 11 };
+      let months = 0;
+      if (span && MON[span[1].toLowerCase()] != null && MON[span[3].toLowerCase()] != null) months = (+span[4] - +span[2]) * 12 + MON[span[3].toLowerCase()] - MON[span[1].toLowerCase()] + 1;
+      $('#fi-travel-note').textContent = 'Total ' + eur(travel.total) + (months > 0 ? ' · ≈ ' + eur(travel.total / months) + '/month over ' + months + ' months' + (travelLine ? ' vs ' + eur(travelLine) + ' in your budget' : '') : '');
       const maxT = d3.max(travel.trips, (x) => x.value) || 1;
       for (const x of travel.trips) {
         const row = el('div', 'fi-trip'); row.style.setProperty('--a', 'var(--a-travel)');
