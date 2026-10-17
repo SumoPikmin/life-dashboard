@@ -33,14 +33,20 @@ from pathlib import Path
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 ROOT = Path(__file__).resolve().parent
-NOTION_VERSION = "2022-06-28"
+NOTION_VERSION = "2025-09-03"
 PBKDF2_ITERATIONS = 600_000
 
-# Databases and the page inside the Life Wiki.
-PROJECTS_DB = "99ac0a23807847ef911c4647ec92f2da"   # 🛠 Active Projects
-GOALS_DB = "b4cc061661b3469ab576f5e2facb9693"      # 🎯 Impossible List
-TASKS_DB = "803e0b92530f4beea2f0a5c012bda99b"      # Task Planner
+# The Life Wiki page and its databases: (name, database id, data source id).
 LIFE_WIKI_PAGE = "e52fc193f0954ba88c24c996b20e6182"
+PROJECTS = ("Active Projects", "99ac0a23807847ef911c4647ec92f2da", "d7e2eda4-a2e7-4373-80b0-c09440a11edb")
+GOALS = ("Impossible List", "b4cc061661b3469ab576f5e2facb9693", "3cdebe34-6799-462f-82c9-a1507dca1647")
+TASKS = ("Task Planner", "803e0b92530f4beea2f0a5c012bda99b", "7dcac3d2-944f-482a-9394-85a9e2e8b7a2")
+
+
+class NotionError(Exception):
+    def __init__(self, code: int, path: str, detail: str):
+        super().__init__(f"Notion API error {code} on {path}: {detail}")
+        self.code = code
 
 
 # ---------------------------------------------------------------- Notion API
@@ -63,11 +69,9 @@ def notion(method: str, path: str, body: dict | None = None) -> dict:
             if e.code in (429, 500, 502, 503, 504) and attempt < 4:
                 time.sleep(float(e.headers.get("Retry-After") or 2 ** attempt))
                 continue
-            if e.code in (401, 403):
-                sys.exit(f"Notion refused the token ({e.code}). Check NOTION_TOKEN. {detail}")
-            if e.code == 404:
-                sys.exit(f"Notion can't see {path}. Connect the integration to the Life Wiki page (••• → Connections). {detail}")
-            sys.exit(f"Notion API error {e.code} on {path}: {detail}")
+            if e.code == 401:
+                sys.exit(f"Notion refused the token (401). Check NOTION_TOKEN. {detail}")
+            raise NotionError(e.code, path, detail) from None
     raise RuntimeError("unreachable")
 
 
@@ -110,13 +114,15 @@ def prop_columns(name: str, prop: dict) -> dict:
     return {}
 
 
-def query_rows(database_id: str) -> list[dict]:
+def query_rows(source: tuple[str, str, str]) -> list[dict]:
     rows, cursor = [], None
     while True:
         body = {"page_size": 100, **({"start_cursor": cursor} if cursor else {})}
-        res = notion("POST", f"/databases/{database_id}/query", body)
+        res = notion("POST", f"/data_sources/{source[2]}/query", body)
         for page in res["results"]:
             row = {"url": page_url(page["id"])}
+            if page.get("object") != "page":
+                continue
             for name, prop in page["properties"].items():
                 row.update(prop_columns(name, prop))
             rows.append(row)
@@ -163,6 +169,28 @@ def page_text(page_id: str) -> str:
 
     walk(block_children(page_id))
     return "\n".join(lines)
+
+
+def diagnose() -> None:
+    """Say what the integration can see. Counts and yes/no only: the Actions log of a public repo is public."""
+    def visible(path: str) -> str:
+        try:
+            notion("GET", path)
+            return "visible"
+        except NotionError as e:
+            return f"NOT visible ({e.code})"
+    print("Notion access check:")
+    print("  Life Wiki page:", visible(f"/pages/{LIFE_WIKI_PAGE}"))
+    for name, db, ds in (PROJECTS, GOALS, TASKS):
+        print(f"  {name}: database {visible(f'/databases/{db}')}, data source {visible(f'/data_sources/{ds}')}")
+    try:
+        res = notion("POST", "/search", {"page_size": 100})
+        kinds: dict[str, int] = {}
+        for r in res.get("results", []):
+            kinds[r.get("object", "?")] = kinds.get(r.get("object", "?"), 0) + 1
+        print("  Shared with the integration (first 100):", kinds or "nothing")
+    except NotionError as e:
+        print("  Search failed:", e.code)
 
 
 # ---------------------------------------------------------------- Skill Tree
@@ -228,15 +256,21 @@ def collect(sample: bool) -> dict:
         payload["generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
         return payload
     export = load_skill_export()
+    try:
+        sources = {
+            "projects": query_rows(PROJECTS),
+            "goals": query_rows(GOALS),
+            "tasks": query_rows(TASKS),
+            "wiki": {"text": page_text(LIFE_WIKI_PAGE)},
+        }
+    except NotionError as e:
+        print(e)
+        diagnose()
+        sys.exit("Notion can't see part of the Life Wiki. In Notion open Life Wiki -> ••• -> Connections and add the integration.")
+    sources["skills"] = skill_rows(export) if export else []
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "sources": {
-            "projects": query_rows(PROJECTS_DB),
-            "goals": query_rows(GOALS_DB),
-            "tasks": query_rows(TASKS_DB),
-            "wiki": {"text": page_text(LIFE_WIKI_PAGE)},
-            "skills": skill_rows(export) if export else [],
-        },
+        "sources": sources,
         "skills_exported": bool(export),
     }
 
