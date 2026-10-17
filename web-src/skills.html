@@ -1,0 +1,534 @@
+  </section>
+  <section class="view" id="view-skills" data-view="skills" hidden>
+<style>
+  .sk {
+    --a-health: #e0614f; --a-travel: #e3923a; --a-finance: #3a9b68; --a-social: #d25d93;
+    --a-career: #4a7fd0; --a-learning: #8a66d1; --a-home: #7f8a9b; --a-bucket: #c9922e;
+    display: grid; gap: var(--cds-gap-lg); min-width: 0;
+  }
+  .sk-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--cds-gap-md); }
+  .sk-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: calc(var(--cds-font-size-title) * 1.35); line-height: 1.05; }
+  .sk-tools { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); align-items: center; }
+  .sk-btn { font-size: var(--cds-font-size-caption); cursor: pointer; color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: 999px; padding: .25rem .8rem; }
+  .sk-btn:hover:not(:disabled) { border-color: var(--color-fg-muted); }
+  .sk-btn:disabled { opacity: .45; cursor: default; }
+  .sk-btn:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  .sk-btn.is-primary { background: var(--color-fg); color: var(--color-bg); border-color: var(--color-fg); }
+  .sk-sync { display: flex; align-items: center; gap: .45rem; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .sk-sync::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; background: var(--cds-chart-muted); flex: none; }
+  .sk-sync[data-level="ok"]::before { background: var(--color-ok); }
+  .sk-sync[data-level="busy"]::before { background: var(--color-warn); }
+  .sk-sync[data-level="bad"]::before { background: var(--color-bad); }
+
+  .sk-settings { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-sm); max-width: 44rem; }
+  .sk-settings p { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.5; }
+  .sk-settings ol { margin: 0; padding-left: 1.2rem; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: grid; gap: 2px; }
+  .sk-settings a { color: var(--color-fg); }
+  .sk-token-row { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+  .sk-token-row input { flex: 1 1 16rem; min-width: 0; font: inherit; font-size: var(--cds-font-size-caption); color: var(--color-fg); background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: 8px; padding: .45rem .6rem; }
+  .sk-msg { min-height: 1.2em; font-size: var(--cds-font-size-caption); }
+  .sk-msg.is-bad { color: var(--color-bad); }
+  .sk-msg.is-ok { color: var(--color-ok); }
+
+  .sk-top { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: stretch; }
+  .sk-level { flex: 1 1 15rem; display: grid; gap: var(--cds-gap-xs); align-content: start; padding: var(--cds-pad-lg); border-radius: var(--cds-radius); background: color-mix(in oklab, var(--a-learning) 8%, var(--color-panel)); border: 1px solid color-mix(in oklab, var(--a-learning) 22%, var(--color-border-line)); }
+  .sk-level-row { display: flex; align-items: baseline; gap: var(--cds-gap-sm); }
+  .sk-big { font-family: var(--font-anthropic-serif); font-size: calc(var(--cds-font-size-title) * 1.2); line-height: 1; font-variant-numeric: tabular-nums; }
+  .sk-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  .sk-xpbar { height: .5rem; border-radius: 999px; background: color-mix(in oklab, var(--color-fg) 8%, transparent); overflow: hidden; margin-block: var(--cds-gap-xs); }
+  .sk-xpbar > span { display: block; height: 100%; border-radius: 999px; background: var(--a-learning); transition: width var(--cds-dur-slow) var(--cds-ease-out); }
+  .sk-tabs { flex: 3 1 26rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr)); gap: var(--cds-gap-sm); min-width: 0; }
+  .sk-tab { font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: var(--cds-radius); padding: var(--cds-pad-sm) var(--cds-pad-md); display: grid; gap: 2px; align-content: center; min-width: 0; background: color-mix(in oklab, var(--a) 8%, var(--color-panel)); border: 1px solid color-mix(in oklab, var(--a) 22%, var(--color-border-line)); }
+  .sk-tab:hover { border-color: var(--a); }
+  .sk-tab[aria-selected="true"] { border-color: var(--a); box-shadow: inset 0 0 0 1px var(--a); }
+  .sk-tab:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+  .sk-tab-name { display: flex; align-items: center; gap: var(--cds-gap-xs); font-weight: var(--cds-font-weight-medium); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sk-dot { width: .625rem; height: .625rem; border-radius: 50%; flex: none; background: var(--a); }
+  .sk-pips { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 2px; }
+  .sk-pips i { width: .5rem; height: .25rem; border-radius: 999px; background: color-mix(in oklab, var(--a) 18%, transparent); }
+  .sk-pips i.is-done { background: var(--a); }
+  .sk-pips i.is-open { background: color-mix(in oklab, var(--a) 50%, transparent); }
+
+  .sk-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-sm); min-width: 0; }
+  .sk-card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-xs) var(--cds-gap-md); }
+  .sk-card-head h3 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+  .sk-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .sk-legend span { display: inline-flex; align-items: center; gap: .35rem; }
+  .sk-legend i { width: .9rem; height: .6rem; border-radius: 3px; display: inline-block; }
+  .sk-note { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+
+  .sk-tree { display: grid; grid-template-columns: 5.25rem minmax(0, 1fr); position: relative; min-height: 14rem; }
+  .sk-gut { position: relative; }
+  .sk-gut span { position: absolute; left: 0; right: var(--cds-pad-sm); text-align: right; font-size: .6875rem; color: var(--color-fg-muted); letter-spacing: .03em; transform: translateY(-50%); }
+  .sk-scroll { overflow-x: auto; overflow-y: hidden; padding-bottom: var(--cds-pad-sm); overscroll-behavior-x: contain; min-width: 0; }
+  .sk-canvas { position: relative; }
+  .sk-lane { position: absolute; left: 0; border-radius: calc(var(--cds-radius) * .75); }
+  .sk-canvas svg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+  .sk-root { position: absolute; transform: translateX(-50%); height: 1.75rem; padding: 0 var(--cds-pad-md); border-radius: 999px; display: flex; align-items: center; white-space: nowrap; font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); background: color-mix(in oklab, var(--a) 26%, var(--color-panel)); border: 1px solid color-mix(in oklab, var(--a) 55%, var(--color-border-line)); }
+  .sk-node { position: absolute; font: inherit; color: inherit; cursor: pointer; border-radius: calc(var(--cds-radius) * .75); border: 1px solid var(--color-border-line); background: var(--color-panel); padding: 4px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; overflow: hidden; transition: transform .12s ease, box-shadow .12s ease, background .2s ease; }
+  .sk-node:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 0, 0, .12); }
+  .sk-node:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+  .sk-node-t { font-size: .75rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .sk-node-m { font-size: .625rem; color: var(--color-fg-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .sk-node.is-done { background: color-mix(in oklab, var(--a) 34%, var(--color-panel)); border: 1.5px solid var(--a); }
+  .sk-node.is-done .sk-node-m { color: var(--color-fg); }
+  .sk-node.is-open { border: 1.5px solid var(--a); box-shadow: 0 0 0 3px color-mix(in oklab, var(--a) 14%, transparent); }
+  .sk-node.is-lock { opacity: .5; }
+  .sk-node.is-ooo { border-style: dashed; }
+  .sk-ready { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-sm); align-items: center; }
+  .sk-chip { font: inherit; font-size: var(--cds-font-size-caption); cursor: pointer; line-height: 1.7; padding: 0 var(--cds-pad-sm); border-radius: 999px; color: var(--color-fg); background: color-mix(in oklab, var(--a) 14%, transparent); border: 1px solid transparent; }
+  .sk-chip:hover { border-color: var(--a); }
+  .sk-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .sk-tip { position: absolute; pointer-events: none; z-index: 5; max-width: 18rem; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); }
+  .sk-tip-h { color: var(--cds-text-secondary); }
+
+  .sk-bucket { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--cds-gap-sm); }
+  .sk-pick { font: inherit; color: inherit; cursor: pointer; text-align: left; display: flex; align-items: center; gap: var(--cds-gap-sm); padding: var(--cds-pad-sm) var(--cds-pad-md); border-radius: 10px; border: 1px solid var(--color-border-line); background: var(--color-panel); min-width: 0; }
+  .sk-pick:hover { border-color: var(--a-bucket); }
+  .sk-pick.is-on { background: color-mix(in oklab, var(--a-bucket) 12%, var(--color-panel)); border-color: color-mix(in oklab, var(--a-bucket) 45%, var(--color-border-line)); }
+  .sk-box { width: 1.2rem; height: 1.2rem; flex: none; border-radius: 6px; border: 1.5px solid var(--color-border-line); display: grid; place-items: center; font-size: .75rem; color: var(--color-panel); }
+  .sk-pick.is-on .sk-box { background: var(--a-bucket); border-color: var(--a-bucket); }
+  .sk-pick-body { display: grid; min-width: 0; }
+  .sk-pick-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+</style>
+
+<div class="sk">
+  <div class="sk-head">
+    <div>
+      <h1 class="sk-title">Skill tree</h1>
+    </div>
+    <div class="sk-tools">
+      <span class="sk-sync" id="sk-sync">Loading…</span>
+      <button type="button" class="sk-btn" id="sk-undo" disabled>Undo</button>
+      <button type="button" class="sk-btn" id="sk-export">Export</button>
+      <button type="button" class="sk-btn" id="sk-import-btn">Import</button>
+      <button type="button" class="sk-btn" id="sk-settings-btn">Sync settings</button>
+      <input type="file" id="sk-import" accept="application/json" hidden>
+    </div>
+  </div>
+
+  <section class="sk-settings" id="sk-settings" hidden>
+    <strong>Save unlocks to GitHub</strong>
+    <p>Your skill tree lives in a private gist on your GitHub account. Every device can read it; to save changes from this device, add a GitHub token once. It is stored on this device encrypted with your dashboard password.</p>
+    <ol>
+      <li>Open <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=Life%20Dashboard%20skill%20tree" target="_blank" rel="noopener">GitHub → new classic token</a> (the <code>gist</code> scope is already ticked; pick an expiry).</li>
+      <li>Click <em>Generate token</em>, copy it, paste it here and save.</li>
+    </ol>
+    <div class="sk-token-row">
+      <input type="password" id="sk-token" placeholder="GitHub token (ghp_…)" autocomplete="off" aria-label="GitHub token">
+      <button type="button" class="sk-btn is-primary" id="sk-token-save">Save token</button>
+      <button type="button" class="sk-btn" id="sk-token-forget" hidden>Remove from this device</button>
+    </div>
+    <div class="sk-msg" id="sk-token-msg" role="status"></div>
+  </section>
+
+  <div class="sk-top">
+    <div class="sk-level">
+      <span class="sk-sub">Level</span>
+      <div class="sk-level-row"><span class="sk-big" id="sk-level">—</span><span class="sk-sub" id="sk-xp"></span></div>
+      <div class="sk-xpbar"><span id="sk-xpbar" style="width:0"></span></div>
+      <span class="sk-sub" id="sk-next"></span>
+      <span class="sk-sub" id="sk-counts"></span>
+    </div>
+    <div class="sk-tabs" id="sk-tabs" role="tablist" aria-label="Branches"></div>
+  </div>
+
+  <section class="sk-card" id="sk-card">
+    <div class="sk-card-head">
+      <h3 id="sk-card-title">—</h3>
+      <div class="sk-legend" id="sk-legend"></div>
+    </div>
+    <p class="sk-note" id="sk-hint">Click a skill to unlock it, click an unlocked skill to lock it again.</p>
+    <div id="sk-body"></div>
+    <div class="sk-ready" id="sk-ready"></div>
+  </section>
+</div>
+
+<script>
+window.SkillTree = (() => {
+  const $ = (s) => document.querySelector(s);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const TIERS = ['Foundation', 'Intermediate', 'Advanced', 'Elite'];
+  const TIER_XP = { Foundation: 15, Intermediate: 40, Advanced: 100, Elite: 250 };
+  const XP_BUCKET = 15, LEVEL_STEP = 300;
+  const HUE = { fitness: 'var(--a-health)', travel: 'var(--a-travel)', finance: 'var(--a-finance)', social: 'var(--a-social)', language: 'var(--a-learning)', bucket: 'var(--a-bucket)' };
+  const GIST_FILE = 'skilltree.json';
+  const TOKEN_SLOT = 'life-gh-token';
+
+  let config = null, st = { done: {}, bucket: {}, notes: {} }, gistId = null, token = null;
+  let branchSel = null, undo = [], saveTimer = null, dirty = false, lastPull = 0;
+
+  const ymd = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const todayStr = () => ymd(new Date());
+  const hue = (b) => HUE[b.id] || b.color || 'var(--cds-chart-muted)';
+  const key = (t, n) => t.id + '#' + n.id;
+  const isDone = (t, id) => !!st.done[t.id + '#' + id];
+  const present = (t) => TIERS.filter((x) => t.nodes.some((n) => n.tier === x));
+  const ofTier = (t, tier) => t.nodes.filter((n) => n.tier === tier);
+  const hasReq = (n) => n.requires && n.requires.length > 0;
+  const nodeXp = (n) => n.xp || TIER_XP[n.tier] || 0;
+  function unlockable(t, n) {
+    if (n.root) return true;
+    if (hasReq(n)) { const need = n.needs != null ? n.needs : n.requires.length; return n.requires.filter((id) => isDone(t, id)).length >= need; }
+    const ts = present(t), i = ts.indexOf(n.tier);
+    return i <= 0 || ofTier(t, ts[i - 1]).some((x) => isDone(t, x.id));
+  }
+  const stateOf = (t, n) => (isDone(t, n.id) ? 'done' : unlockable(t, n) ? 'open' : 'lock');
+  function lockReason(t, n) {
+    if (hasReq(n)) {
+      const names = n.requires.map((id) => (t.nodes.find((x) => x.id === id) || {}).title || id);
+      const need = n.needs != null ? n.needs : n.requires.length;
+      return (need < n.requires.length ? 'Needs any ' + need + ' of: ' : 'Needs: ') + names.join(', ');
+    }
+    const ts = present(t), i = ts.indexOf(n.tier);
+    return i > 0 ? 'Unlock any ' + ts[i - 1] + ' skill in ' + t.name + ' first' : '';
+  }
+  const tracks = () => config.branches.flatMap((b) => b.tracks.map((t) => ({ b, t })));
+  function totals() {
+    let xp = 0, done = 0, total = 0, ready = 0;
+    for (const { t } of tracks()) for (const n of t.nodes) {
+      total++;
+      const s = stateOf(t, n);
+      if (s === 'done') { done++; xp += nodeXp(n); } else if (s === 'open') ready++;
+    }
+    const bucketDone = Object.keys(st.bucket || {}).length;
+    xp += bucketDone * XP_BUCKET;
+    return { xp, done, total, ready, bucketDone, bucketTotal: (config.bucket || []).length, level: Math.floor(xp / LEVEL_STEP) + 1, into: xp % LEVEL_STEP };
+  }
+
+  // ---------- GitHub gist
+  const api = (method, body) => fetch('https://api.github.com/gists/' + gistId, {
+    method, cache: 'no-store',
+    headers: { Accept: 'application/vnd.github+json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  function setSync(level, text) { const s = $('#sk-sync'); s.dataset.level = level; s.textContent = text; }
+  function idleStatus() {
+    if (!gistId) return setSync('', 'Not connected to GitHub: changes stay on this page until you export');
+    if (!token) return setSync('', 'Read-only on this device · add a token to save');
+    setSync('ok', 'Saved to GitHub');
+  }
+  async function pull(force) {
+    if (!gistId || dirty) return;
+    if (!force && Date.now() - lastPull < 60000) return;
+    lastPull = Date.now();
+    try {
+      const res = await api('GET');
+      if (!res.ok) throw new Error(res.status === 404 ? 'gist not found' : 'HTTP ' + res.status);
+      const g = await res.json();
+      const f = g.files && g.files[GIST_FILE];
+      if (!f) throw new Error('gist has no ' + GIST_FILE);
+      const raw = f.truncated && f.raw_url ? await (await fetch(f.raw_url, { cache: 'no-store' })).text() : f.content;
+      const remote = JSON.parse(raw);
+      if (dirty) return;
+      if (remote.config) config = remote.config;
+      if (remote.state) st = normalize(remote.state);
+      render();
+      idleStatus();
+    } catch (e) {
+      setSync('bad', 'Couldn’t read GitHub (' + e.message + '), showing the last sync');
+    }
+  }
+  function queueSave() {
+    dirty = true;
+    $('#sk-undo').disabled = !undo.length;
+    if (!gistId) { setSync('busy', 'Changed on this page only: export to keep it'); return; }
+    if (!token) { setSync('busy', 'Not saved: add a GitHub token to keep this change'); openSettings(); return; }
+    setSync('busy', 'Saving…');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(save, 700);
+  }
+  async function save() {
+    try {
+      const content = JSON.stringify({ config, state: st, at: new Date().toISOString() }, null, 1);
+      const res = await api('PATCH', { files: { [GIST_FILE]: { content } } });
+      if (!res.ok) throw new Error(res.status === 401 ? 'token rejected' : res.status === 404 ? 'token can’t see the gist' : 'HTTP ' + res.status);
+      dirty = false;
+      setSync('ok', 'Saved to GitHub · ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    } catch (e) {
+      setSync('bad', 'Couldn’t save (' + e.message + '). Your change is still on this page.');
+    }
+  }
+  const normalize = (s) => ({ done: { ...(s && s.done) }, bucket: { ...(s && s.bucket) }, notes: { ...(s && s.notes) } });
+
+  // ---------- token, sealed with the dashboard key
+  async function loadToken() {
+    try {
+      const sealed = localStorage.getItem(TOKEN_SLOT);
+      token = sealed && window.lifeVault ? await window.lifeVault.open(sealed) : null;
+    } catch (_) { token = null; }
+    $('#sk-token-forget').hidden = !token;
+  }
+  function openSettings() { $('#sk-settings').hidden = false; }
+  $('#sk-settings-btn').addEventListener('click', () => { $('#sk-settings').hidden = !$('#sk-settings').hidden; });
+  $('#sk-token-save').addEventListener('click', async () => {
+    const msg = $('#sk-token-msg');
+    const value = $('#sk-token').value.trim();
+    if (!value) { msg.className = 'sk-msg is-bad'; msg.textContent = 'Paste a token first.'; return; }
+    msg.className = 'sk-msg'; msg.textContent = 'Checking the token…';
+    const prev = token; token = value;
+    try {
+      const res = await api('GET');
+      const scopes = res.headers.get('X-OAuth-Scopes') || '';
+      if (!res.ok) throw new Error(res.status === 401 ? 'GitHub rejected this token' : 'GitHub answered ' + res.status);
+      if (scopes && !scopes.split(',').map((s) => s.trim()).includes('gist')) throw new Error('this token has no gist scope');
+      localStorage.setItem(TOKEN_SLOT, await window.lifeVault.seal(value));
+      $('#sk-token').value = '';
+      $('#sk-token-forget').hidden = false;
+      msg.className = 'sk-msg is-ok'; msg.textContent = 'Saved. Changes from this device now go to GitHub.';
+      if (dirty) save(); else idleStatus();
+    } catch (e) {
+      token = prev;
+      msg.className = 'sk-msg is-bad'; msg.textContent = 'Not saved: ' + e.message + '.';
+    }
+  });
+  $('#sk-token-forget').addEventListener('click', () => {
+    try { localStorage.removeItem(TOKEN_SLOT); } catch (_) {}
+    token = null; $('#sk-token-forget').hidden = true;
+    $('#sk-token-msg').className = 'sk-msg'; $('#sk-token-msg').textContent = 'Removed from this device.';
+    idleStatus();
+  });
+
+  // ---------- actions
+  function snapshot() { undo.push(JSON.stringify(st)); if (undo.length > 80) undo.shift(); }
+  function nodeClick(t, n) {
+    const k = key(t, n);
+    if (st.done[k]) { snapshot(); delete st.done[k]; }
+    else {
+      if (!unlockable(t, n) && !window.confirm('"' + n.title + '" is locked. ' + lockReason(t, n) + '.\n\nUnlock it anyway? It will show as taken out of order.')) return;
+      snapshot(); st.done[k] = todayStr();
+    }
+    render(); queueSave();
+  }
+  function bucketClick(id) {
+    snapshot();
+    if (st.bucket[id]) delete st.bucket[id]; else st.bucket[id] = todayStr();
+    render(); queueSave();
+  }
+  $('#sk-undo').addEventListener('click', () => { if (!undo.length) return; st = JSON.parse(undo.pop()); render(); queueSave(); });
+  $('#sk-export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify({ config, state: st }, null, 2)], { type: 'application/json' });
+    const a = el('a'); a.href = URL.createObjectURL(blob); a.download = 'skilltree-' + todayStr() + '.json';
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+  $('#sk-import-btn').addEventListener('click', () => $('#sk-import').click());
+  $('#sk-import').addEventListener('change', (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const d = JSON.parse(r.result);
+        if (!d.config || !Array.isArray(d.config.branches)) throw new Error('not a Skill Tree export');
+        if (!window.confirm('Replace the skill tree with "' + f.name + '"? You can undo the unlock changes, not the tree layout.')) return;
+        snapshot(); config = d.config; st = normalize(d.state); render(); queueSave();
+      } catch (err) { window.alert('Could not read that file: ' + err.message); }
+    };
+    r.readAsText(f); e.target.value = '';
+  });
+
+  // ---------- render
+  (() => {
+    const box = $('#sk-legend');
+    for (const [label, style] of [['Unlocked', 'background:color-mix(in oklab, var(--a-learning) 34%, var(--color-panel));border:1.5px solid var(--a-learning)'],
+      ['Ready', 'border:1.5px solid var(--a-learning)'], ['Locked', 'border:1px solid var(--color-border-line);opacity:.6'], ['Out of order', 'border:1.5px dashed var(--a-learning)']]) {
+      const s = el('span'); const i = el('i'); i.setAttribute('style', style); s.append(i, document.createTextNode(label)); box.append(s);
+    }
+  })();
+
+  function renderTop() {
+    const s = totals();
+    $('#sk-level').textContent = s.level;
+    $('#sk-xp').textContent = d3.format(',')(s.xp) + ' XP';
+    $('#sk-xpbar').style.width = (s.into / LEVEL_STEP) * 100 + '%';
+    $('#sk-next').textContent = s.into + ' of ' + LEVEL_STEP + ' XP towards level ' + (s.level + 1);
+    $('#sk-counts').textContent = s.done + ' of ' + s.total + ' skills · ' + s.ready + ' ready · bucket list ' + s.bucketDone + ' of ' + s.bucketTotal;
+    const tabs = $('#sk-tabs'); tabs.replaceChildren();
+    const ids = [...config.branches.map((b) => b.id), 'bucket'];
+    if (!ids.includes(branchSel)) branchSel = ids[0];
+    for (const b of [...config.branches, { id: 'bucket', name: 'Bucket list', tracks: [] }]) {
+      const tab = el('button', 'sk-tab'); tab.type = 'button'; tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-selected', String(b.id === branchSel)); tab.dataset.branch = b.id;
+      tab.style.setProperty('--a', hue(b));
+      const nm = el('span', 'sk-tab-name'); nm.append(el('span', 'sk-dot'), el('span', '', b.name));
+      let sub, pips = el('span', 'sk-pips');
+      if (b.id === 'bucket') {
+        sub = (Object.keys(st.bucket).length) + ' of ' + (config.bucket || []).length + ' done';
+        for (const it of config.bucket || []) pips.append(el('i', st.bucket[it.id] ? 'is-done' : ''));
+      } else {
+        let d = 0, n = 0, xp = 0;
+        for (const t of b.tracks) for (const x of t.nodes) {
+          n++; const s2 = stateOf(t, x);
+          if (s2 === 'done') { d++; xp += nodeXp(x); }
+          pips.append(el('i', s2 === 'done' ? 'is-done' : s2 === 'open' ? 'is-open' : ''));
+        }
+        sub = d + ' of ' + n + ' · ' + xp + ' XP';
+      }
+      tab.append(nm, el('span', 'sk-sub', sub), pips);
+      tabs.append(tab);
+    }
+  }
+  $('#sk-tabs').addEventListener('click', (e) => {
+    const tab = e.target.closest('.sk-tab'); if (!tab) return;
+    branchSel = tab.dataset.branch; render();
+  });
+
+  function renderBucket() {
+    const body = $('#sk-body'), card = $('#sk-card');
+    card.style.setProperty('--a', 'var(--a-bucket)');
+    $('#sk-card-title').textContent = 'Bucket list';
+    $('#sk-hint').textContent = 'One-off experiences. Tick one when it is done (' + XP_BUCKET + ' XP each).';
+    $('#sk-legend').hidden = true;
+    $('#sk-ready').replaceChildren();
+    const grid = el('div', 'sk-bucket');
+    for (const it of config.bucket || []) {
+      const on = !!st.bucket[it.id];
+      const b = el('button', 'sk-pick' + (on ? ' is-on' : '')); b.type = 'button';
+      b.setAttribute('aria-pressed', String(on));
+      const box = el('span', 'sk-box', on ? '✓' : '');
+      const txt = el('span', 'sk-pick-body');
+      txt.append(el('span', '', it.label), el('span', 'sk-pick-sub', (it.tag || '') + (on ? ' · done ' + (st.bucket[it.id] === '?' ? 'earlier' : st.bucket[it.id]) : '')));
+      b.append(box, txt);
+      b.addEventListener('click', () => bucketClick(it.id));
+      grid.append(b);
+    }
+    body.replaceChildren(grid);
+  }
+
+  function renderTree(b) {
+    const body = $('#sk-body'), card = $('#sk-card');
+    card.style.setProperty('--a', hue(b));
+    $('#sk-card-title').textContent = b.name;
+    $('#sk-hint').textContent = 'Click a skill to unlock it, click an unlocked skill to lock it again.';
+    $('#sk-legend').hidden = false;
+    const tiers = TIERS.filter((tier) => b.tracks.some((t) => ofTier(t, tier).length));
+    const width = body.clientWidth || card.clientWidth || 700;
+    const narrow = width < 560;
+    const NW = narrow ? 116 : 140, NH = 66, LANE = 94, HEAD = 44, GAP = 8, CGAP = 28;
+    const laneTop = (tier) => HEAD + tiers.indexOf(tier) * LANE;
+    const cyOf = (tier) => laneTop(tier) + LANE / 2;
+    let x = 0; const cols = [];
+    for (const t of b.tracks) {
+      const maxN = Math.max(1, ...tiers.map((tier) => ofTier(t, tier).length));
+      const w = Math.max(maxN * NW + (maxN - 1) * GAP, 150);
+      cols.push({ t, left: x, width: w, center: x + w / 2 }); x += w + CGAP;
+    }
+    const W = Math.max(1, x - CGAP), H = HEAD + tiers.length * LANE + 4;
+    const pos = {};
+    for (const c of cols) for (const tier of tiers) {
+      const ns = ofTier(c.t, tier);
+      let sx = c.left + (c.width - (ns.length * NW + (ns.length - 1) * GAP)) / 2;
+      for (const n of ns) { pos[key(c.t, n)] = { x: sx + NW / 2, y: cyOf(tier) }; sx += NW + GAP; }
+    }
+    const edges = [], hubs = [];
+    for (const c of cols) {
+      const ts = present(c.t);
+      ts.forEach((tier, ti) => {
+        const gated = [];
+        for (const n of ofTier(c.t, tier)) {
+          const p = pos[key(c.t, n)];
+          if (hasReq(n)) {
+            const anyof = n.needs != null && n.needs < n.requires.length;
+            for (const rid of n.requires) { const q = pos[c.t.id + '#' + rid]; if (q) edges.push({ x1: q.x, y1: q.y + NH / 2, x2: p.x, y2: p.y - NH / 2, on: isDone(c.t, rid), dashed: anyof }); }
+          } else if (ti === 0 || n.root) edges.push({ x1: c.center, y1: HEAD - 14, x2: p.x, y2: p.y - NH / 2, on: true });
+          else gated.push(n);
+        }
+        if (gated.length && ti > 0) {
+          const prev = ofTier(c.t, ts[ti - 1]);
+          const gy = (cyOf(ts[ti - 1]) + NH / 2 + cyOf(tier) - NH / 2) / 2;
+          const on = prev.some((q) => isDone(c.t, q.id));
+          hubs.push({ x: c.center, y: gy, on });
+          for (const q of prev) { const qp = pos[key(c.t, q)]; edges.push({ x1: qp.x, y1: qp.y + NH / 2, x2: c.center, y2: gy, on }); }
+          for (const n of gated) { const np = pos[key(c.t, n)]; edges.push({ x1: c.center, y1: gy, x2: np.x, y2: np.y - NH / 2, on }); }
+        }
+      });
+    }
+
+    const tree = el('div', 'sk-tree');
+    const gut = el('div', 'sk-gut'); gut.style.height = H + 'px';
+    for (const tier of tiers) { const s = el('span', '', tier); s.style.top = cyOf(tier) + 'px'; gut.append(s); }
+    const scroll = el('div', 'sk-scroll');
+    const canvas = el('div', 'sk-canvas'); canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    tiers.forEach((tier, i) => {
+      const lane = el('div', 'sk-lane');
+      lane.style.top = laneTop(tier) + 2 + 'px'; lane.style.height = LANE - 4 + 'px'; lane.style.width = W + 'px';
+      lane.style.background = 'color-mix(in oklab, var(--a) ' + (3 + i * 3) + '%, transparent)';
+      canvas.append(lane);
+    });
+    const svg = d3.select(canvas).append('svg').attr('width', W).attr('height', H).attr('viewBox', '0 0 ' + W + ' ' + H);
+    const curve = (e) => { const my = (e.y1 + e.y2) / 2; return 'M' + e.x1 + ' ' + e.y1 + ' C' + e.x1 + ' ' + my + ' ' + e.x2 + ' ' + my + ' ' + e.x2 + ' ' + e.y2; };
+    svg.selectAll('path').data(edges).join('path').attr('d', curve)
+      .style('fill', 'none').style('stroke', (d) => (d.on ? 'var(--a)' : 'var(--cds-chart-axis)'))
+      .style('stroke-opacity', (d) => (d.on ? 0.85 : 0.45)).style('stroke-width', 2).style('stroke-dasharray', (d) => (d.dashed ? '5 4' : null));
+    svg.selectAll('circle').data(hubs).join('circle').attr('cx', (d) => d.x).attr('cy', (d) => d.y).attr('r', 5)
+      .style('fill', (d) => (d.on ? 'var(--a)' : 'var(--color-panel)')).style('stroke', (d) => (d.on ? 'var(--a)' : 'var(--cds-chart-axis)')).style('stroke-width', 1.5);
+    for (const c of cols) { const pill = el('div', 'sk-root', c.t.name); pill.style.left = c.center + 'px'; pill.style.top = '6px'; canvas.append(pill); }
+
+    const tip = el('div', 'sk-tip'); tip.hidden = true;
+    const show = (t, n, node) => {
+      const s = stateOf(t, n), ooo = s === 'done' && !unlockable(t, n), d = st.done[key(t, n)];
+      const line = s === 'done' ? (d === '?' ? 'Unlocked earlier' : 'Unlocked ' + d) + (ooo ? ', out of order' : '') + ' · click to lock'
+        : s === 'open' ? 'Ready · click to unlock' : lockReason(t, n);
+      tip.replaceChildren(el('div', 'sk-tip-h', n.tier + ' · ' + nodeXp(n) + ' XP'), el('div', '', n.title), el('div', '', line));
+      tip.hidden = false;
+      const bb = tree.getBoundingClientRect(), r = node.getBoundingClientRect();
+      tip.style.left = Math.max(0, Math.min(r.left - bb.left, bb.width - tip.offsetWidth)) + 'px';
+      tip.style.top = (r.bottom - bb.top + 6) + 'px';
+    };
+    for (const c of cols) for (const n of c.t.nodes) {
+      const p = pos[key(c.t, n)]; if (!p) continue;
+      const s = stateOf(c.t, n), ooo = s === 'done' && !unlockable(c.t, n);
+      const node = el('button', 'sk-node is-' + s + (ooo ? ' is-ooo' : ''));
+      node.type = 'button';
+      node.style.left = p.x - NW / 2 + 'px'; node.style.top = p.y - NH / 2 + 'px'; node.style.width = NW + 'px'; node.style.height = NH + 'px';
+      node.setAttribute('aria-label', n.title + ', ' + (s === 'done' ? 'unlocked, click to lock' : s === 'open' ? 'ready, click to unlock' : 'locked'));
+      node.append(el('span', 'sk-node-t', n.title), el('span', 'sk-node-m', nodeXp(n) + ' XP' + (s === 'done' ? ' · ✓' : s === 'open' ? ' · ready' : ' · locked')));
+      node.addEventListener('mouseenter', () => show(c.t, n, node));
+      node.addEventListener('focus', () => show(c.t, n, node));
+      node.addEventListener('mouseleave', () => { tip.hidden = true; });
+      node.addEventListener('blur', () => { tip.hidden = true; });
+      node.addEventListener('click', () => nodeClick(c.t, n));
+      canvas.append(node);
+    }
+    const prevScroll = body.querySelector('.sk-scroll')?.scrollLeft || 0;
+    scroll.append(canvas);
+    scroll.addEventListener('scroll', () => { tip.hidden = true; });
+    tree.append(gut, scroll, tip);
+    body.replaceChildren(tree);
+    scroll.scrollLeft = prevScroll;
+
+    const ready = $('#sk-ready'); ready.replaceChildren();
+    const open = b.tracks.flatMap((t) => t.nodes.filter((n) => stateOf(t, n) === 'open').map((n) => ({ t, n })))
+      .sort((p, q) => TIERS.indexOf(p.n.tier) - TIERS.indexOf(q.n.tier) || nodeXp(p.n) - nodeXp(q.n));
+    ready.append(el('span', 'sk-label', open.length ? 'Ready to unlock:' : 'Nothing ready in this branch'));
+    for (const { t, n } of open.slice(0, 10)) {
+      const chip = el('button', 'sk-chip', n.title + ' · ' + nodeXp(n) + ' XP'); chip.type = 'button';
+      chip.addEventListener('click', () => nodeClick(t, n));
+      ready.append(chip);
+    }
+    if (open.length > 10) ready.append(el('span', 'sk-label', '+ ' + (open.length - 10) + ' more'));
+  }
+
+  function render() {
+    if (!config) return;
+    renderTop();
+    if (branchSel === 'bucket') renderBucket();
+    else renderTree(config.branches.find((b) => b.id === branchSel));
+    $('#sk-undo').disabled = !undo.length;
+  }
+
+  return {
+    async init(payload) {
+      const base = payload.skilltree || null;
+      gistId = payload.skill_gist || null;
+      if (base) { config = base.config; st = normalize(base.state); }
+      await loadToken();
+      if (!config && !gistId) { setSync('', 'No skill tree yet: import your Skill Tree export'); return; }
+      idleStatus();
+      render();
+      pull(true);
+    },
+    shown() { render(); pull(false); },
+    redraw: render,
+  };
+})();
+</script>

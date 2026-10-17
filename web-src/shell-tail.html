@@ -1,13 +1,16 @@
-
-</main>
+  </section>
+  </main>
+</div>
 
 <script>
-/* Unlock data.enc (AES-GCM, PBKDF2-SHA256), then re-check for a newer sync every 10 minutes while the tab is open. */
+/* Unlock data.enc (AES-GCM, PBKDF2-SHA256), route between views, and re-check for a newer sync every 10 minutes. */
 (() => {
   const $ = (s) => document.querySelector(s);
   const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const toB64 = (u8) => { let s = ''; for (const b of u8) s += String.fromCharCode(b); return btoa(s); };
   const keySlot = (blob) => 'life-key:' + blob.salt;
-  let key = null, lastGen = null, blobSalt = null;
+  const USES = ['encrypt', 'decrypt'];
+  let key = null, lastGen = null, booted = false;
 
   async function fetchBlob() {
     const res = await fetch('data.enc?ts=' + Date.now(), { cache: 'no-store' });
@@ -17,7 +20,7 @@
   async function deriveKey(password, blob) {
     const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
     return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: b64(blob.salt), iterations: blob.iter },
-      base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']);
+      base, { name: 'AES-GCM', length: 256 }, true, USES);
   }
   async function decrypt(blob, k) {
     const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(blob.iv) }, k, b64(blob.ct));
@@ -27,12 +30,27 @@
   async function remembered(blob) {
     try {
       const raw = localStorage.getItem(keySlot(blob));
-      return raw ? await crypto.subtle.importKey('raw', b64(raw), 'AES-GCM', true, ['decrypt']) : null;
+      return raw ? await crypto.subtle.importKey('raw', b64(raw), 'AES-GCM', true, USES) : null;
     } catch (_) { return null; }
   }
   function forget() {
     try { Object.keys(localStorage).filter((k) => k.startsWith('life-key:')).forEach((k) => localStorage.removeItem(k)); } catch (_) {}
   }
+
+  /* Seals small secrets (the GitHub token) with the dashboard key, so they only open after the password. */
+  window.lifeVault = {
+    async seal(text) {
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(text)));
+      const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12);
+      return toB64(out);
+    },
+    async open(sealed) {
+      const raw = b64(sealed);
+      const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: raw.slice(0, 12) }, key, raw.slice(12));
+      return new TextDecoder().decode(plain);
+    },
+  };
 
   function ago(iso) {
     const m = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
@@ -44,16 +62,32 @@
   function updateSync() {
     if (!lastGen) return;
     const el = $('#shell-sync');
-    const hours = (Date.now() - new Date(lastGen)) / 36e5;
-    el.textContent = 'Synced from Notion ' + ago(lastGen) + ' · updates every 3 hours';
-    el.classList.toggle('is-stale', hours > 8);
+    el.textContent = 'Notion synced ' + ago(lastGen) + ' · every 3 h';
+    el.classList.toggle('is-stale', (Date.now() - new Date(lastGen)) / 36e5 > 8);
   }
-  function show(payload) {
+
+  // ---------- views
+  function route() {
+    const view = (location.hash || '#home').slice(1) === 'skills' ? 'skills' : 'home';
+    document.querySelectorAll('.view').forEach((v) => { v.hidden = v.dataset.view !== view; });
+    document.querySelectorAll('.side-link').forEach((a) => {
+      if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    document.title = (view === 'skills' ? 'Skill tree' : 'Life Wiki Dashboard');
+    if (!booted) return;
+    if (view === 'skills') window.SkillTree.shown(); else window.dash.redraw();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+
+  async function show(payload, first) {
     lastGen = payload.generated_at;
     $('#lock').hidden = true;
-    $('#shell-bar').hidden = false;
-    $('#dash-root').hidden = false;
+    $('#app').hidden = false;
+    booted = true;
+    route();
     window.dash._load(payload.sources);
+    if (first) await window.SkillTree.init(payload);
     updateSync();
   }
   async function refresh(manual) {
@@ -61,10 +95,11 @@
     const btn = $('#shell-refresh');
     if (manual) { btn.disabled = true; btn.textContent = 'Checking…'; }
     try {
-      const blob = await fetchBlob();
-      const payload = await decrypt(blob, key);
-      if (payload.generated_at !== lastGen) show(payload);
-      if (manual) btn.textContent = payload.generated_at !== lastGen ? 'Updated' : 'Up to date';
+      const payload = await decrypt(await fetchBlob(), key);
+      const newer = payload.generated_at !== lastGen;
+      if (newer) { lastGen = payload.generated_at; window.dash._load(payload.sources); updateSync(); }
+      if ((location.hash || '').slice(1) === 'skills') window.SkillTree.shown();
+      if (manual) btn.textContent = newer ? 'Updated' : 'Up to date';
     } catch (e) {
       console.error(e);
       if (manual) btn.textContent = 'Couldn’t check';
@@ -78,16 +113,16 @@
   setInterval(updateSync, 60000);
   setInterval(() => { if (!document.hidden) refresh(false); }, 10 * 60000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(false); });
+  route();
 
   (async () => {
     let blob;
     try { blob = await fetchBlob(); } catch (e) {
       $('#lock').hidden = false; $('#lock-msg').textContent = e.message; $('#lock-btn').disabled = true; return;
     }
-    blobSalt = blob.salt;
     const saved = await remembered(blob);
     if (saved) {
-      try { const p = await decrypt(blob, saved); key = saved; return show(p); } catch (_) { forget(); }
+      try { const p = await decrypt(blob, saved); key = saved; return show(p, true); } catch (_) { forget(); }
     }
     $('#lock').hidden = false;
     $('#lock-pw').focus();
@@ -102,10 +137,10 @@
         key = k;
         if ($('#lock-remember').checked) {
           const raw = new Uint8Array(await crypto.subtle.exportKey('raw', k));
-          try { localStorage.setItem(keySlot(blob), btoa(String.fromCharCode(...raw))); } catch (_) {}
+          try { localStorage.setItem(keySlot(blob), toB64(raw)); } catch (_) {}
         }
         $('#lock-pw').value = '';
-        show(p);
+        show(p, true);
       } catch (_) {
         $('#lock-msg').textContent = 'Wrong password.';
         $('#lock-btn').disabled = false;

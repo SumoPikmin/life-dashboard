@@ -1,6 +1,5 @@
 <style>
-  /* Layout: hero (story + life wheel) → figure strip → tinted area cards → focus column beside a signals sidebar.
-     Area hues follow the user's Notion tag colours (red, orange, green, pink, blue, purple, grey), tuned to mid tones that hold on light and dark. */
+  /* Home: hero (story + figures) → life map with area detail beside it → signals. Area hues follow the Notion tag colours. */
   .lw {
     --a-health: #e0614f; --a-travel: #e3923a; --a-finance: #3a9b68; --a-social: #d25d93;
     --a-career: #4a7fd0; --a-learning: #8a66d1; --a-home: #7f8a9b; --a-none: var(--cds-chart-muted);
@@ -10,93 +9,91 @@
   .lw a:hover { text-decoration-color: currentColor; }
   .lw-tint { background: color-mix(in oklab, var(--a, var(--a-none)) 8%, var(--color-panel)); border: 1px solid color-mix(in oklab, var(--a, var(--a-none)) 22%, var(--color-border-line)); }
 
-  /* Hero */
-  .lw-hero { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xl); align-items: center; }
-  .lw-story { flex: 1 1 22rem; min-width: 0; display: grid; gap: var(--cds-gap-md); }
+  .lw-hero { display: grid; gap: var(--cds-gap-md); }
   .lw-eyebrow { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); letter-spacing: .04em; }
   .lw-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: calc(var(--cds-font-size-title) * 1.35); line-height: 1.05; text-wrap: balance; }
-  .lw-takeaway { margin: 0; max-width: 62ch; font-size: var(--cds-font-size-body); line-height: 1.55; }
-  .lw-principle { margin: 0; padding: var(--cds-pad-md) var(--cds-pad-lg); border-radius: var(--cds-radius); display: grid; gap: var(--cds-gap-xs); max-width: 62ch; }
+  .lw-story { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md) var(--cds-gap-xl); align-items: flex-start; }
+  .lw-takeaway { margin: 0; flex: 1 1 26rem; max-width: 62ch; line-height: 1.55; }
+  .lw-principle { margin: 0; flex: 1 1 18rem; max-width: 34rem; padding: var(--cds-pad-md) var(--cds-pad-lg); border-radius: var(--cds-radius); display: grid; gap: var(--cds-gap-xs); }
   .lw-principle-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .lw-principle-text { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-heading); line-height: 1.35; min-height: 1.35em; }
-  .lw-wheel-wrap { flex: 1 1 19rem; min-width: 0; display: grid; gap: var(--cds-gap-xs); }
-  .lw-wheel { position: relative; min-height: 18rem; }
-  .lw-wheel svg { display: block; overflow: visible; }
-  .lw-wheel-note { margin: 0; text-align: center; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
 
-  /* Figure strip */
   .lw-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
   .lw-fig { padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: 2px; align-content: start; box-shadow: -1px 0 0 var(--color-border-line), 0 -1px 0 var(--color-border-line); }
   .lw-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .lw-big { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); line-height: 1.15; font-variant-numeric: tabular-nums; }
   .lw-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
 
-  /* Sections */
   .lw-section { display: grid; gap: var(--cds-gap-md); min-width: 0; align-content: start; }
   .lw-section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-xs) var(--cds-gap-md); }
   .lw-h2 { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); }
   .lw-h3 { margin: 0; font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); }
+  .lw-h4 { margin: 0; font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); letter-spacing: .03em; }
   .lw-note { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .lw-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-md); align-content: start; min-width: 0; }
-
-  /* Area cards */
-  .lw-areas { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: var(--cds-gap-md); min-height: 10rem; }
-  .lw-area { font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-sm); align-content: start; min-width: 0; transition: opacity var(--cds-dur-slow), border-color var(--cds-dur-slow), transform var(--cds-dur-slow) var(--cds-ease-out); }
-  .lw-area:hover { border-color: var(--a); }
-  .lw-area:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
-  .lw-area[aria-pressed="true"] { border-color: var(--a); box-shadow: inset 0 0 0 1px var(--a); }
-  .lw-area.is-dim { opacity: .45; }
-  .lw-area-head { display: flex; align-items: center; justify-content: space-between; gap: var(--cds-gap-sm); }
-  .lw-area-name { display: flex; align-items: center; gap: var(--cds-gap-sm); font-weight: var(--cds-font-weight-medium); min-width: 0; }
+  .lw-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: var(--cds-gap-md); }
   .lw-dot { width: .625rem; height: .625rem; border-radius: 50%; flex: none; display: inline-block; background: var(--a, var(--a-none)); }
   .lw-pill { font-size: var(--cds-font-size-caption); line-height: 1.7; padding: 0 var(--cds-pad-sm); border-radius: 999px; white-space: nowrap; color: var(--color-fg-muted); background: color-mix(in oklab, var(--color-fg) 6%, transparent); }
   .lw-pill[data-level="ok"] { color: var(--color-ok); background: color-mix(in oklab, var(--color-ok) 12%, transparent); }
   .lw-pill[data-level="warn"] { color: var(--color-warn); background: color-mix(in oklab, var(--color-warn) 14%, transparent); }
-  .lw-area-pct { display: flex; align-items: baseline; gap: var(--cds-gap-sm); }
-  .lw-area-pct .lw-big { font-size: var(--cds-font-size-title); }
-  .lw-stack { height: .5rem; border-radius: 999px; overflow: hidden; display: flex; background: color-mix(in oklab, var(--color-fg) 7%, transparent); }
-  .lw-stack > span { height: 100%; }
-  .lw-counts { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
-  .lw-counts span span { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
-  .lw-area-next { font-size: var(--cds-font-size-caption); line-height: 1.45; padding-top: var(--cds-pad-sm); border-top: 1px solid color-mix(in oklab, var(--a) 18%, var(--color-border-line)); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .lw-area-next em { font-style: normal; color: var(--color-fg-muted); }
+
+  /* Life map */
+  .lw-mapwrap { display: flex; flex-wrap: wrap; gap: var(--cds-gap-lg); align-items: flex-start; }
+  .lw-map { flex: 1.25 1 26rem; min-width: 0; display: grid; gap: var(--cds-gap-sm); }
   .lw-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
-  .lw-legend span { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); }
-  .lw-legend i { width: .75rem; height: .5rem; border-radius: 2px; display: inline-block; }
+  .lw-legend span { display: inline-flex; align-items: center; gap: .35rem; }
+  .lw-rows { display: grid; gap: var(--cds-gap-xs); min-height: 18rem; position: relative; }
+  .lw-row { font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; grid-template-columns: minmax(8.5rem, 11rem) minmax(0, 1fr) auto; gap: var(--cds-gap-xs) var(--cds-gap-md); align-items: center; transition: border-color var(--cds-dur-slow), background var(--cds-dur-slow); }
+  .lw-row:hover { border-color: color-mix(in oklab, var(--a) 60%, var(--color-border-line)); }
+  .lw-row:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+  .lw-row[aria-pressed="true"] { border-color: var(--a); background: color-mix(in oklab, var(--a) 9%, var(--color-panel)); box-shadow: inset 3px 0 0 var(--a); }
+  .lw-row-name { display: flex; align-items: center; gap: var(--cds-gap-sm); font-weight: var(--cds-font-weight-medium); min-width: 0; }
+  .lw-row-name span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lw-marks { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-height: 1rem; }
+  .lw-sep { width: 1px; height: .9rem; margin: 0 4px; background: var(--color-border-line); }
+  .lw-m { display: inline-block; flex: none; background: var(--a); }
+  .lw-m.is-project { width: .8rem; height: .8rem; border-radius: 3px; }
+  .lw-m.is-goal { width: .8rem; height: .8rem; border-radius: 50%; }
+  .lw-m.is-task { width: .3rem; height: .8rem; border-radius: 2px; opacity: .75; }
+  .lw-m.is-idea { width: .5rem; height: .5rem; border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--a) 55%, transparent); }
+  .lw-m.is-done { width: .5rem; height: .5rem; border-radius: 50%; background: color-mix(in oklab, var(--a) 40%, transparent); }
+  .lw-more { font-size: .6875rem; color: var(--color-fg-muted); margin-left: 2px; }
+  .lw-legend .lw-m { --a: var(--color-fg-muted); }
+  .lw-row-sum { grid-column: 2 / 4; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  @media (max-width: 560px) {
+    .lw-row { grid-template-columns: minmax(0, 1fr) auto; }
+    .lw-row .lw-marks { grid-column: 1 / 3; grid-row: 2; }
+    .lw-row-sum { grid-column: 1 / 3; }
+  }
 
-  /* Focus + sidebar */
-  .lw-split { display: flex; flex-wrap: wrap; gap: var(--cds-gap-lg); align-items: flex-start; }
-  .lw-main { flex: 2 1 30rem; min-width: 0; display: grid; gap: var(--cds-gap-md); }
-  .lw-side { flex: 1 1 18rem; min-width: 0; display: grid; gap: var(--cds-gap-md); }
-  .lw-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--cds-gap-md); }
-  .lw-focus-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-sm); }
-  .lw-clear { font: inherit; font-size: var(--cds-font-size-caption); cursor: pointer; color: var(--color-fg-muted); background: transparent; border: 1px solid var(--color-border-line); border-radius: 999px; padding: 0 var(--cds-pad-sm); line-height: 1.7; }
-  .lw-clear:hover { color: var(--color-fg); border-color: var(--color-fg-muted); }
-  .lw-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--cds-gap-md); min-height: 4rem; align-content: start; }
-  .lw-list.is-tight { gap: var(--cds-gap-sm); }
-
-  .lw-proj { display: grid; gap: var(--cds-gap-xs); padding-bottom: var(--cds-pad-md); border-bottom: 1px solid var(--color-border-line); min-width: 0; }
-  .lw-proj:last-child { border-bottom: 0; padding-bottom: 0; }
-  .lw-row { display: flex; align-items: baseline; gap: var(--cds-gap-sm); min-width: 0; }
-  .lw-row .lw-dot { transform: translateY(-1px); }
+  /* Area detail */
+  .lw-detail { flex: 1 1 22rem; min-width: 0; border-radius: var(--cds-radius); overflow: hidden; display: grid; align-content: start; min-height: 18rem; }
+  .lw-detail-head { padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-xs); background: color-mix(in oklab, var(--a) 16%, var(--color-panel)); border-bottom: 1px solid color-mix(in oklab, var(--a) 30%, var(--color-border-line)); }
+  .lw-detail-title { display: flex; align-items: center; gap: var(--cds-gap-sm); justify-content: space-between; }
+  .lw-detail-title h3 { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); line-height: 1.1; }
+  .lw-detail-body { padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-lg); background: var(--color-panel); }
+  .lw-block { display: grid; gap: var(--cds-gap-sm); }
+  .lw-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--cds-gap-sm); align-content: start; }
+  .lw-proj { display: grid; gap: var(--cds-gap-xs); padding: var(--cds-pad-md); border-radius: calc(var(--cds-radius) * .8); border: 1px solid color-mix(in oklab, var(--a) 25%, var(--color-border-line)); background: color-mix(in oklab, var(--a) 5%, var(--color-panel)); min-width: 0; }
+  .lw-proj-top { display: flex; align-items: baseline; gap: var(--cds-gap-sm); min-width: 0; }
   .lw-name { min-width: 0; overflow-wrap: anywhere; font-weight: var(--cds-font-weight-medium); }
   .lw-tag { margin-left: auto; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .lw-tag.is-p1 { color: var(--color-bad); }
-  .lw-meta { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); padding-left: calc(.625rem + var(--cds-gap-sm)); overflow-wrap: anywhere; line-height: 1.45; }
+  .lw-meta { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); overflow-wrap: anywhere; line-height: 1.45; }
   .lw-meta .lw-k { font-weight: var(--cds-font-weight-medium); color: var(--color-fg); }
-  .lw-time { margin-left: calc(.625rem + var(--cds-gap-sm)); height: .3125rem; border-radius: 999px; background: color-mix(in oklab, var(--a) 16%, transparent); position: relative; overflow: hidden; }
+  .lw-time { height: .3125rem; border-radius: 999px; background: color-mix(in oklab, var(--a) 16%, transparent); position: relative; overflow: hidden; }
   .lw-time > span { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--a); }
-  .lw-group { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); letter-spacing: .03em; }
-  .lw-item { display: grid; gap: 2px; min-width: 0; }
+  .lw-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .lw-item { display: flex; align-items: baseline; gap: var(--cds-gap-sm); min-width: 0; }
   .lw-item .lw-name { font-weight: 400; }
+  .lw-item .lw-dot { transform: translateY(-1px); }
 
-  .lw-insight { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--cds-gap-sm); align-items: start; font-size: var(--cds-font-size-body); line-height: 1.45; }
+  .lw-insight { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--cds-gap-sm); align-items: start; line-height: 1.45; }
   .lw-flag { margin-top: .45em; width: .5rem; height: .5rem; border-radius: 50%; background: var(--cds-chart-muted); }
   .lw-flag[data-level="warn"] { background: var(--color-warn); }
   .lw-flag[data-level="ok"] { background: var(--color-ok); }
   .lw-insight-area { display: flex; align-items: center; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-top: 2px; }
   .lw-insight-area .lw-dot { width: .5rem; height: .5rem; }
-
   .lw-date { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr); gap: var(--cds-gap-md); align-items: center; }
   .lw-cal { border-radius: calc(var(--cds-radius) * .75); overflow: hidden; text-align: center; border: 1px solid color-mix(in oklab, var(--a) 30%, var(--color-border-line)); }
   .lw-cal-m { display: block; font-size: .625rem; line-height: 1.6; letter-spacing: .06em; text-transform: uppercase; background: color-mix(in oklab, var(--a) 22%, var(--color-panel)); }
@@ -105,47 +102,11 @@
   .lw-rel { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .lw-rel.is-soon { color: var(--color-warn); }
 
-  /* Skill tree */
-  .lw-sk-top { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: stretch; }
-  .lw-level { flex: 1 1 15rem; display: grid; gap: var(--cds-gap-xs); align-content: start; padding: var(--cds-pad-lg); border-radius: var(--cds-radius); min-width: 0; margin: 0; }
-  .lw-level-row { display: flex; align-items: baseline; gap: var(--cds-gap-sm); flex-wrap: wrap; }
-  .lw-xpbar { height: .5rem; border-radius: 999px; background: color-mix(in oklab, var(--color-fg) 8%, transparent); overflow: hidden; margin-block: var(--cds-gap-xs); }
-  .lw-xpbar > span { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--a); transition: width var(--cds-dur-slow) var(--cds-ease-out); }
-  .lw-tabs { flex: 3 1 24rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr)); gap: var(--cds-gap-sm); min-width: 0; min-height: 4rem; }
-  .lw-tab { font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: var(--cds-radius); padding: var(--cds-pad-sm) var(--cds-pad-md); display: grid; gap: 2px; align-content: center; min-width: 0; }
-  .lw-tab:hover { border-color: var(--a); }
-  .lw-tab[aria-selected="true"] { border-color: var(--a); box-shadow: inset 0 0 0 1px var(--a); }
-  .lw-tab:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
-  .lw-tab-name { display: flex; align-items: center; gap: var(--cds-gap-xs); font-weight: var(--cds-font-weight-medium); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .lw-tree { display: grid; grid-template-columns: 5.25rem minmax(0, 1fr); position: relative; min-height: 14rem; }
-  .lw-tree-gut { position: relative; }
-  .lw-tree-gut span { position: absolute; left: 0; right: var(--cds-pad-sm); text-align: right; font-size: .6875rem; color: var(--color-fg-muted); letter-spacing: .03em; transform: translateY(-50%); }
-  .lw-tree-scroll { overflow-x: auto; overflow-y: hidden; padding-bottom: var(--cds-pad-sm); overscroll-behavior-x: contain; min-width: 0; }
-  .lw-tree-canvas { position: relative; }
-  .lw-lane { position: absolute; left: 0; border-radius: calc(var(--cds-radius) * .75); }
-  .lw-tree-canvas svg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
-  .lw-root { position: absolute; transform: translateX(-50%); height: 1.75rem; padding: 0 var(--cds-pad-md); border-radius: 999px; display: flex; align-items: center; white-space: nowrap; font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); background: color-mix(in oklab, var(--a) 26%, var(--color-panel)); border: 1px solid color-mix(in oklab, var(--a) 55%, var(--color-border-line)); }
-  .lw-node { position: absolute; border-radius: calc(var(--cds-radius) * .75); border: 1px solid var(--color-border-line); background: var(--color-panel); padding: 4px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; overflow: hidden; }
-  .lw-node-t { font-size: .75rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-  .lw-node-m { font-size: .625rem; color: var(--color-fg-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .lw-node.is-done { background: color-mix(in oklab, var(--a) 34%, var(--color-panel)); border: 1.5px solid var(--a); }
-  .lw-node.is-done .lw-node-m { color: var(--color-fg); }
-  .lw-node.is-open { border: 1.5px solid var(--a); box-shadow: 0 0 0 3px color-mix(in oklab, var(--a) 14%, transparent); }
-  .lw-node.is-locked { opacity: .45; }
-  .lw-node.is-ooo { border-style: dashed; }
-  .lw-ready { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-sm); align-items: center; }
-  .lw-ready .lw-pill { color: var(--color-fg); background: color-mix(in oklab, var(--a) 14%, transparent); }
-  .lw-scrollhint { margin: 0 0 0 5.25rem; }
-
-  .lw-tip { position: absolute; pointer-events: none; z-index: 5; max-width: 16rem; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); }
+  .lw-tip { position: absolute; pointer-events: none; z-index: 5; max-width: 18rem; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); }
   .lw-tip-h { color: var(--cds-text-secondary); }
-
   .lw-fail { display: flex; align-items: center; justify-content: center; gap: var(--cds-gap-sm); min-height: inherit; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
   .lw-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
-  .lw [data-dash-source-state="empty"] { color: transparent; }
-  .lw [data-dash-source-state="refreshing"] { opacity: .5; transition: opacity var(--cds-dur-slow); }
   @media (prefers-reduced-motion: no-preference) {
-    .lw-area:hover { transform: translateY(-1px); }
     .lw-in { animation: lw-rise var(--cds-dur-slow) var(--cds-ease-out) both; }
     @keyframes lw-rise { from { opacity: .001; transform: translateY(4px); } to { opacity: 1; transform: none; } }
   }
@@ -153,126 +114,72 @@
 
 <div class="lw">
   <header class="lw-hero" id="overview">
+    <span class="lw-eyebrow" id="lw-today"></span>
+    <h1 class="lw-title">Life Wiki Dashboard</h1>
     <div class="lw-story">
-      <span class="lw-eyebrow" id="lw-today"></span>
-      <h1 class="lw-title">Life Wiki Dashboard</h1>
-      <p class="lw-takeaway dash-skeleton" data-source="summary insights">—</p>
+      <p class="lw-takeaway dash-skeleton">—</p>
       <figure class="lw-principle lw-tint" style="--a: var(--a-learning)">
         <span class="lw-principle-label">Principle of the day</span>
-        <span class="lw-principle-text dash-skeleton" data-source="wiki" data-field="text">—</span>
+        <span class="lw-principle-text dash-skeleton">—</span>
       </figure>
-    </div>
-    <div class="lw-wheel-wrap" id="life-wheel">
-      <div class="lw-wheel" id="lw-wheel" data-source="areas summary"></div>
-      <p class="lw-note lw-wheel-note">Life wheel: share of each area's Impossible List that is done or active. Click a slice to focus.</p>
     </div>
   </header>
 
   <section class="lw-strip" id="headline" aria-label="Headline figures">
     <div class="lw-fig">
       <span class="lw-label">Active projects</span>
-      <span class="lw-big dash-skeleton" data-source="summary" data-row="0" data-field="projects" data-fmt="int">—</span>
-      <span class="lw-sub">across <span data-source="summary" data-row="0" data-field="project_areas" data-fmt="int">—</span> life areas</span>
+      <span class="lw-big dash-skeleton" data-source="summary" data-field="projects" data-fmt="int">—</span>
+      <span class="lw-sub">across <span data-source="summary" data-field="project_areas" data-fmt="int">—</span> life areas</span>
     </div>
     <div class="lw-fig">
       <span class="lw-label">Active goals</span>
-      <span class="lw-big dash-skeleton" data-source="summary" data-row="0" data-field="goals_active" data-fmt="int">—</span>
-      <span class="lw-sub"><span data-source="summary" data-row="0" data-field="next_year_goals" data-fmt="int">—</span> planned for next year</span>
+      <span class="lw-big dash-skeleton" data-source="summary" data-field="goals_active" data-fmt="int">—</span>
+      <span class="lw-sub"><span data-source="summary" data-field="next_year_goals" data-fmt="int">—</span> planned for next year</span>
     </div>
     <div class="lw-fig">
       <span class="lw-label">Impossible List done</span>
-      <span class="lw-big dash-skeleton" data-source="summary" data-row="0" data-field="goals_done" data-fmt="int">—</span>
-      <span class="lw-sub"><span data-source="summary" data-row="0" data-field="done_share" data-fmt="pct">—</span> of <span data-source="summary" data-row="0" data-field="goals_total" data-fmt="int">—</span> items</span>
+      <span class="lw-big dash-skeleton" data-source="summary" data-field="goals_done" data-fmt="int">—</span>
+      <span class="lw-sub"><span data-source="summary" data-field="done_share" data-fmt="pct">—</span> of <span data-source="summary" data-field="goals_total" data-fmt="int">—</span> items</span>
     </div>
     <div class="lw-fig">
       <span class="lw-label">Tasks this week</span>
-      <span class="lw-big dash-skeleton" data-source="summary" data-row="0" data-field="tasks_open" data-fmt="int">—</span>
-      <span class="lw-sub"><span data-source="summary" data-row="0" data-field="tasks_daily" data-fmt="int">—</span> daily · <span data-source="summary" data-row="0" data-field="tasks_capture" data-fmt="int">—</span> in Capture</span>
+      <span class="lw-big dash-skeleton" data-source="summary" data-field="tasks_open" data-fmt="int">—</span>
+      <span class="lw-sub"><span data-source="summary" data-field="tasks_daily" data-fmt="int">—</span> daily · <span data-source="summary" data-field="tasks_capture" data-fmt="int">—</span> in Capture</span>
     </div>
     <div class="lw-fig">
       <span class="lw-label">Next-year goal budget</span>
-      <span class="lw-big dash-skeleton" data-source="summary" data-row="0" data-field="next_year_budget" data-fmt="eur">—</span>
-      <span class="lw-sub">≈ <span data-source="summary" data-row="0" data-field="monthly_saving" data-fmt="eur">—</span> a month to save</span>
+      <span class="lw-big dash-skeleton" data-source="summary" data-field="next_year_budget" data-fmt="eur">—</span>
+      <span class="lw-sub">≈ <span data-source="summary" data-field="monthly_saving" data-fmt="eur">—</span> a month to save</span>
     </div>
   </section>
 
   <section class="lw-section" id="areas">
     <div class="lw-section-head">
       <h2 class="lw-h2">Life areas</h2>
-      <div class="lw-legend" id="lw-legend"></div>
+      <span class="lw-note">Every mark is one real item. Hover a mark for its name, click an area to open it.</span>
     </div>
-    <div class="lw-areas" id="lw-areas" data-source="areas items"></div>
+    <div class="lw-mapwrap">
+      <div class="lw-map">
+        <div class="lw-legend" id="lw-legend"></div>
+        <div class="lw-rows" id="lw-rows"></div>
+      </div>
+      <article class="lw-detail" id="lw-detail" aria-live="polite"></article>
+    </div>
   </section>
 
-  <div class="lw-split">
-    <section class="lw-main" id="focus">
-      <div class="lw-focus-head">
-        <h2 class="lw-h2" id="lw-focus-title">All areas</h2>
-        <button type="button" class="lw-clear" id="lw-focus-clear" hidden>Show all areas ×</button>
-      </div>
-      <section class="lw-card" id="focus-projects">
-        <div class="lw-section-head">
-          <h3 class="lw-h3">Projects</h3>
-          <span class="lw-note">Bar shows how far through its period each project is</span>
-        </div>
-        <ul class="lw-list" id="lw-f-projects" data-source="items"></ul>
-      </section>
-      <div class="lw-pair">
-        <section class="lw-card" id="focus-goals">
-          <h3 class="lw-h3">Goals</h3>
-          <ul class="lw-list is-tight" id="lw-f-goals" data-source="items"></ul>
-        </section>
-        <section class="lw-card" id="focus-tasks">
-          <h3 class="lw-h3">Tasks</h3>
-          <ul class="lw-list is-tight" id="lw-f-tasks" data-source="items"></ul>
-        </section>
-      </div>
+  <div class="lw-grid2">
+    <section class="lw-card" id="insights">
+      <h3 class="lw-h3">Worth a look</h3>
+      <ul class="lw-list" id="lw-insights"></ul>
     </section>
-
-    <aside class="lw-side">
-      <section class="lw-card" id="insights">
-        <h3 class="lw-h3">Worth a look</h3>
-        <ul class="lw-list" id="lw-insights" data-source="insights"></ul>
-      </section>
-      <section class="lw-card" id="coming-up">
-        <div class="lw-section-head">
-          <h3 class="lw-h3">Coming up</h3>
-          <span class="lw-note">Next 90 days</span>
-        </div>
-        <ul class="lw-list is-tight" id="lw-dates" data-source="dates"></ul>
-      </section>
-    </aside>
-  </div>
-
-  <section class="lw-section" id="skill-tree">
-    <div class="lw-section-head">
-      <h2 class="lw-h2">Skill tree</h2>
-      <span class="lw-note">From your latest Skill Tree export · <a href="https://claude.ai/artifact/2qSd91QJz9vPM4oiFTfFNN" target="_blank" rel="noopener">Open the Skill Tree to unlock skills</a></span>
-    </div>
-    <div class="lw-sk-top">
-      <figure class="lw-level lw-tint" style="--a: var(--a-learning)" id="skill-level">
-        <span class="lw-label">Level</span>
-        <div class="lw-level-row">
-          <span class="lw-big dash-skeleton" data-source="skillsum" data-row="0" data-field="level" data-fmt="int">—</span>
-          <span class="lw-sub"><span data-source="skillsum" data-row="0" data-field="xp" data-fmt="int">—</span> XP in total</span>
-        </div>
-        <div class="lw-xpbar" id="lw-xpbar" data-source="skillsum"><span></span></div>
-        <span class="lw-sub"><span data-source="skillsum" data-row="0" data-field="level_xp" data-fmt="int">—</span> of <span data-source="skillsum" data-row="0" data-field="level_step" data-fmt="int">—</span> XP towards the next level</span>
-        <span class="lw-sub"><span data-source="skillsum" data-row="0" data-field="unlocked" data-fmt="int">—</span> of <span data-source="skillsum" data-row="0" data-field="total" data-fmt="int">—</span> skills unlocked · <span data-source="skillsum" data-row="0" data-field="ready" data-fmt="int">—</span> ready now</span>
-        <span class="lw-sub">Bucket list: <span data-source="skillsum" data-row="0" data-field="bucket_done" data-fmt="int">—</span> of <span data-source="skillsum" data-row="0" data-field="bucket_total" data-fmt="int">—</span> done</span>
-      </figure>
-      <div class="lw-tabs" id="lw-tabs" role="tablist" aria-label="Skill tree branches" data-source="skillbranches"></div>
-    </div>
-    <section class="lw-card" id="skill-tree-chart">
+    <section class="lw-card" id="coming-up">
       <div class="lw-section-head">
-        <h3 class="lw-h3" id="lw-tree-title">Skill tree</h3>
-        <div class="lw-legend" id="lw-tree-legend"></div>
+        <h3 class="lw-h3">Coming up</h3>
+        <span class="lw-note">Next 90 days</span>
       </div>
-      <div class="lw-tree" id="lw-tree" data-source="tree"></div>
-      <p class="lw-note lw-scrollhint" id="lw-scrollhint" hidden>Scroll sideways to see every track</p>
-      <div class="lw-ready" id="lw-ready" data-source="tree"></div>
+      <ul class="lw-list" id="lw-dates"></ul>
     </section>
-  </section>
+  </div>
 </div>
 
 <script>
@@ -315,7 +222,7 @@ dash.calc('items', {
       ...projects.map((p) => ({
         key: p.url, kind: 'project', name: p.Name || 'Untitled', area: area(p.Area || goalArea[list(p.Goals)[0]]),
         status: 'Active', scope: '', next: clean(p['Next action']), start: p['date:Period:start'] || '', end: p['date:Period:end'] || '',
-        budget: 0, url: p.url, links: list(p.Goals).length,
+        budget: 0, url: p.url, links: list(p.Goals).length, goalKeys: list(p.Goals),
       })),
       ...goals.map((g) => ({
         key: g.url, kind: 'goal', name: g.Name || 'Untitled', area: area(g.Category), status: g.Status || 'Idea', scope: g.Scope || '',
@@ -456,91 +363,17 @@ dash.calc('dates', {
   },
 });
 
-dash.calc('tree', {
-  title: 'Skill tree nodes',
-  description: 'Each skill with its state: unlocked, ready (prerequisites met) or locked, using the Skill Tree app’s own rules.',
-  inputs: ['skills'],
-  fn: (skills) => {
-    const AREA = { fitness: 'Health & Fitness', travel: 'Travel & Adventure', finance: 'Finance', social: 'Social', language: 'Learning' };
-    const TIERS = ['Foundation', 'Intermediate', 'Advanced', 'Elite'];
-    const nodes = skills.filter((s) => s.kind === 'node');
-    const done = new Set(nodes.filter((n) => n.unlocked).map((n) => n.key));
-    const byTrack = {};
-    for (const n of nodes) (byTrack[n.track] = byTrack[n.track] || []).push(n);
-    const name = (track, id) => (byTrack[track].find((x) => x.node === id) || {}).title || id;
-    return nodes.map((n) => {
-      const req = n.requires ? n.requires.split('|') : [];
-      let open = true, reason = '';
-      if (!n.root && req.length) {
-        const need = n.needs == null ? req.length : n.needs;
-        open = req.filter((r) => done.has(n.track + '#' + r)).length >= need;
-        if (!open) reason = (need < req.length ? 'Needs any ' + need + ' of: ' : 'Needs: ') + req.map((r) => name(n.track, r)).join(', ');
-      } else if (!n.root) {
-        const tiers = TIERS.filter((t) => byTrack[n.track].some((x) => x.tier === t));
-        const i = tiers.indexOf(n.tier);
-        open = i <= 0 || byTrack[n.track].some((x) => x.tier === tiers[i - 1] && done.has(x.key));
-        if (!open) reason = 'Unlock any ' + tiers[i - 1] + ' skill in ' + n.track_name + ' first';
-      }
-      const isDone = done.has(n.key);
-      return {
-        key: n.key, area: AREA[n.branch] || n.branch_name, branch: n.branch, branch_name: n.branch_name,
-        track: n.track, track_name: n.track_name, node: n.node, title: n.title, tier: n.tier, xp: n.xp,
-        requires: n.requires, needs: n.needs, root: n.root, unlocked: n.unlocked,
-        state: isDone ? 'done' : open ? 'open' : 'locked', out_of_order: isDone && !open, reason,
-      };
-    });
-  },
-});
-
-dash.calc('skillbranches', {
-  title: 'Skill tree branches',
-  description: 'Per branch: skills unlocked, total, ready to unlock, XP earned and the latest dated unlock.',
-  inputs: ['tree'],
-  fn: (tree) => {
-    const areas = [...new Set(tree.map((n) => n.area))];
-    return areas.map((area) => {
-      const ns = tree.filter((n) => n.area === area);
-      const won = ns.filter((n) => n.state === 'done');
-      const dates = won.map((n) => n.unlocked).filter((d) => d && d !== '?').sort();
-      return {
-        area, branch: ns[0].branch, branch_name: ns[0].branch_name,
-        unlocked: won.length, total: ns.length, ready: ns.filter((n) => n.state === 'open').length,
-        xp: won.reduce((s, n) => s + n.xp, 0), last_unlock: dates[dates.length - 1] || '',
-      };
-    });
-  },
-});
-
-dash.calc('skillsum', {
-  title: 'Skill tree level',
-  description: 'XP from unlocked skills plus finished bucket-list items, and the level it gives (a new level every 300 XP, as in the Skill Tree app).',
-  inputs: ['skills', 'tree'],
-  fn: (skills, tree) => {
-    const bucket = skills.filter((s) => s.kind === 'bucket');
-    const bucketDone = bucket.filter((b) => b.unlocked);
-    const won = tree.filter((n) => n.state === 'done');
-    const xp = won.reduce((s, n) => s + n.xp, 0) + bucketDone.reduce((s, b) => s + b.xp, 0);
-    const step = 300;
-    return [{
-      xp, level: Math.floor(xp / step) + 1, level_xp: xp % step, level_step: step,
-      unlocked: won.length, total: tree.length, ready: tree.filter((n) => n.state === 'open').length,
-      bucket_done: bucketDone.length, bucket_total: bucket.length,
-    }];
-  },
-});
 </script>
 
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
+  const ORDER = ['Health & Fitness', 'Travel & Adventure', 'Finance', 'Social', 'Career', 'Learning', 'Home & Admin'];
   const HUE = {
     'Health & Fitness': 'var(--a-health)', 'Travel & Adventure': 'var(--a-travel)', Finance: 'var(--a-finance)', Social: 'var(--a-social)',
     Career: 'var(--a-career)', Learning: 'var(--a-learning)', 'Home & Admin': 'var(--a-home)',
   };
-  const SHORT = { 'Health & Fitness': 'Health', 'Travel & Adventure': 'Travel', 'Home & Admin': 'Home' };
   const color = (a) => HUE[a] || 'var(--a-none)';
-  const tint = (a, pct) => `color-mix(in oklab, ${color(a)} ${pct}%, var(--color-panel))`;
-  const enc = (s) => String(s).replace(/%/g, '%25').replace(/&/g, '%26').replace(/=/g, '%3D');
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const paint = (node, area) => { node.style.setProperty('--a', color(area)); return node; };
   const dot = (area) => paint(el('span', 'lw-dot'), area);
@@ -554,10 +387,10 @@ dash.calc('skillsum', {
   const parseDay = (s) => (s ? new Date(s.slice(0, 10) + 'T00:00:00Z') : null);
   const today = () => { const n = new Date(); return new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())); };
   const daysBetween = (a, b) => Math.round((b - a) / 864e5);
+  const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
   const state = (...ids) => {
     const s = ids.map((id) => dash.data(id).status);
     if (s.includes('error')) return 'error';
-    if (s.some((x) => x === 'connect' || x === 'declined' || x === 'missing')) return 'blocked';
     return s.every((x) => x === 'ok') ? 'ok' : 'loading';
   };
   const hold = (box, st) => {
@@ -566,127 +399,66 @@ dash.calc('skillsum', {
     if (st === 'error') box.append(el('div', 'lw-fail', 'Failed to load'));
     return st !== 'ok';
   };
-  const picked = () => dash.params().area || null;
-  const pick = (area) => dash.setParams({ area: picked() === area ? null : area });
-  let animated = false;
-
   const t = today();
   const isoWeek = (() => { const d = new Date(t); d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7)); return Math.ceil(((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7); })();
   $('#lw-today').textContent = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(t) + ' · week ' + isoWeek;
 
-  const STACK = [['goals_done', 'Done', 100], ['goals_active', 'Active', 55], ['goals_hold', 'On hold', 28]];
+  // ---------- hover tooltip shared by the map
+  const tip = el('div', 'lw-tip'); tip.hidden = true;
+  $('#lw-rows').after(tip);
+  const showTip = (target, lines) => {
+    tip.replaceChildren(...lines.map((l, i) => el('div', i === 0 ? 'lw-tip-h' : '', l)));
+    tip.hidden = false;
+    const host = tip.offsetParent || document.body;
+    const b = host.getBoundingClientRect(), r = target.getBoundingClientRect();
+    tip.style.left = Math.max(0, Math.min(r.left - b.left - 8, b.width - tip.offsetWidth)) + 'px';
+    tip.style.top = (r.bottom - b.top + 6) + 'px';
+  };
+  $('.lw-map').style.position = 'relative';
+
   (() => {
     const box = $('#lw-legend');
-    for (const [, name, pct] of [...STACK, [null, 'Idea', 0]]) {
-      const s = el('span'); const i = el('i');
-      i.style.background = pct ? `color-mix(in oklab, var(--color-fg) ${pct * 0.6}%, transparent)` : 'color-mix(in oklab, var(--color-fg) 7%, transparent)';
-      s.append(i, document.createTextNode(name)); box.append(s);
+    for (const [cls, label] of [['is-project', 'Active project'], ['is-goal', 'Active goal'], ['is-task', 'Task this week'], ['is-idea', 'Idea on the Impossible List'], ['is-done', 'Done']]) {
+      const s = el('span'); s.append(el('i', 'lw-m ' + cls), document.createTextNode(label)); box.append(s);
     }
   })();
 
+  // ---------- selection
+  let selected = null;
+  const score = (r) => r.projects * 3 + r.goals_active * 2 + r.tasks_open;
+  const currentArea = (rows) => {
+    if (selected && rows.some((r) => r.area === selected)) return selected;
+    return rows.slice().sort((a, b) => score(b) - score(a))[0]?.area || null;
+  };
+  const select = (area) => { selected = area; dash.setParams({ area }); };
+
   function header() {
     const p = $('.lw-takeaway');
-    const st = state('summary', 'insights');
-    if (st === 'ok') {
+    if (state('summary', 'insights') === 'ok') {
       const d = dash.data('summary').data[0];
       const warn = dash.data('insights').data.find((r) => r.level === 'warn');
       p.classList.remove('dash-skeleton');
       p.textContent = d.projects + ' projects are running across ' + d.project_areas + ' life areas, carrying ' + d.goals_active + ' active goals. ' +
         (warn ? 'First thing to look at: ' + warn.text : 'Nothing needs attention right now.');
-    } else { p.textContent = '—'; p.classList.toggle('dash-skeleton', st === 'loading'); }
-
+    }
     const q = $('.lw-principle-text');
     const w = dash.data('wiki');
     const rows = w.status === 'ok' ? w.data.filter((r) => r.kind === 'principle') : [];
     if (rows.length) {
       const doy = Math.floor((t - Date.UTC(t.getUTCFullYear(), 0, 0)) / 864e5);
-      const r = rows[doy % rows.length];
       q.classList.remove('dash-skeleton');
-      q.dataset.where = 'kind=principle&n=' + r.n;
-      q.textContent = r.text;
-    } else { q.textContent = '—'; q.classList.toggle('dash-skeleton', w.status === 'loading'); }
+      q.textContent = rows[doy % rows.length].text;
+    } else if (w.status !== 'loading') { q.classList.remove('dash-skeleton'); q.textContent = 'Add Life Principles to your Life Wiki page to see one here.'; }
   }
 
   function figures() {
-    document.querySelectorAll('[data-source="summary"][data-field], [data-source="skillsum"][data-field]').forEach((node) => {
-      const s = dash.data(node.dataset.source);
-      if (s.status === 'ok') {
-        const v = (s.data[0] || {})[node.dataset.field];
-        node.classList.remove('dash-skeleton');
-        node.textContent = v == null ? '—' : (FMT[node.dataset.fmt] || String)(v);
-      } else {
-        node.textContent = '—';
-        node.classList.toggle('dash-skeleton', s.status === 'loading' && node.classList.contains('lw-big'));
-      }
+    const s = dash.data('summary');
+    document.querySelectorAll('[data-source="summary"][data-field]').forEach((node) => {
+      if (s.status !== 'ok') return;
+      const v = (s.data[0] || {})[node.dataset.field];
+      node.classList.remove('dash-skeleton');
+      node.textContent = v == null ? '—' : (FMT[node.dataset.fmt] || String)(v);
     });
-  }
-
-  function wheel() {
-    const box = $('#lw-wheel');
-    if (hold(box, state('areas', 'summary'))) return;
-    box.classList.remove('dash-skeleton');
-    const rows = dash.data('areas').data.filter((r) => r.area !== 'Unassigned');
-    const sum = dash.data('summary').data[0];
-    const sel = picked();
-    const W = Math.max(260, box.clientWidth || 360);
-    const H = Math.round(Math.min(380, Math.max(270, W * 0.82)));
-    const R = Math.max(70, Math.min(H / 2 - 30, W / 2 - 74));
-    const r0 = R * 0.3;
-    const rr = (v) => r0 + (R - r0) * v;
-    const step = (2 * Math.PI) / rows.length;
-    const svg = d3.select(box).append('svg').attr('width', '100%').attr('height', H).attr('viewBox', `0 0 ${W} ${H}`)
-      .attr('role', 'img').attr('aria-label', 'Life wheel: share of each area’s Impossible List that is done or active');
-    const g = svg.append('g').attr('transform', `translate(${W / 2},${H / 2})`);
-    for (const v of [0.25, 0.5, 0.75, 1]) {
-      g.append('circle').attr('r', rr(v)).style('fill', 'none').style('stroke', 'var(--cds-chart-grid)').style('stroke-dasharray', v === 1 ? null : '2 3');
-    }
-    const arc = d3.arc().cornerRadius(4);
-    const ang = (i) => ({ startAngle: i * step + 0.025, endAngle: (i + 1) * step - 0.025 });
-    const tip = el('div', 'lw-tip'); tip.hidden = true; box.append(tip);
-    const slice = g.selectAll('g.lw-slice').data(rows).join('g').attr('class', 'lw-slice')
-      .style('cursor', 'pointer').attr('opacity', (d) => (sel && sel !== d.area ? 0.3 : 1));
-    slice.append('path').attr('d', (d, i) => arc({ innerRadius: r0, outerRadius: R, ...ang(i) }))
-      .style('fill', (d) => `color-mix(in oklab, ${color(d.area)} 11%, transparent)`);
-    const fill = slice.append('path').style('fill', (d) => color(d.area));
-    const draw = (k) => fill.attr('d', (d, i) => arc({ innerRadius: r0, outerRadius: rr(d.progress * k), ...ang(i) }));
-    const motion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
-    if (!animated && motion) {
-      animated = true; draw(0);
-      fill.transition().duration(700).ease(d3.easeCubicOut).attrTween('d', (d) => {
-        const i = rows.indexOf(d);
-        return (k) => arc({ innerRadius: r0, outerRadius: rr(d.progress * k), ...ang(i) });
-      });
-    } else { animated = true; draw(1); }
-    slice.each(function (d, i) {
-      const a = (i + 0.5) * step;
-      const sx = Math.sin(a), cy = -Math.cos(a);
-      const x = sx * (R + 12), y = cy * (R + 12);
-      const anchor = sx > 0.2 ? 'start' : sx < -0.2 ? 'end' : 'middle';
-      const lift = cy < -0.6 ? -16 : cy > 0.6 ? 6 : -5;
-      d3.select(this).append('text').attr('x', x).attr('y', y + lift).attr('text-anchor', anchor)
-        .style('fill', 'var(--color-fg)').style('font-size', 'var(--cds-font-size-caption)').style('font-weight', 'var(--cds-font-weight-medium)')
-        .text(SHORT[d.area] || d.area);
-      d3.select(this).append('text').attr('x', x).attr('y', y + lift + 14).attr('text-anchor', anchor)
-        .style('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)').style('font-variant-numeric', 'tabular-nums')
-        .text(d.total ? FMT.pct(d.progress) : 'no list items');
-    });
-    g.append('circle').attr('r', r0 - 4).style('fill', 'var(--color-panel)').style('stroke', 'var(--color-border-line)');
-    g.append('text').attr('y', 4).attr('text-anchor', 'middle')
-      .style('fill', 'var(--color-fg)').style('font-family', 'var(--font-anthropic-serif)').style('font-size', 'var(--cds-font-size-title)')
-      .style('font-variant-numeric', 'tabular-nums').text(FMT.pct(sum.list_progress));
-    g.append('text').attr('y', 20).attr('text-anchor', 'middle')
-      .style('fill', 'var(--color-fg-muted)').style('font-size', '0.625rem').text('in motion');
-    slice.on('mouseenter', (e, d) => {
-      tip.replaceChildren(el('div', 'lw-tip-h', d.area),
-        el('div', '', d.goals_done + ' done · ' + d.goals_active + ' active · ' + d.goals_idea + ' ideas' + (d.goals_hold ? ' · ' + d.goals_hold + ' on hold' : '')),
-        el('div', '', d.projects + (d.projects === 1 ? ' project' : ' projects') + ' · ' + d.tasks_open + ' tasks this week'));
-      tip.hidden = false;
-    }).on('mousemove', (e) => {
-      const b = box.getBoundingClientRect();
-      tip.style.left = Math.max(0, Math.min(e.clientX - b.left + 12, b.width - tip.offsetWidth)) + 'px';
-      tip.style.top = (e.clientY - b.top + 14) + 'px';
-    }).on('mouseleave', () => { tip.hidden = true; })
-      .on('click', (e, d) => pick(d.area));
   }
 
   function statusOf(r) {
@@ -698,69 +470,162 @@ dash.calc('skillsum', {
     return ['quiet', 'Quiet'];
   }
 
-  function areas() {
-    const box = $('#lw-areas');
+  function map() {
+    const box = $('#lw-rows');
     if (hold(box, state('areas', 'items'))) return;
     box.classList.remove('dash-skeleton');
     const items = dash.data('items').data;
-    const sel = picked();
-    dash.data('areas').data.forEach((r, idx) => {
-      const where = 'area=' + enc(r.area);
-      const mark = (node, field) => { node.dataset.source = 'areas'; node.dataset.field = field; node.dataset.where = where; return node; };
-      const card = paint(el('button', 'lw-area lw-tint'), r.area);
-      card.type = 'button';
-      card.dataset.area = r.area;
-      card.setAttribute('aria-pressed', String(sel === r.area));
-      if (sel && sel !== r.area) card.classList.add('is-dim');
-      if (!sel) { card.classList.add('lw-in'); card.style.animationDelay = idx * 40 + 'ms'; }
-
-      const head = el('div', 'lw-area-head');
-      const name = el('span', 'lw-area-name');
-      name.append(dot(r.area), el('span', '', r.area));
+    const rows = dash.data('areas').data;
+    const cur = currentArea(rows);
+    rows.forEach((r, i) => {
+      const of = (f) => items.filter((x) => x.area === r.area && f(x));
+      const row = paint(el('button', 'lw-row lw-in'), r.area);
+      row.type = 'button';
+      row.style.animationDelay = i * 35 + 'ms';
+      row.dataset.area = r.area;
+      row.setAttribute('aria-pressed', String(r.area === cur));
+      const name = el('span', 'lw-row-name'); name.append(dot(r.area), el('span', '', r.area));
       const [level, label] = statusOf(r);
       const pill = el('span', 'lw-pill', label); pill.dataset.level = level;
-      head.append(name, pill);
 
-      const pct = el('div', 'lw-area-pct');
-      const big = mark(el('span', 'lw-big', r.total ? FMT.pct(r.progress) : '–'), 'progress');
-      pct.append(big, el('span', 'lw-sub', r.total ? 'of ' + r.total + ' list items in motion' : 'no Impossible List items'));
+      const marks = el('span', 'lw-marks');
+      const add = (list, cls, kind) => list.forEach((x) => {
+        const m = el('i', 'lw-m ' + cls);
+        m.dataset.tip = JSON.stringify([kind, x.name]);
+        m.setAttribute('aria-label', kind + ': ' + x.name);
+        marks.append(m);
+      });
+      const now = [of((x) => x.kind === 'project'), of((x) => x.kind === 'goal' && x.status === 'Active'), of((x) => x.kind === 'task' && (x.status === 'Daily' || x.status === 'Weekly'))];
+      add(now[0], 'is-project', 'Project');
+      add(now[1], 'is-goal', 'Active goal');
+      add(now[2], 'is-task', 'Task this week');
+      if (!now.some((l) => l.length)) marks.append(el('span', 'lw-more', 'Nothing active'));
+      marks.append(el('span', 'lw-sep'));
+      const ideas = of((x) => x.kind === 'goal' && (x.status === 'Idea' || x.status === 'On Hold'));
+      add(ideas.slice(0, 24), 'is-idea', 'Idea');
+      if (ideas.length > 24) marks.append(el('span', 'lw-more', '+' + (ideas.length - 24)));
+      add(of((x) => x.kind === 'goal' && x.status === 'Done').slice(0, 12), 'is-done', 'Done');
 
-      const stack = el('div', 'lw-stack');
-      if (r.total) {
-        for (const [field, , p] of STACK) {
-          if (!r[field]) continue;
-          const seg = el('span');
-          seg.style.width = (r[field] / r.total) * 100 + '%';
-          seg.style.background = tint(r.area, p);
-          stack.append(seg);
-        }
-      }
-
-      const counts = el('div', 'lw-counts');
-      for (const [field, one, many] of [['projects', 'project', 'projects'], ['goals_active', 'active goal', 'active goals'], ['goals_idea', 'idea', 'ideas'], ['tasks_open', 'task', 'tasks']]) {
-        const c = el('span');
-        c.append(mark(el('span', '', String(r[field])), field), document.createTextNode(' ' + (r[field] === 1 ? one : many)));
-        counts.append(c);
-      }
-
-      card.append(head, pct, stack, counts);
-      const proj = items.find((i) => i.kind === 'project' && i.area === r.area && i.next);
-      if (proj) {
-        const nx = el('div', 'lw-area-next');
-        nx.append(el('em', '', 'Next  '), document.createTextNode(proj.next));
-        card.append(nx);
-      }
-      box.append(card);
+      const sum = el('span', 'lw-row-sum', [plural(r.projects, 'project', 'projects'), plural(r.goals_active, 'active goal', 'active goals'),
+        plural(r.tasks_open, 'task', 'tasks'), plural(r.goals_idea + r.goals_hold, 'idea', 'ideas'), r.goals_done + ' done'].join(' · '));
+      row.append(name, marks, pill, sum);
+      box.append(row);
     });
+  }
+  $('#lw-rows').addEventListener('click', (e) => { const row = e.target.closest('.lw-row'); if (row) select(row.dataset.area); });
+  $('#lw-rows').addEventListener('mouseover', (e) => {
+    const m = e.target.closest('.lw-m[data-tip]');
+    if (m) { const [kind, name] = JSON.parse(m.dataset.tip); showTip(m, [kind, name]); }
+  });
+  $('#lw-rows').addEventListener('mouseout', (e) => { if (e.target.closest('.lw-m')) tip.hidden = true; });
+
+  function detail() {
+    const box = $('#lw-detail');
+    if (state('areas', 'items', 'dates') !== 'ok') { box.replaceChildren(); box.classList.toggle('dash-skeleton', state('areas', 'items', 'dates') === 'loading'); return; }
+    box.classList.remove('dash-skeleton');
+    const rows = dash.data('areas').data;
+    const area = currentArea(rows);
+    const r = rows.find((x) => x.area === area);
+    box.replaceChildren();
+    if (!r) return;
+    paint(box, area);
+    const items = dash.data('items').data.filter((x) => x.area === area);
+    const goalsById = Object.fromEntries(dash.data('items').data.filter((x) => x.kind === 'goal').map((g) => [g.key, g]));
+
+    const head = el('div', 'lw-detail-head');
+    const title = el('div', 'lw-detail-title');
+    title.append(el('h3', '', area));
+    const [level, label] = statusOf(r);
+    const pill = el('span', 'lw-pill', label); pill.dataset.level = level;
+    title.append(pill);
+    head.append(title, el('span', 'lw-sub', [plural(r.projects, 'active project', 'active projects'), plural(r.goals_active, 'active goal', 'active goals'), plural(r.tasks_open, 'task this week', 'tasks this week')].join(' · ')));
+    const body = el('div', 'lw-detail-body');
+    box.append(head, body);
+    const block = (heading) => { const b = el('section', 'lw-block'); b.append(el('h4', 'lw-h4', heading)); body.append(b); return b; };
+
+    // Active projects
+    const pb = block('Active projects');
+    const projects = items.filter((x) => x.kind === 'project').sort((a, b) => (a.start || '9999').localeCompare(b.start || '9999'));
+    if (!projects.length) pb.append(el('p', 'lw-note', area === 'Unassigned' ? 'No projects without an area.' : 'No active project in this area. Turn an Impossible List goal into a project to get it moving.'));
+    const pl = el('ul', 'lw-list'); pb.append(pl);
+    for (const p of projects) {
+      const li = paint(el('li', 'lw-proj'), area);
+      const top = el('div', 'lw-proj-top');
+      const s = parseDay(p.start), e = parseDay(p.end);
+      let tag = 'Ongoing', share = null;
+      if (s && t < s) { const n = daysBetween(t, s); tag = n === 1 ? 'Starts tomorrow' : 'Starts in ' + n + ' days'; share = 0; }
+      else if (s && e && t > e) { tag = 'Ended'; share = 1; }
+      else if (s && e) { share = (t - s) / (e - s); tag = FMT.pct(share) + ' through'; }
+      else if (s) tag = 'Since ' + fmtShort(s);
+      top.append(link(p.name, p.url), el('span', 'lw-tag', tag));
+      li.append(top);
+      if (share != null) {
+        const bar = el('div', 'lw-time'); const f = el('span');
+        f.style.width = Math.max(share * 100, share > 0 ? 2 : 0) + '%'; bar.append(f); li.append(bar);
+      }
+      li.append(el('div', 'lw-meta', s ? fmtLong(s) + (e ? ' → ' + fmtLong(e) : '') : 'No period set'));
+      const nx = el('div', 'lw-meta');
+      if (p.next) nx.append(el('span', 'lw-k', 'Next  '), document.createTextNode(p.next)); else nx.textContent = 'No next action yet';
+      li.append(nx);
+      const linked = (p.goalKeys || []).map((k) => goalsById[k]).filter(Boolean);
+      if (linked.length) {
+        const chips = el('div', 'lw-chips');
+        for (const g of linked) chips.append(el('span', 'lw-pill', g.name));
+        li.append(chips);
+      }
+      pl.append(li);
+    }
+
+    // Active goals and next year's picks
+    const goals = items.filter((x) => x.kind === 'goal' && (x.status === 'Active' || (x.scope === 'Next Year' && x.status !== 'Done' && x.status !== 'Archived')))
+      .sort((a, b) => (a.status === 'Active' ? 0 : 1) - (b.status === 'Active' ? 0 : 1));
+    if (goals.length) {
+      const gb = block('Goals');
+      const gl = el('ul', 'lw-list'); gb.append(gl);
+      for (const g of goals) {
+        const li = el('li', 'lw-item');
+        li.append(dot(area), link(g.name, g.url), el('span', 'lw-tag', (g.status === 'Active' ? 'Active' : 'Next year · idea') + (g.budget ? ' · ' + FMT.eur(g.budget) : '')));
+        gl.append(li);
+      }
+    }
+
+    // Tasks
+    const rankP = { P1: 0, P2: 1, P3: 2 };
+    const tasks = items.filter((x) => x.kind === 'task' && (x.status === 'Daily' || x.status === 'Weekly'))
+      .sort((a, b) => (a.status === 'Daily' ? 0 : 1) - (b.status === 'Daily' ? 0 : 1) || (rankP[a.scope] ?? 9) - (rankP[b.scope] ?? 9));
+    if (tasks.length) {
+      const tb = block('This week');
+      const tl = el('ul', 'lw-list'); tb.append(tl);
+      for (const x of tasks) {
+        const li = el('li', 'lw-item');
+        li.append(dot(area), link(x.name, x.url), el('span', 'lw-tag' + (x.scope === 'P1' ? ' is-p1' : ''), [x.status, x.scope].filter(Boolean).join(' · ')));
+        tl.append(li);
+      }
+    }
+
+    // Dates in this area
+    const ds = dash.data('dates').data.map((d) => ({ ...d, d: parseDay(d.date) }))
+      .filter((d) => d.area === area && d.d && d.d >= t && daysBetween(t, d.d) <= 120).slice(0, 4);
+    if (ds.length) {
+      const db = block('Coming up');
+      const dl = el('ul', 'lw-list'); db.append(dl);
+      for (const d of ds) {
+        const li = el('li', 'lw-item');
+        li.append(dot(area), link(d.label, d.url), el('span', 'lw-tag', fmtShort(d.d)));
+        dl.append(li);
+      }
+    }
+
+    const later = items.filter((x) => x.kind === 'goal' && (x.status === 'Idea' || x.status === 'On Hold') && x.scope !== 'Next Year');
+    if (later.length) body.append(el('p', 'lw-note', plural(later.length, 'more idea', 'more ideas') + ' for later years on the Impossible List.'));
   }
 
   function insights() {
     const box = $('#lw-insights');
     if (hold(box, state('insights'))) return;
     box.classList.remove('dash-skeleton');
-    const sel = picked();
-    const rows = dash.data('insights').data.filter((r) => !sel || r.area === sel || !r.area);
-    if (!rows.length) { box.append(el('li', 'lw-note', 'Nothing flagged for this area.')); return; }
+    const rows = dash.data('insights').data;
+    if (!rows.length) { box.append(el('li', 'lw-note', 'Nothing flagged.')); return; }
     for (const r of rows) {
       const li = el('li', 'lw-insight');
       const f = el('span', 'lw-flag'); f.dataset.level = r.level;
@@ -776,10 +641,9 @@ dash.calc('skillsum', {
     const box = $('#lw-dates');
     if (hold(box, state('dates'))) return;
     box.classList.remove('dash-skeleton');
-    const sel = picked();
     const rows = dash.data('dates').data
       .map((r) => ({ ...r, d: parseDay(r.date) }))
-      .filter((r) => r.d && r.d >= t && daysBetween(t, r.d) <= 90 && (!sel || r.area === sel))
+      .filter((r) => r.d && r.d >= t && daysBetween(t, r.d) <= 90)
       .slice(0, 8);
     if (!rows.length) { box.append(el('li', 'lw-note', 'Nothing dated in the next 90 days.')); return; }
     for (const r of rows) {
@@ -797,277 +661,6 @@ dash.calc('skillsum', {
     }
   }
 
-  function focus() {
-    const sel = picked();
-    $('#lw-focus-title').textContent = sel || 'All areas';
-    $('#lw-focus-clear').hidden = !sel;
-    const boxes = ['#lw-f-projects', '#lw-f-goals', '#lw-f-tasks'].map($);
-    const st = state('items');
-    if (st !== 'ok') { boxes.forEach((b) => hold(b, st)); return; }
-    boxes.forEach((b) => { b.replaceChildren(); b.classList.remove('dash-skeleton'); });
-    const items = dash.data('items').data.filter((i) => !sel || i.area === sel);
-    const empty = (b, text) => b.append(el('li', 'lw-note', text));
-    const [pb, gb, tb] = boxes;
-
-    const projects = items.filter((i) => i.kind === 'project')
-      .sort((a, b) => (a.start || '9999').localeCompare(b.start || '9999'));
-    for (const p of projects) {
-      const li = paint(el('li', 'lw-proj'), p.area);
-      const top = el('div', 'lw-row');
-      const s = parseDay(p.start), e = parseDay(p.end);
-      let tag = 'Ongoing', share = null;
-      if (s && t < s) { const n = daysBetween(t, s); tag = n === 1 ? 'Starts tomorrow' : 'Starts in ' + n + ' days'; share = 0; }
-      else if (s && e && t > e) { tag = 'Ended'; share = 1; }
-      else if (s && e) { share = (t - s) / (e - s); tag = FMT.pct(share) + ' through'; }
-      else if (s) tag = 'Since ' + fmtShort(s);
-      top.append(dot(p.area), link(p.name, p.url), el('span', 'lw-tag', tag));
-      li.append(top);
-      li.append(el('div', 'lw-meta', (s ? fmtLong(s) + (e ? ' → ' + fmtLong(e) : '') : 'No period set') + ' · ' + p.area));
-      if (share != null) {
-        const bar = el('div', 'lw-time'); const fillBar = el('span');
-        fillBar.style.width = Math.max(share * 100, share > 0 ? 2 : 0) + '%';
-        bar.append(fillBar); li.append(bar);
-      }
-      const nx = el('div', 'lw-meta');
-      if (p.next) nx.append(el('span', 'lw-k', 'Next  '), document.createTextNode(p.next));
-      else nx.textContent = 'No next action yet';
-      li.append(nx);
-      pb.append(li);
-    }
-    if (!projects.length) empty(pb, 'No active project in this area.');
-
-    const rankG = { Active: 0, Idea: 1, 'On Hold': 2 };
-    const goals = items.filter((i) => i.kind === 'goal' && (i.status === 'Active' || (i.scope === 'Next Year' && i.status !== 'Done' && i.status !== 'Archived')))
-      .sort((a, b) => (rankG[a.status] ?? 3) - (rankG[b.status] ?? 3));
-    let lastStatus = null;
-    for (const g of goals) {
-      if (g.status !== lastStatus) { gb.append(el('li', 'lw-group', g.status === 'Active' ? 'Active' : 'Planned for next year, not started')); lastStatus = g.status; }
-      const li = el('li', 'lw-item');
-      const top = el('div', 'lw-row');
-      top.append(dot(g.area), link(g.name, g.url));
-      if (g.budget) top.append(el('span', 'lw-tag', FMT.eur(g.budget)));
-      li.append(top);
-      if (!g.links) li.append(el('div', 'lw-meta', 'No project linked'));
-      gb.append(li);
-    }
-    if (!goals.length) empty(gb, 'No active or next-year goal in this area.');
-    const later = items.filter((i) => i.kind === 'goal' && i.status === 'Idea' && i.scope !== 'Next Year').length;
-    if (later) gb.append(el('li', 'lw-note', '+ ' + later + ' more ideas on the Impossible List for later years'));
-
-    const rankP = { P1: 0, P2: 1, P3: 2 };
-    const tasks = items.filter((i) => i.kind === 'task');
-    for (const [status, label] of [['Daily', 'Daily'], ['Weekly', 'This week']]) {
-      const group = tasks.filter((x) => x.status === status).sort((a, b) => (rankP[a.scope] ?? 9) - (rankP[b.scope] ?? 9));
-      if (!group.length) continue;
-      tb.append(el('li', 'lw-group', label));
-      for (const x of group) {
-        const li = el('li', 'lw-item');
-        const top = el('div', 'lw-row');
-        top.append(dot(x.area), link(x.name, x.url));
-        if (x.scope) top.append(el('span', 'lw-tag' + (x.scope === 'P1' ? ' is-p1' : ''), x.scope));
-        li.append(top);
-        if (x.next) li.append(el('div', 'lw-meta', x.next));
-        tb.append(li);
-      }
-    }
-    if (!tasks.some((x) => x.status === 'Daily' || x.status === 'Weekly')) empty(tb, 'No daily or weekly tasks here.');
-    const capture = tasks.filter((x) => x.status === 'Capture').length;
-    const onHold = tasks.filter((x) => x.status === 'On-Hold').length;
-    if (capture || onHold) tb.append(el('li', 'lw-note', capture + ' in Capture · ' + onHold + ' on hold'));
-  }
-
-
-  const TIERS = ['Foundation', 'Intermediate', 'Advanced', 'Elite'];
-  let branchSel = null;
-  const effArea = (areas) => {
-    const pa = picked();
-    if (pa && areas.includes(pa)) return pa;
-    if (branchSel && areas.includes(branchSel)) return branchSel;
-    return areas[0];
-  };
-
-  (() => {
-    const box = $('#lw-tree-legend');
-    for (const [cls, label] of [['is-done', 'Unlocked'], ['is-open', 'Ready'], ['is-locked', 'Locked']]) {
-      const s = el('span'); const i = el('i');
-      i.style.border = '1.5px solid var(--a-learning)';
-      if (cls === 'is-done') i.style.background = 'color-mix(in oklab, var(--a-learning) 34%, var(--color-panel))';
-      if (cls === 'is-locked') { i.style.border = '1px solid var(--color-border-line)'; i.style.opacity = '.6'; }
-      s.append(i, document.createTextNode(label)); box.append(s);
-    }
-  })();
-
-  function skillLevel() {
-    const s = dash.data('skillsum');
-    const bar = $('#lw-xpbar > span');
-    bar.style.width = s.status === 'ok' && s.data[0] ? (s.data[0].level_xp / s.data[0].level_step) * 100 + '%' : '0%';
-  }
-
-  function skillTabs() {
-    const box = $('#lw-tabs');
-    if (hold(box, state('skillbranches'))) return;
-    box.classList.remove('dash-skeleton');
-    const rows = dash.data('skillbranches').data;
-    const eff = effArea(rows.map((r) => r.area));
-    for (const r of rows) {
-      const where = 'area=' + enc(r.area);
-      const mark = (text, field) => { const n = el('span', '', text); n.dataset.source = 'skillbranches'; n.dataset.field = field; n.dataset.where = where; return n; };
-      const tab = paint(el('button', 'lw-tab lw-tint'), r.area);
-      tab.type = 'button';
-      tab.setAttribute('role', 'tab');
-      tab.setAttribute('aria-selected', String(r.area === eff));
-      tab.dataset.area = r.area;
-      const nm = el('span', 'lw-tab-name');
-      nm.append(dot(r.area), el('span', '', r.branch_name));
-      const sub = el('span', 'lw-sub');
-      sub.append(mark(String(r.unlocked), 'unlocked'), document.createTextNode(' of '), mark(String(r.total), 'total'),
-        document.createTextNode(' · '), mark(String(r.ready), 'ready'), document.createTextNode(' ready'));
-      tab.append(nm, sub);
-      box.append(tab);
-    }
-  }
-
-  function skillTree() {
-    const box = $('#lw-tree');
-    const ready = $('#lw-ready');
-    const hint = $('#lw-scrollhint');
-    const st = state('tree');
-    if (st !== 'ok') { hold(box, st); ready.replaceChildren(); hint.hidden = true; return; }
-    box.replaceChildren();
-    box.classList.remove('dash-skeleton');
-    const all = dash.data('tree').data;
-    const area = effArea([...new Set(all.map((n) => n.area))]);
-    const nodes = all.filter((n) => n.area === area);
-    if (!nodes.length) { box.append(el('p', 'lw-note', 'No skills in this branch yet.')); ready.replaceChildren(); return; }
-    $('#lw-tree-title').textContent = nodes[0].branch_name;
-    paint(box, area); paint(ready, area);
-
-    const tracks = [];
-    for (const n of nodes) if (!tracks.some((t) => t.id === n.track)) tracks.push({ id: n.track, name: n.track_name });
-    const tiers = TIERS.filter((t) => nodes.some((n) => n.tier === t));
-    const narrow = (box.clientWidth || 600) < 560;
-    const NW = narrow ? 116 : 136, NH = 64, LANE = 92, HEAD = 44, GAP = 8, CGAP = 28;
-    const of = (track, tier) => nodes.filter((n) => n.track === track && n.tier === tier);
-    const laneTop = (t) => HEAD + tiers.indexOf(t) * LANE;
-    const cyOf = (t) => laneTop(t) + LANE / 2;
-    let x = 0; const cols = [];
-    for (const tr of tracks) {
-      const maxN = Math.max(1, ...tiers.map((t) => of(tr.id, t).length));
-      const w = Math.max(maxN * NW + (maxN - 1) * GAP, 150);
-      cols.push({ ...tr, left: x, width: w, center: x + w / 2 });
-      x += w + CGAP;
-    }
-    const W = Math.max(1, x - CGAP), H = HEAD + tiers.length * LANE + 4;
-    const pos = {};
-    for (const c of cols) for (const t of tiers) {
-      const ns = of(c.id, t);
-      let sx = c.left + (c.width - (ns.length * NW + (ns.length - 1) * GAP)) / 2;
-      for (const n of ns) { pos[n.key] = { x: sx + NW / 2, y: cyOf(t) }; sx += NW + GAP; }
-    }
-    const isDone = (key) => (nodes.find((n) => n.key === key) || {}).state === 'done';
-    const edges = [], hubs = [];
-    for (const c of cols) {
-      const ts = TIERS.filter((t) => of(c.id, t).length);
-      ts.forEach((tier, ti) => {
-        const gated = [];
-        for (const n of of(c.id, tier)) {
-          const p = pos[n.key];
-          const req = n.requires ? n.requires.split('|') : [];
-          if (req.length) {
-            const anyof = n.needs != null && n.needs < req.length;
-            for (const r of req) { const q = pos[c.id + '#' + r]; if (q) edges.push({ x1: q.x, y1: q.y + NH / 2, x2: p.x, y2: p.y - NH / 2, on: isDone(c.id + '#' + r), dashed: anyof }); }
-          } else if (ti === 0 || n.root) {
-            edges.push({ x1: c.center, y1: HEAD - 14, x2: p.x, y2: p.y - NH / 2, on: true });
-          } else gated.push(n);
-        }
-        if (gated.length && ti > 0) {
-          const prev = of(c.id, ts[ti - 1]);
-          const gy = (cyOf(ts[ti - 1]) + NH / 2 + cyOf(tier) - NH / 2) / 2;
-          const on = prev.some((q) => q.state === 'done');
-          hubs.push({ x: c.center, y: gy, on });
-          for (const q of prev) edges.push({ x1: pos[q.key].x, y1: pos[q.key].y + NH / 2, x2: c.center, y2: gy, on });
-          for (const n of gated) edges.push({ x1: c.center, y1: gy, x2: pos[n.key].x, y2: pos[n.key].y - NH / 2, on });
-        }
-      });
-    }
-
-    const gut = el('div', 'lw-tree-gut'); gut.style.height = H + 'px';
-    for (const t of tiers) { const s = el('span', '', t); s.style.top = cyOf(t) + 'px'; gut.append(s); }
-    const scroll = el('div', 'lw-tree-scroll');
-    const canvas = el('div', 'lw-tree-canvas');
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-    tiers.forEach((t, i) => {
-      const lane = el('div', 'lw-lane');
-      lane.style.top = laneTop(t) + 2 + 'px'; lane.style.height = LANE - 4 + 'px'; lane.style.width = W + 'px';
-      lane.style.background = 'color-mix(in oklab, var(--a) ' + (3 + i * 3) + '%, transparent)';
-      canvas.append(lane);
-    });
-    const svg = d3.select(canvas).append('svg').attr('width', W).attr('height', H).attr('viewBox', '0 0 ' + W + ' ' + H);
-    const curve = (e) => { const my = (e.y1 + e.y2) / 2; return 'M' + e.x1 + ' ' + e.y1 + ' C' + e.x1 + ' ' + my + ' ' + e.x2 + ' ' + my + ' ' + e.x2 + ' ' + e.y2; };
-    svg.selectAll('path').data(edges).join('path').attr('d', curve)
-      .style('fill', 'none').style('stroke', (d) => (d.on ? 'var(--a)' : 'var(--cds-chart-axis)'))
-      .style('stroke-opacity', (d) => (d.on ? 0.85 : 0.45)).style('stroke-width', 2).style('stroke-dasharray', (d) => (d.dashed ? '5 4' : null));
-    svg.selectAll('circle').data(hubs).join('circle').attr('cx', (d) => d.x).attr('cy', (d) => d.y).attr('r', 5)
-      .style('fill', (d) => (d.on ? 'var(--a)' : 'var(--color-panel)')).style('stroke', (d) => (d.on ? 'var(--a)' : 'var(--cds-chart-axis)')).style('stroke-width', 1.5);
-    for (const c of cols) {
-      const pill = el('div', 'lw-root', c.name);
-      pill.style.left = c.center + 'px'; pill.style.top = '6px';
-      canvas.append(pill);
-    }
-    const tip = el('div', 'lw-tip'); tip.hidden = true;
-    const showTip = (n, node) => {
-      const when = n.state === 'done' ? (n.unlocked === '?' ? 'Unlocked earlier' : 'Unlocked ' + fmtLong(parseDay(n.unlocked))) + (n.out_of_order ? ', out of order' : '')
-        : n.state === 'open' ? 'Ready to unlock' : n.reason || 'Locked';
-      tip.replaceChildren(el('div', 'lw-tip-h', n.tier + ' · ' + n.xp + ' XP'), el('div', '', n.title), el('div', '', when));
-      tip.hidden = false;
-      const b = box.getBoundingClientRect(), r = node.getBoundingClientRect();
-      tip.style.left = Math.max(0, Math.min(r.left - b.left, b.width - tip.offsetWidth)) + 'px';
-      tip.style.top = (r.bottom - b.top + 6) + 'px';
-    };
-    for (const n of nodes) {
-      const p = pos[n.key];
-      const node = el('div', 'lw-node is-' + n.state + (n.out_of_order ? ' is-ooo' : ''));
-      node.style.left = p.x - NW / 2 + 'px'; node.style.top = p.y - NH / 2 + 'px';
-      node.style.width = NW + 'px'; node.style.height = NH + 'px';
-      node.tabIndex = 0;
-      node.setAttribute('aria-label', n.title + ', ' + (n.state === 'done' ? 'unlocked' : n.state === 'open' ? 'ready to unlock' : 'locked'));
-      node.append(el('span', 'lw-node-t', n.title), el('span', 'lw-node-m', n.xp + ' XP' + (n.state === 'done' ? ' · ✓' : n.state === 'open' ? ' · ready' : '')));
-      node.addEventListener('mouseenter', () => showTip(n, node));
-      node.addEventListener('focus', () => showTip(n, node));
-      node.addEventListener('click', () => showTip(n, node));
-      node.addEventListener('mouseleave', () => { tip.hidden = true; });
-      node.addEventListener('blur', () => { tip.hidden = true; });
-      canvas.append(node);
-    }
-    scroll.append(canvas);
-    scroll.addEventListener('scroll', () => { tip.hidden = true; });
-    box.append(gut, scroll, tip);
-    hint.hidden = !(W > scroll.clientWidth + 4);
-
-    ready.replaceChildren();
-    const open = nodes.filter((n) => n.state === 'open')
-      .sort((a, b) => TIERS.indexOf(a.tier) - TIERS.indexOf(b.tier) || a.xp - b.xp);
-    ready.append(el('span', 'lw-label', open.length ? 'Ready to unlock' : 'Nothing ready to unlock in this branch'));
-    for (const n of open.slice(0, 8)) ready.append(el('span', 'lw-pill', n.title + ' · ' + n.xp + ' XP'));
-    if (open.length > 8) ready.append(el('span', 'lw-note', '+ ' + (open.length - 8) + ' more'));
-  }
-
-  $('#lw-tabs').addEventListener('click', (e) => {
-    const tab = e.target.closest('.lw-tab');
-    if (!tab) return;
-    branchSel = tab.dataset.area;
-    if (picked() && picked() !== branchSel) pick(branchSel);
-    else { skillTabs(); skillTree(); }
-  });
-
-  $('#lw-areas').addEventListener('click', (e) => {
-    const card = e.target.closest('.lw-area');
-    if (card) pick(card.dataset.area);
-  });
-  $('#lw-focus-clear').addEventListener('click', () => dash.setParams({ area: null }));
-
-  dash.onData(() => {
-    header(); figures(); wheel(); areas(); insights(); dates(); focus(); skillLevel(); skillTabs(); skillTree();
-  });
+  dash.onData(() => { header(); figures(); map(); detail(); insights(); dates(); });
 })();
 </script>

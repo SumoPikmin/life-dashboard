@@ -131,120 +131,122 @@
   ],
   "wiki": {
    "text": "# Life Principles\n---\n1. Sample principle one\n2. Sample principle two\n## Other\n</column>\n# Quotes\n---\nSample quote\n</column>"
+  }
+ },
+ "skilltree": {
+  "config": {
+   "branches": [
+    {
+     "id": "fitness",
+     "name": "Health & Fitness",
+     "color": "#ef4444",
+     "icon": "",
+     "tracks": [
+      {
+       "id": "run",
+       "name": "Running",
+       "nodes": [
+        {
+         "id": "r1",
+         "title": "Sample: 5K",
+         "tier": "Foundation",
+         "xp": 15,
+         "requires": []
+        },
+        {
+         "id": "r2",
+         "title": "Sample: 10K",
+         "tier": "Intermediate",
+         "xp": 40,
+         "requires": [
+          "r1"
+         ]
+        },
+        {
+         "id": "r3",
+         "title": "Sample: half marathon",
+         "tier": "Advanced",
+         "xp": 100,
+         "requires": [
+          "r2"
+         ]
+        }
+       ]
+      },
+      {
+       "id": "str",
+       "name": "Strength",
+       "nodes": [
+        {
+         "id": "s1",
+         "title": "Sample: 10 push-ups",
+         "tier": "Foundation",
+         "xp": 15,
+         "requires": []
+        },
+        {
+         "id": "s2",
+         "title": "Sample: first pull-up",
+         "tier": "Intermediate",
+         "xp": 40,
+         "requires": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "finance",
+     "name": "Finance",
+     "color": "#22c55e",
+     "icon": "",
+     "tracks": [
+      {
+       "id": "cash",
+       "name": "Finance",
+       "nodes": [
+        {
+         "id": "f1",
+         "title": "Sample: €1,000 saved",
+         "tier": "Foundation",
+         "xp": 15,
+         "requires": []
+        },
+        {
+         "id": "f2",
+         "title": "Sample: €5,000 saved",
+         "tier": "Intermediate",
+         "xp": 40,
+         "requires": [
+          "f1"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "bucket": [
+    {
+     "id": "b1",
+     "label": "Sample: sunrise hike",
+     "tag": "Common"
+    },
+    {
+     "id": "b2",
+     "label": "Sample: cooking class",
+     "tag": "Experience"
+    }
+   ]
   },
-  "skills": [
-   {
-    "kind": "node",
-    "key": "run#r1",
-    "branch": "fitness",
-    "branch_name": "Health & Fitness",
-    "track": "run",
-    "track_name": "Running",
-    "node": "r1",
-    "title": "Sample: 5K",
-    "tier": "Foundation",
-    "xp": 15,
-    "requires": "",
-    "needs": null,
-    "root": false,
-    "unlocked": "2026-09-01"
+  "state": {
+   "done": {
+    "run#r1": "2026-09-01",
+    "cash#f1": "?"
    },
-   {
-    "kind": "node",
-    "key": "run#r2",
-    "branch": "fitness",
-    "branch_name": "Health & Fitness",
-    "track": "run",
-    "track_name": "Running",
-    "node": "r2",
-    "title": "Sample: 10K",
-    "tier": "Intermediate",
-    "xp": 40,
-    "requires": "r1",
-    "needs": null,
-    "root": false,
-    "unlocked": ""
-   },
-   {
-    "kind": "node",
-    "key": "run#r3",
-    "branch": "fitness",
-    "branch_name": "Health & Fitness",
-    "track": "run",
-    "track_name": "Running",
-    "node": "r3",
-    "title": "Sample: Half",
-    "tier": "Advanced",
-    "xp": 100,
-    "requires": "r2",
-    "needs": null,
-    "root": false,
-    "unlocked": ""
-   },
-   {
-    "kind": "node",
-    "key": "str#s1",
-    "branch": "fitness",
-    "branch_name": "Health & Fitness",
-    "track": "str",
-    "track_name": "Strength",
-    "node": "s1",
-    "title": "Sample: 10 push-ups",
-    "tier": "Foundation",
-    "xp": 15,
-    "requires": "",
-    "needs": null,
-    "root": false,
-    "unlocked": ""
-   },
-   {
-    "kind": "node",
-    "key": "str#s2",
-    "branch": "fitness",
-    "branch_name": "Health & Fitness",
-    "track": "str",
-    "track_name": "Strength",
-    "node": "s2",
-    "title": "Sample: pull-up",
-    "tier": "Intermediate",
-    "xp": 40,
-    "requires": "",
-    "needs": null,
-    "root": false,
-    "unlocked": ""
-   },
-   {
-    "kind": "node",
-    "key": "cash#f1",
-    "branch": "finance",
-    "branch_name": "Finance",
-    "track": "cash",
-    "track_name": "Finance",
-    "node": "f1",
-    "title": "Sample: first €1,000 saved",
-    "tier": "Foundation",
-    "xp": 15,
-    "requires": "",
-    "needs": null,
-    "root": false,
-    "unlocked": "?"
-   },
-   {
-    "kind": "bucket",
-    "key": "bucket#b1",
-    "branch": "bucket",
-    "branch_name": "Bucket list",
-    "track": "bucket",
-    "track_name": "Common",
-    "node": "b1",
-    "title": "Sample: sunrise hike",
-    "tier": "Bucket",
-    "xp": 15,
-    "requires": "",
-    "needs": null,
-    "root": true,
-    "unlocked": ""
-   }
-  ]
- }
+   "bucket": {},
+   "notes": {}
+  }
+ },
+ "skill_gist": null
 }

@@ -37,6 +37,8 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           DASHBOARD_PASSWORD: ${{ secrets.DASHBOARD_PASSWORD }}
           SKILLTREE_JSON: ${{ secrets.SKILLTREE_JSON }}
+          SKILLTREE_GIST: ${{ secrets.SKILLTREE_GIST }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python build.py site
 
       - uses: actions/configure-pages@v5

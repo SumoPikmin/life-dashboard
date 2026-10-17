@@ -7,8 +7,10 @@ PBKDF2-SHA256), the same browser format as the Garmin dashboard.
 Environment:
   NOTION_TOKEN        internal integration secret, connected to the Life Wiki page
   DASHBOARD_PASSWORD  password the page asks for
-  SKILLTREE_JSON      the Skill Tree app's export (JSON text), optional
+  SKILLTREE_GIST      id of the private gist holding skilltree.json (the page saves unlocks there)
+  SKILLTREE_JSON      fallback: the Skill Tree app's export (JSON text)
   SKILLTREE_FILE      or a path to that export, for local builds
+  GITHUB_TOKEN        optional, only to raise the API rate limit when reading the gist
 
 Usage:
   python build.py site            build from Notion
@@ -194,31 +196,32 @@ def diagnose() -> None:
 
 
 # ---------------------------------------------------------------- Skill Tree
-def skill_rows(export: dict) -> list[dict]:
-    """The Skill Tree app's export -> one row per skill and bucket-list item."""
-    done = (export.get("state") or {}).get("done") or {}
-    bucket_done = (export.get("state") or {}).get("bucket") or {}
-    rows = []
-    for b in export["config"]["branches"]:
-        for t in b["tracks"]:
-            for n in t["nodes"]:
-                key = f"{t['id']}#{n['id']}"
-                rows.append({
-                    "kind": "node", "key": key, "branch": b["id"], "branch_name": b["name"],
-                    "track": t["id"], "track_name": t["name"], "node": n["id"], "title": n["title"],
-                    "tier": n["tier"], "xp": n.get("xp", 0), "requires": "|".join(n.get("requires") or []),
-                    "needs": n.get("needs"), "root": bool(n.get("root")), "unlocked": done.get(key, ""),
-                })
-    for it in export["config"].get("bucket") or []:
-        rows.append({
-            "kind": "bucket", "key": "bucket#" + it["id"], "branch": "bucket", "branch_name": "Bucket list",
-            "track": "bucket", "track_name": it.get("tag", ""), "node": it["id"], "title": it["label"],
-            "tier": "Bucket", "xp": 15, "requires": "", "needs": None, "root": True, "unlocked": bucket_done.get(it["id"], ""),
-        })
-    return rows
+def read_gist(gist_id: str) -> dict | None:
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "life-dashboard-build"}
+    if os.environ.get("GITHUB_TOKEN"):
+        headers["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
+    try:
+        with urllib.request.urlopen(urllib.request.Request(f"https://api.github.com/gists/{gist_id}", headers=headers), timeout=30) as res:
+            g = json.load(res)
+        f = (g.get("files") or {}).get("skilltree.json")
+        if not f:
+            return None
+        raw = f["content"]
+        if f.get("truncated") and f.get("raw_url"):
+            with urllib.request.urlopen(urllib.request.Request(f["raw_url"], headers={"User-Agent": "life-dashboard-build"}), timeout=30) as res:
+                raw = res.read().decode()
+        return json.loads(raw)
+    except (urllib.error.URLError, ValueError) as e:
+        print(f"Could not read the skill tree gist ({e}); falling back to the export")
+        return None
 
 
 def load_skill_export() -> dict | None:
+    gist_id = os.environ.get("SKILLTREE_GIST", "").strip()
+    if gist_id:
+        data = read_gist(gist_id)
+        if data:
+            return data
     raw = os.environ.get("SKILLTREE_JSON", "").strip()
     path = os.environ.get("SKILLTREE_FILE", "").strip()
     if not raw and path:
@@ -267,11 +270,11 @@ def collect(sample: bool) -> dict:
         print(e)
         diagnose()
         sys.exit("Notion can't see part of the Life Wiki. In Notion open Life Wiki -> ••• -> Connections and add the integration.")
-    sources["skills"] = skill_rows(export) if export else []
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "sources": sources,
-        "skills_exported": bool(export),
+        "skilltree": {"config": export["config"], "state": export.get("state") or {}} if export else None,
+        "skill_gist": os.environ.get("SKILLTREE_GIST", "").strip() or None,
     }
 
 
@@ -283,15 +286,17 @@ def main() -> None:
         sys.exit("DASHBOARD_PASSWORD is not set. Add it as a repository secret (see README).")
     payload = collect("--sample" in sys.argv)
     s = payload["sources"]
+    tree = payload.get("skilltree") or {}
+    skills = sum(len(t["nodes"]) for b in (tree.get("config") or {}).get("branches", []) for t in b["tracks"])
     print(f"projects={len(s['projects'])} goals={len(s['goals'])} tasks={len(s['tasks'])} "
-          f"wiki_chars={len(s['wiki']['text'])} skills={len(s['skills'])}")
+          f"wiki_chars={len(s['wiki']['text'])} skills={skills} gist={'yes' if payload.get('skill_gist') else 'no'}")
     blob = encrypt_for_browser(payload, password, deployment_salt())
     assert decrypt_from_browser_format(blob, password)["generated_at"] == payload["generated_at"]
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
     src = ROOT / "web-src"
-    page = "".join((src / f).read_text(encoding="utf-8") for f in ("shell-head.html", "dashboard.html", "shell-tail.html"))
+    page = "".join((src / f).read_text(encoding="utf-8") for f in ("shell-head.html", "dashboard.html", "skills.html", "shell-tail.html"))
     (out / "index.html").write_text(page, encoding="utf-8")
     (out / "data.enc").write_text(json.dumps(blob), encoding="utf-8")
     (out / ".nojekyll").write_text("", encoding="utf-8")

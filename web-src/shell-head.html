@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <style>
-  /* Tokens the dashboard page is written against (same names as the claude.ai Dashboard type). */
+  /* Tokens the page is written against (same names as the claude.ai Dashboard type). */
   :root {
     color-scheme: light;
     --font-anthropic-sans: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -24,7 +24,7 @@
     --color-ok: #2c8452; --color-warn: #a8640f; --color-bad: #c03f36;
     --cds-chart-grid: #ebe9e3; --cds-chart-axis: #a6a59f; --cds-chart-muted: #c8c6bf; --cds-chart-reference: #85847f;
     --cds-surface-popover: #ffffff; --cds-border: #e3e1db; --cds-shadow-popover: 0 8px 28px rgba(20, 20, 20, .12); --cds-text-secondary: #676b74;
-    --skel: #ecebe6; --skel-hi: #f6f5f1;
+    --skel: #ecebe6; --skel-hi: #f6f5f1; --side-bg: #eeede8;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -33,7 +33,7 @@
       --color-ok: #5cc38a; --color-warn: #e4a64e; --color-bad: #ee7a70;
       --cds-chart-grid: #26282d; --cds-chart-axis: #55585f; --cds-chart-muted: #44474e; --cds-chart-reference: #7a7d84;
       --cds-surface-popover: #23252a; --cds-border: #33353b; --cds-shadow-popover: 0 8px 28px rgba(0, 0, 0, .5); --cds-text-secondary: #9b9da4;
-      --skel: #222429; --skel-hi: #2b2d33;
+      --skel: #222429; --skel-hi: #2b2d33; --side-bg: #0f1013;
     }
   }
   html, body { margin: 0; }
@@ -42,16 +42,42 @@
   [hidden] { display: none !important; }
   button { font: inherit; }
 
-  .shell-bar { position: sticky; top: 0; z-index: 30; background: color-mix(in oklab, var(--color-bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-border-line); padding-top: env(safe-area-inset-top, 0px); }
-  .shell-in { max-width: 1240px; margin: 0 auto; padding-block: .5rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
-  .shell-sync { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; align-items: center; gap: .4rem; }
-  .shell-sync::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; background: var(--color-ok); }
-  .shell-sync.is-stale::before { background: var(--color-warn); }
-  .shell-space { flex: 1; }
+  /* App frame: sidebar + views. Below 860px the sidebar becomes a top bar. */
+  .app { display: grid; grid-template-columns: 15rem minmax(0, 1fr); min-height: 100vh; min-height: 100dvh; }
+  .side { position: sticky; top: 0; height: 100vh; height: 100dvh; background: var(--side-bg); border-right: 1px solid var(--color-border-line); display: flex; flex-direction: column; gap: 1.5rem; padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1rem 1.25rem max(1rem, env(safe-area-inset-left, 0px)); }
+  .side-brand { display: grid; gap: .35rem; padding: 0 .5rem; }
+  .side-title { font-family: var(--font-anthropic-serif); font-size: 1.35rem; line-height: 1.1; }
+  .side-swatch { display: flex; gap: 3px; }
+  .side-swatch span { width: 1rem; height: .25rem; border-radius: 999px; }
+  .side-nav { display: grid; gap: .25rem; }
+  .side-link { display: flex; align-items: center; gap: .65rem; padding: .55rem .65rem; border-radius: 10px; color: var(--color-fg-muted); text-decoration: none; font-weight: 500; }
+  .side-link svg { width: 1.1rem; height: 1.1rem; flex: none; }
+  .side-link:hover { color: var(--color-fg); background: color-mix(in oklab, var(--color-fg) 6%, transparent); }
+  .side-link[aria-current="page"] { color: var(--color-fg); background: var(--color-panel); box-shadow: 0 1px 2px rgba(0, 0, 0, .06), inset 0 0 0 1px var(--color-border-line); }
+  .side-link:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  .side-foot { margin-top: auto; display: grid; gap: .6rem; padding: 0 .5rem; }
+  .side-sync { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; align-items: baseline; gap: .45rem; line-height: 1.35; }
+  .side-sync::before { content: ""; flex: none; width: .45rem; height: .45rem; border-radius: 50%; background: var(--color-ok); transform: translateY(-1px); }
+  .side-sync.is-stale::before { background: var(--color-warn); }
+  .side-btns { display: flex; gap: .4rem; flex-wrap: wrap; }
   .shell-btn { font-size: var(--cds-font-size-caption); cursor: pointer; color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: 999px; padding: .2rem .75rem; }
   .shell-btn:hover { border-color: var(--color-fg-muted); }
   .shell-btn:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
-  #dash-root { max-width: 1240px; margin: 0 auto; padding-block: 1.75rem 3rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  #dash-root { min-width: 0; padding-block: 2rem 3.5rem; padding-left: max(16px, min(3vw, 2.5rem)); padding-right: max(16px, env(safe-area-inset-right, 0px), min(3vw, 2.5rem)); }
+  .view { max-width: 1240px; margin: 0 auto; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: minmax(0, 1fr); }
+    .side { position: sticky; z-index: 30; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; padding: calc(.5rem + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) .5rem max(16px, env(safe-area-inset-left, 0px)); border-right: 0; border-bottom: 1px solid var(--color-border-line); }
+    .side-brand { padding: 0; }
+    .side-title { font-size: 1.1rem; }
+    .side-swatch { display: none; }
+    .side-nav { display: flex; gap: .25rem; margin-left: auto; }
+    .side-link { padding: .35rem .6rem; }
+    .side-foot { margin: 0; flex-basis: 100%; display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: 0; }
+    .side-sync { min-width: 0; font-size: .75rem; }
+    .side-btns { flex-wrap: nowrap; }
+    #dash-root { padding-block: 1.25rem 3rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  }
 
   .dash-skeleton { color: transparent !important; border-radius: 6px; background: linear-gradient(90deg, var(--skel) 0%, var(--skel-hi) 50%, var(--skel) 100%) 0 0 / 200% 100%; }
   @media (prefers-reduced-motion: no-preference) { .dash-skeleton { animation: shell-shimmer 1.4s linear infinite; } }
@@ -67,14 +93,14 @@
   .lock-btn { font-weight: 600; cursor: pointer; color: var(--color-bg); background: var(--color-fg); border: 0; border-radius: 10px; padding: .65rem 1rem; }
   .lock-btn:disabled { opacity: .6; cursor: progress; }
   .lock-msg { min-height: 1.2em; margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-bad); }
-  .lock-swatches { display: flex; gap: 4px; }
-  .lock-swatches span { width: 1.25rem; height: .3rem; border-radius: 999px; }
+  .swatches { display: flex; gap: 4px; }
+  .swatches span { width: 1.25rem; height: .3rem; border-radius: 999px; }
 </style>
 </head>
 <body>
 <div class="lock" id="lock" hidden>
   <form class="lock-card" id="lock-form" autocomplete="on">
-    <div class="lock-swatches" aria-hidden="true">
+    <div class="swatches" aria-hidden="true">
       <span style="background:#e0614f"></span><span style="background:#e3923a"></span><span style="background:#3a9b68"></span><span style="background:#d25d93"></span><span style="background:#4a7fd0"></span><span style="background:#8a66d1"></span><span style="background:#7f8a9b"></span>
     </div>
     <h1 class="lock-title">Life Wiki Dashboard</h1>
@@ -87,17 +113,8 @@
   </form>
 </div>
 
-<header class="shell-bar" id="shell-bar" hidden>
-  <div class="shell-in">
-    <span class="shell-sync" id="shell-sync">Loading…</span>
-    <span class="shell-space"></span>
-    <button type="button" class="shell-btn" id="shell-refresh">Refresh</button>
-    <button type="button" class="shell-btn" id="shell-lock">Lock</button>
-  </div>
-</header>
-
 <script>
-/* Stand-in for the claude.ai Dashboard runtime: the page below calls dash.data / calc / loader / onData / params. */
+/* Stand-in for the claude.ai Dashboard runtime: the Home view calls dash.data / calc / loader / onData / params. */
 window.dash = (() => {
   const data = {}, status = {}, loaders = {}, calcs = [], subs = [];
   let params = { area: null };
@@ -116,6 +133,7 @@ window.dash = (() => {
     params() { return params; },
     setParams(p) { params = { ...params, ...p }; run(); },
     resetParams() { params = { area: null }; run(); },
+    redraw: run,
     refresh() {}, setLink() {},
     _load(sources) {
       for (const [id, value] of Object.entries(sources)) {
@@ -137,4 +155,32 @@ window.dash = (() => {
 })();
 </script>
 
-<main id="dash-root" hidden>
+<div class="app" id="app" hidden>
+  <aside class="side" aria-label="Navigation">
+    <div class="side-brand">
+      <span class="side-title">Life Wiki</span>
+      <div class="side-swatch" aria-hidden="true">
+        <span style="background:#e0614f"></span><span style="background:#e3923a"></span><span style="background:#3a9b68"></span><span style="background:#d25d93"></span><span style="background:#4a7fd0"></span><span style="background:#8a66d1"></span><span style="background:#7f8a9b"></span>
+      </div>
+    </div>
+    <nav class="side-nav">
+      <a class="side-link" href="#home" data-view="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/></svg>
+        Home
+      </a>
+      <a class="side-link" href="#skills" data-view="skills">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="18" r="2.2"/><circle cx="12" cy="12.5" r="1.4"/><path d="M12 7.2v3.9M11 13.5l-3.8 2.7M13 13.5l3.8 2.7"/></svg>
+        Skill tree
+      </a>
+    </nav>
+    <div class="side-foot">
+      <span class="side-sync" id="shell-sync">Loading…</span>
+      <div class="side-btns">
+        <button type="button" class="shell-btn" id="shell-refresh">Refresh</button>
+        <button type="button" class="shell-btn" id="shell-lock">Lock</button>
+      </div>
+    </div>
+  </aside>
+
+  <main id="dash-root">
+  <section class="view" id="view-home" data-view="home">
