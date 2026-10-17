@@ -286,6 +286,7 @@ dash.calc('items', {
       ...goals.map((g) => ({
         key: g.url, kind: 'goal', name: g.Name || 'Untitled', area: area(g.Category), status: g.Status || 'Idea', scope: g.Scope || '',
         next: clean(g['Next action']), start: '', end: '', budget: euro(g.Budget), url: g.url, links: list(g.Project).length,
+        tags: list(g['Sub-tag']), projectKeys: list(g.Project),
       })),
       ...tasks.map((t) => ({
         key: t.url, kind: 'task', name: t.Name || 'Untitled', area: area(list(t['Life Area'])[0]),

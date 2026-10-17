@@ -348,7 +348,7 @@ def main() -> None:
         shutil.rmtree(out)
     out.mkdir(parents=True)
     src = ROOT / "web-src"
-    page = "".join((src / f).read_text(encoding="utf-8") for f in ("shell-head.html", "dashboard.html", "skills.html", "finance.html", "shell-tail.html"))
+    page = "".join((src / f).read_text(encoding="utf-8") for f in ("shell-head.html", "dashboard.html", "skills.html", "finance.html", "areas.html", "shell-tail.html"))
     (out / "index.html").write_text(page, encoding="utf-8")
     (out / "data.enc").write_text(json.dumps(blob), encoding="utf-8")
     (out / ".nojekyll").write_text("", encoding="utf-8")

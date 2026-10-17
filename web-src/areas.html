@@ -1,0 +1,494 @@
+  </section>
+  <section class="view" id="view-travel" data-view="travel" hidden>
+<style>
+  /* Shared by the Travel and Health & sports views. */
+  .av { --a-health: #e0614f; --a-travel: #e3923a; --a-finance: #3a9b68; --a-social: #d25d93; --a-career: #4a7fd0; --a-learning: #8a66d1; --a-home: #7f8a9b;
+    display: grid; gap: var(--cds-gap-xl); min-width: 0; }
+  .av a { color: inherit; text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 25%, transparent); text-underline-offset: 3px; }
+  .av a:hover { text-decoration-color: currentColor; }
+  .av-head { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md) var(--cds-gap-xl); align-items: flex-end; justify-content: space-between; }
+  .av-head-text { display: grid; gap: var(--cds-gap-sm); flex: 1 1 26rem; min-width: 0; }
+  .av-eyebrow { display: inline-flex; align-items: center; gap: .4rem; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .av-eyebrow::before { content: ""; width: .7rem; height: .7rem; border-radius: 3px; background: var(--a); }
+  .av-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: calc(var(--cds-font-size-title) * 1.35); line-height: 1.05; }
+  .av-lead { margin: 0; max-width: 66ch; line-height: 1.55; }
+  .av-cta { display: inline-flex; align-items: center; gap: .5rem; padding: .6rem 1rem; border-radius: 12px; background: var(--a); color: #fff !important; text-decoration: none !important; font-weight: var(--cds-font-weight-medium); white-space: nowrap; }
+  .av-cta:hover { filter: brightness(1.05); }
+  .av-cta:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 3px; }
+  .av-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
+  .av-fig { padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: 3px; align-content: start; box-shadow: -1px 0 0 var(--color-border-line), 0 -1px 0 var(--color-border-line); min-width: 0; }
+  .av-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .av-big { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .av-big.is-text { font-size: var(--cds-font-size-heading); line-height: 1.3; }
+  .av-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  .av-sub.is-warn { color: var(--color-warn); } .av-sub.is-ok { color: var(--color-ok); }
+  .av-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); align-items: start; }
+  .av-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-md); align-content: start; min-width: 0; }
+  .av-card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-xs) var(--cds-gap-md); }
+  .av-card h2 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+  .av-note { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.5; }
+  .av-verdict { margin: 0; font-size: var(--cds-font-size-caption); line-height: 1.5; padding: var(--cds-pad-sm) var(--cds-pad-md); border-radius: 8px; background: color-mix(in oklab, var(--color-fg) 4%, transparent); }
+  .av-verdict.is-ok { color: var(--color-ok); background: color-mix(in oklab, var(--color-ok) 9%, transparent); }
+  .av-verdict.is-warn { color: var(--color-warn); background: color-mix(in oklab, var(--color-warn) 10%, transparent); }
+  .av-chart { position: relative; min-height: 12rem; }
+  .av-chart svg { display: block; overflow: visible; }
+  .av-tip { position: absolute; pointer-events: none; z-index: 5; max-width: 18rem; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); }
+  .av-tip-h { color: var(--cds-text-secondary); }
+
+  .av-projects { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); }
+  .av-proj { border-radius: var(--cds-radius); border: 1px solid color-mix(in oklab, var(--a) 30%, var(--color-border-line)); background: color-mix(in oklab, var(--a) 5%, var(--color-panel)); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-sm); align-content: start; min-width: 0; }
+  .av-proj-top { display: flex; align-items: baseline; gap: var(--cds-gap-sm); }
+  .av-proj-top strong { font-weight: var(--cds-font-weight-medium); font-size: var(--cds-font-size-heading); min-width: 0; overflow-wrap: anywhere; }
+  .av-tag { margin-left: auto; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .av-time { position: relative; height: .55rem; border-radius: 999px; background: color-mix(in oklab, var(--a) 15%, transparent); }
+  .av-time > span { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--a); }
+  .av-time-labels { display: flex; justify-content: space-between; font-size: .6875rem; color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  .av-kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px var(--cds-gap-md); font-size: var(--cds-font-size-caption); }
+  .av-kv dt { color: var(--color-fg-muted); }
+  .av-kv dd { margin: 0; overflow-wrap: anywhere; }
+  .av-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .av-item { display: flex; align-items: baseline; gap: var(--cds-gap-sm); min-width: 0; font-size: var(--cds-font-size-caption); }
+  .av-item > :nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
+  .av-dot { width: .55rem; height: .55rem; border-radius: 50%; flex: none; background: var(--a); transform: translateY(-1px); }
+  .av-dot.is-done { box-shadow: 0 0 0 2px color-mix(in oklab, var(--a) 30%, transparent); }
+  .av-dot.is-idea { background: transparent; box-shadow: inset 0 0 0 1.5px var(--a); }
+  .av-pill { font-size: var(--cds-font-size-caption); line-height: 1.7; padding: 0 var(--cds-pad-sm); border-radius: 999px; white-space: nowrap; color: var(--color-fg-muted); background: color-mix(in oklab, var(--color-fg) 6%, transparent); margin-left: auto; }
+  .av-pill[data-level="ok"] { color: var(--color-ok); background: color-mix(in oklab, var(--color-ok) 12%, transparent); }
+  .av-pill[data-level="active"] { color: var(--color-fg); background: color-mix(in oklab, var(--a) 20%, transparent); }
+  .av-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--cds-gap-md); }
+  .av-group { display: grid; gap: var(--cds-gap-sm); align-content: start; padding: var(--cds-pad-md); border-radius: 10px; background: color-mix(in oklab, var(--color-fg) 2.5%, transparent); }
+  .av-group-head { display: flex; align-items: baseline; gap: var(--cds-gap-sm); font-weight: var(--cds-font-weight-medium); }
+  .av-group-head span:last-child { margin-left: auto; font-weight: 400; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .av-meter { height: .3rem; border-radius: 999px; background: color-mix(in oklab, var(--a) 15%, transparent); overflow: hidden; }
+  .av-meter > span { display: block; height: 100%; background: var(--a); border-radius: 999px; }
+  .av-bars { display: grid; gap: var(--cds-gap-sm); }
+  .av-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px var(--cds-gap-sm); align-items: baseline; font-size: var(--cds-font-size-caption); }
+  .av-bar .av-meter { grid-column: 1 / -1; height: .5rem; }
+  .av-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .av-chip { font-size: var(--cds-font-size-caption); line-height: 1.7; padding: 0 var(--cds-pad-sm); border-radius: 999px; background: color-mix(in oklab, var(--a) 14%, transparent); }
+  .av-empty { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+</style>
+
+<div class="av" id="travel-view" style="--a: var(--a-travel)">
+  <header class="av-head">
+    <div class="av-head-text">
+      <span class="av-eyebrow">Life area</span>
+      <h1 class="av-title">Travel</h1>
+      <p class="av-lead" id="tv-lead">Loading…</p>
+    </div>
+  </header>
+  <section class="av-strip" id="tv-strip" aria-label="Travel at a glance"></section>
+  <section class="av-card" id="tv-plan">
+    <div class="av-card-head"><h2>Trip plan and travel pot</h2><span class="av-note" id="tv-plan-note"></span></div>
+    <div class="av-chart" id="tv-chart"></div>
+    <p class="av-verdict" id="tv-verdict"></p>
+  </section>
+  <section class="av-projects" id="tv-projects"></section>
+  <section class="av-card" id="tv-goals">
+    <div class="av-card-head"><h2>Impossible List: travel</h2><span class="av-note" id="tv-goals-note"></span></div>
+    <div class="av-groups" id="tv-groups"></div>
+  </section>
+  <div class="av-grid">
+    <section class="av-card" id="tv-savings">
+      <div class="av-card-head"><h2>Travel savings goals</h2><span class="av-note">From your Savings Goals database</span></div>
+      <div class="av-bars" id="tv-saving-bars"></div>
+    </section>
+    <section class="av-card" id="tv-skills">
+      <div class="av-card-head"><h2>Skill tree: travel</h2><a class="av-note" href="#skills">Open skill tree</a></div>
+      <div class="av-bars" id="tv-skill-bars"></div>
+    </section>
+  </div>
+</div>
+  </section>
+  <section class="view" id="view-health" data-view="health" hidden>
+<div class="av" id="health-view" style="--a: var(--a-health)">
+  <header class="av-head">
+    <div class="av-head-text">
+      <span class="av-eyebrow">Life area</span>
+      <h1 class="av-title">Health &amp; sports</h1>
+      <p class="av-lead" id="hv-lead">Loading…</p>
+    </div>
+    <a class="av-cta" href="https://sumopikmin.github.io/garmin-dashboard/" target="_blank" rel="noopener">Open Garmin dashboard ↗</a>
+  </header>
+  <section class="av-strip" id="hv-strip" aria-label="Health and sports at a glance"></section>
+  <section class="av-projects" id="hv-projects"></section>
+  <div class="av-grid">
+    <section class="av-card" id="hv-races">
+      <div class="av-card-head"><h2>Races and events</h2><span class="av-note">Dated items and planned race trips</span></div>
+      <ul class="av-list" id="hv-race-list"></ul>
+    </section>
+    <section class="av-card" id="hv-tasks">
+      <div class="av-card-head"><h2>Habits and tasks</h2><span class="av-note">Task Planner · Health &amp; Fitness</span></div>
+      <ul class="av-list" id="hv-task-list"></ul>
+    </section>
+  </div>
+  <section class="av-card" id="hv-goals">
+    <div class="av-card-head"><h2>Impossible List: health &amp; fitness</h2><span class="av-note" id="hv-goals-note"></span></div>
+    <div class="av-groups" id="hv-groups"></div>
+  </section>
+  <section class="av-card" id="hv-skills">
+    <div class="av-card-head"><h2>Skill tree: health &amp; fitness</h2><a class="av-note" href="#skills">Open skill tree</a></div>
+    <div class="av-groups" id="hv-skill-groups"></div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const eur = (n) => '€' + d3.format(',.0f')(n);
+  const pct = d3.format('.0%');
+  const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many || one + 's');
+  const link = (text, url) => {
+    if (!/^https:\/\//.test(url || '')) return el('span', '', text);
+    const a = el('a', '', text); a.href = url; a.target = '_blank'; a.rel = 'noopener'; return a;
+  };
+  const clean = (s) => String(s || '').replace(/\*\*/g, '').trim();
+  const num = (s) => { const m = String(s || '').replace(/\*/g, '').replace(/(\d),(\d{3})/g, '$1$2').match(/-?\d+(?:[.,]\d+)?/); return m ? Number(m[0].replace(',', '.')) : null; };
+  const parseDay = (s) => (s ? new Date(s.slice(0, 10) + 'T00:00:00Z') : null);
+  const now = new Date(); const t = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const days = (a, b) => Math.round((b - a) / 864e5);
+  const fmtLong = d3.utcFormat('%-d %b %Y'), fmtShort = d3.utcFormat('%-d %b');
+  const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, mai: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, okt: 9, nov: 10, dec: 11, dez: 11 };
+  const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const mLabel = (m) => MONTH_NAMES[m % 12] + ' ' + Math.floor(m / 12);
+  const ok = (id) => dash.data(id).status === 'ok';
+  const data = (id) => (ok(id) ? dash.data(id).data : null);
+  const visible = (id) => !document.getElementById(id).hidden;
+  const STATUS_RANK = { Active: 0, Done: 1, 'On Hold': 2, Idea: 3 };
+
+  /* "Mar 2027" → that month; "Nov/Dec 2026" → Nov; "H1 2027" → Jan–Jun; "During 2027" → the whole year. Months as year*12+month. */
+  function parseWhen(s) {
+    const low = String(s || '').toLowerCase();
+    const y = low.match(/(20\d\d)/);
+    if (!y) return null;
+    const Y = +y[1] * 12;
+    if (/\bh1\b/.test(low)) return { a: Y, b: Y + 5 };
+    if (/\bh2\b/.test(low)) return { a: Y + 6, b: Y + 11 };
+    const m = low.match(/\b(jan|feb|mar|apr|may|mai|jun|jul|aug|sep|oct|okt|nov|dec|dez)/);
+    if (m) return { a: Y + MON[m[1]], b: Y + MON[m[1]] };
+    return { a: Y, b: Y + 11 };
+  }
+  function tableFor(fin, re) { return ((fin && fin.tables) || []).find((x) => re.test(x.heading || '')); }
+  function trips() {
+    const fin = data('finance');
+    const tb = tableFor(fin, /travel/i);
+    if (!tb) return [];
+    const [head, ...rows] = tb.header ? tb.rows : [[], ...tb.rows];
+    const col = (re, fb) => { const i = head.findIndex((h) => re.test(h)); return i >= 0 ? i : fb; };
+    const iWhen = col(/when|wann|date/i, 0), iTrip = col(/trip|reise/i, 1), iCost = col(/estimate|cost|kosten|€/i, 2);
+    return rows.map((r) => ({ when: clean(r[iWhen]), name: clean(r[iTrip]), cost: num(r[iCost]) || 0, raw: clean(r[iCost]), span: parseWhen(r[iWhen]) }))
+      .filter((x) => x.name && x.span && !/total|summe|gesamt/i.test(x.when + ' ' + x.name));
+  }
+  function travelLine() {
+    const fin = data('finance');
+    const budgets = (fin && fin.budgets) || [];
+    const b = budgets[budgets.length - 1];
+    return b ? d3.sum(b.groups.flatMap((g) => g.items).filter((x) => /travel|reise|urlaub/i.test(x.name)), (x) => x.value) : 0;
+  }
+  const fig = (box, label, big, sub, cls, isText) => {
+    const f = el('div', 'av-fig');
+    f.append(el('span', 'av-label', label), el('span', 'av-big' + (isText ? ' is-text' : ''), big));
+    if (sub) f.append(el('span', 'av-sub' + (cls ? ' ' + cls : ''), sub));
+    box.append(f);
+  };
+
+  /* A project card: period with today, linked goals, next action, related tasks. */
+  function projectCard(p, goalsByKey, tasks) {
+    const card = el('article', 'av-proj');
+    const s = parseDay(p.start), e = parseDay(p.end);
+    let tag = 'Ongoing', share = null;
+    if (s && t < s) { const n = days(t, s); tag = n === 1 ? 'Starts tomorrow' : 'Starts in ' + n + ' days'; share = 0; }
+    else if (s && e && t > e) { tag = 'Ended'; share = 1; }
+    else if (s && e) { share = (t - s) / (e - s); tag = Math.max(0, Math.ceil(days(t, e) / 7)) + ' weeks left'; }
+    const top = el('div', 'av-proj-top'); top.append(link(p.name, p.url)); top.lastChild.style.fontWeight = '600'; top.append(el('span', 'av-tag', tag));
+    card.append(top);
+    if (share != null) {
+      const bar = el('div', 'av-time'); const f = el('span'); f.style.width = Math.max(share * 100, share > 0 ? 1.5 : 0) + '%'; bar.append(f);
+      const lab = el('div', 'av-time-labels'); lab.append(el('span', '', s ? fmtLong(s) : ''), el('span', '', share > 0 && share < 1 ? pct(share) + ' through' : ''), el('span', '', e ? fmtLong(e) : ''));
+      card.append(bar, lab);
+    }
+    const dl = el('dl', 'av-kv');
+    const add = (k, v) => { if (!v) return; dl.append(el('dt', '', k)); const dd = el('dd'); if (typeof v === 'string') dd.textContent = v; else dd.append(v); dl.append(dd); };
+    add('Next action', p.next || 'none yet');
+    const linked = (p.goalKeys || []).map((k) => goalsByKey[k]).filter(Boolean);
+    if (linked.length) {
+      const ul = el('ul', 'av-list');
+      for (const g of linked) {
+        const li = el('li', 'av-item');
+        const d = el('span', 'av-dot' + (g.status === 'Done' ? ' is-done' : g.status === 'Idea' ? ' is-idea' : ''));
+        const pill = el('span', 'av-pill', [g.status, g.budget ? eur(g.budget) : ''].filter(Boolean).join(' · '));
+        if (g.status === 'Active') pill.dataset.level = 'active';
+        if (g.status === 'Done') pill.dataset.level = 'ok';
+        li.append(d, link(g.name, g.url), pill); ul.append(li);
+      }
+      add('Goals it serves', ul);
+      const budget = d3.sum(linked, (g) => g.budget);
+      if (budget) add('Goal budgets', eur(budget));
+    }
+    if (tasks && tasks.length) add('Open tasks', tasks.map((x) => x.name + (x.scope ? ' (' + x.scope + ')' : '')).join(' · '));
+    card.append(dl);
+    return card;
+  }
+
+  function goalGroups(box, goals, groupOf, order) {
+    box.replaceChildren();
+    const groups = d3.groups(goals, groupOf).sort((a, b) => (order ? order.indexOf(a[0]) - order.indexOf(b[0]) : 0) || b[1].length - a[1].length);
+    for (const [name, list] of groups) {
+      const done = list.filter((g) => g.status === 'Done').length;
+      const g = el('div', 'av-group');
+      const head = el('div', 'av-group-head'); head.append(el('span', '', name), el('span', '', done + ' of ' + list.length + ' done'));
+      const meter = el('div', 'av-meter'); const f = el('span'); f.style.width = (done / list.length) * 100 + '%'; meter.append(f);
+      const ul = el('ul', 'av-list');
+      for (const x of list.slice().sort((p, q) => (STATUS_RANK[p.status] ?? 9) - (STATUS_RANK[q.status] ?? 9) || p.name.localeCompare(q.name))) {
+        const li = el('li', 'av-item');
+        const d = el('span', 'av-dot' + (x.status === 'Done' ? ' is-done' : x.status === 'Idea' || x.status === 'On Hold' ? ' is-idea' : ''));
+        const pill = el('span', 'av-pill', x.status === 'Idea' ? (x.scope || 'Idea') : x.status);
+        if (x.status === 'Active') pill.dataset.level = 'active';
+        if (x.status === 'Done') pill.dataset.level = 'ok';
+        li.append(d, link(x.name, x.url), pill); ul.append(li);
+      }
+      g.append(head, meter, ul);
+      box.append(g);
+    }
+    if (!groups.length) box.append(el('p', 'av-empty', 'Nothing on the Impossible List here yet.'));
+  }
+
+  function skillBars(box, branchId, asGroups) {
+    box.replaceChildren();
+    const b = window.SkillTree && window.SkillTree.branch(branchId);
+    if (!b) { box.append(el('p', 'av-empty', 'The skill tree hasn’t loaded yet.')); return null; }
+    for (const tr of b.tracks) {
+      if (asGroups) {
+        const g = el('div', 'av-group');
+        const head = el('div', 'av-group-head'); head.append(el('span', '', tr.name), el('span', '', tr.done + ' of ' + tr.total + ' · ' + tr.xp + ' XP'));
+        const meter = el('div', 'av-meter'); const f = el('span'); f.style.width = (tr.done / tr.total) * 100 + '%'; meter.append(f);
+        g.append(head, meter);
+        if (tr.latest) g.append(el('span', 'av-note', 'Latest: ' + tr.latest.title + ' (' + tr.latest.at + ')'));
+        if (tr.ready.length) {
+          const chips = el('div', 'av-chips');
+          for (const r of tr.ready.slice(0, 4)) chips.append(el('span', 'av-chip', r.title));
+          g.append(el('span', 'av-note', 'Ready to unlock:'), chips);
+        }
+        box.append(g);
+      } else {
+        const row = el('div', 'av-bar');
+        row.append(el('span', '', tr.name), el('span', 'av-sub', tr.done + ' of ' + tr.total + (tr.ready.length ? ' · ' + tr.ready.length + ' ready' : '')));
+        const meter = el('div', 'av-meter'); const f = el('span'); f.style.width = (tr.done / tr.total) * 100 + '%'; meter.append(f); row.append(meter);
+        box.append(row);
+      }
+    }
+    return b;
+  }
+
+  // ---------------------------------------------------------------- Travel
+  function travelChart(list, line, start) {
+    const box = $('#tv-chart'); box.replaceChildren();
+    if (!list.length) { box.append(el('p', 'av-empty', 'No trip plan found: add a "Travel Budget" table to your Finance page.')); return null; }
+    const first = Math.min(start, d3.min(list, (x) => x.span.a)), last = d3.max(list, (x) => x.span.b);
+    const months = d3.range(first, last + 1);
+    // Running travel pot: +line each month, minus each trip (a range spreads evenly over its months).
+    const out = new Map(months.map((m) => [m, 0]));
+    for (const x of list) { const n = x.span.b - x.span.a + 1; for (let m = x.span.a; m <= x.span.b; m++) out.set(m, (out.get(m) || 0) + x.cost / n); }
+    let bal = 0; const series = [];
+    for (const m of months) { if (m >= start) bal += line; bal -= out.get(m) || 0; series.push({ m, bal, out: out.get(m) || 0 }); }
+    const W = Math.max(300, box.clientWidth || 700), lanes = 3, laneH = 26, top = 8, chartH = 130, axisH = 22;
+    const H = top + lanes * laneH + 10 + chartH + axisH;
+    const x = d3.scaleLinear([first - 0.5, last + 0.5], [8, W - 8]);
+    const svg = d3.select(box).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+    // month grid + labels
+    const g0 = svg.append('g');
+    for (const m of months) {
+      g0.append('line').attr('x1', x(m - 0.5)).attr('x2', x(m - 0.5)).attr('y1', top).attr('y2', H - axisH).style('stroke', 'var(--cds-chart-grid)');
+      if (W / months.length > 34 || m % 2 === first % 2) g0.append('text').attr('x', x(m)).attr('y', H - 6).attr('text-anchor', 'middle')
+        .style('fill', 'var(--color-fg-muted)').style('font-size', '0.6875rem').text(m % 12 === 0 ? mLabel(m) : MONTH_NAMES[m % 12]);
+    }
+    const nowM = t.getUTCFullYear() * 12 + t.getUTCMonth();
+    if (nowM >= first && nowM <= last) g0.append('line').attr('x1', x(nowM)).attr('x2', x(nowM)).attr('y1', top).attr('y2', H - axisH)
+      .style('stroke', 'var(--cds-chart-reference)').style('stroke-dasharray', '3 3');
+    // trips: lanes so labels don't collide
+    const tip = el('div', 'av-tip'); tip.hidden = true; box.append(tip);
+    const laneEnd = Array(lanes).fill(-Infinity);
+    const r = d3.scaleSqrt([0, d3.max(list, (d) => d.cost) || 1], [3, 11]);
+    const gt = svg.append('g');
+    for (const tr of list.slice().sort((p, q) => p.span.a - q.span.a)) {
+      const x0 = x(tr.span.a - (tr.span.a === tr.span.b ? 0 : 0.45)), x1 = x(tr.span.b + (tr.span.a === tr.span.b ? 0 : 0.45));
+      let lane = laneEnd.findIndex((end) => end < x0 - 4); if (lane < 0) lane = laneEnd.indexOf(Math.min(...laneEnd));
+      const y = top + lane * laneH + laneH / 2;
+      const node = gt.append('g').style('cursor', 'default');
+      if (tr.span.a === tr.span.b) node.append('circle').attr('cx', x0).attr('cy', y).attr('r', r(tr.cost)).style('fill', 'var(--a-travel)').style('fill-opacity', 0.85);
+      else node.append('rect').attr('x', x0).attr('y', y - 5).attr('width', Math.max(6, x1 - x0)).attr('height', 10).attr('rx', 5).style('fill', 'var(--a-travel)').style('fill-opacity', 0.45);
+      const label = node.append('text').attr('x', (tr.span.a === tr.span.b ? x0 + r(tr.cost) + 4 : x0 + 4)).attr('y', y + 4)
+        .style('fill', 'var(--color-fg)').style('font-size', '0.6875rem').text(tr.name);
+      const lw = label.node().getComputedTextLength();
+      laneEnd[lane] = Math.max(x1, (tr.span.a === tr.span.b ? x0 + r(tr.cost) + 4 : x0 + 4) + lw);
+      node.on('mouseenter', (e) => {
+        tip.replaceChildren(el('div', 'av-tip-h', tr.when), el('div', '', tr.name), el('div', '', tr.raw || eur(tr.cost)));
+        tip.hidden = false;
+        const b = box.getBoundingClientRect();
+        tip.style.left = Math.max(0, Math.min(e.clientX - b.left + 10, b.width - tip.offsetWidth)) + 'px'; tip.style.top = (e.clientY - b.top + 12) + 'px';
+      }).on('mouseleave', () => { tip.hidden = true; });
+    }
+    // balance line
+    const cTop = top + lanes * laneH + 10, cBot = cTop + chartH;
+    const ext = d3.extent(series, (d) => d.bal); const y = d3.scaleLinear([Math.min(0, ext[0]), Math.max(0, ext[1])], [cBot - 4, cTop + 14]).nice();
+    const gc = svg.append('g');
+    gc.append('line').attr('x1', 8).attr('x2', W - 8).attr('y1', y(0)).attr('y2', y(0)).style('stroke', 'var(--cds-chart-axis)');
+    gc.append('text').attr('x', 8).attr('y', cTop + 8).style('fill', 'var(--color-fg-muted)').style('font-size', '0.6875rem').text('Travel pot after each month');
+    const area = d3.area().x((d) => x(d.m)).y0(y(0)).y1((d) => y(d.bal));
+    const lineGen = d3.line().x((d) => x(d.m)).y((d) => y(d.bal));
+    const id = 'tvclip' + Math.random().toString(36).slice(2, 7);
+    const defs = svg.append('defs');
+    defs.append('clipPath').attr('id', id + 'p').append('rect').attr('x', 0).attr('y', 0).attr('width', W).attr('height', y(0));
+    defs.append('clipPath').attr('id', id + 'n').append('rect').attr('x', 0).attr('y', y(0)).attr('width', W).attr('height', H);
+    gc.append('path').attr('d', area(series)).attr('clip-path', `url(#${id}p)`).style('fill', 'var(--a-travel)').style('fill-opacity', 0.18);
+    gc.append('path').attr('d', area(series)).attr('clip-path', `url(#${id}n)`).style('fill', 'var(--color-bad)').style('fill-opacity', 0.18);
+    gc.append('path').attr('d', lineGen(series)).style('fill', 'none').style('stroke', 'var(--a-travel)').style('stroke-width', 2).style('stroke-linejoin', 'round');
+    const low = series.reduce((p, q) => (q.bal < p.bal ? q : p), series[0]);
+    gc.append('circle').attr('cx', x(low.m)).attr('cy', y(low.bal)).attr('r', 4).style('fill', low.bal < 0 ? 'var(--color-bad)' : 'var(--a-travel)');
+    gc.append('text').attr('x', Math.min(W - 60, x(low.m) + 6)).attr('y', y(low.bal) + (low.bal < 0 ? 14 : -8)).style('fill', 'var(--color-fg)').style('font-size', '0.6875rem').text(eur(low.bal));
+    const endP = series[series.length - 1];
+    gc.append('text').attr('x', W - 8).attr('y', y(endP.bal) - 8).attr('text-anchor', 'end').style('fill', 'var(--color-fg-muted)').style('font-size', '0.6875rem').text('end ' + eur(endP.bal));
+    return { low, end: endP, total: d3.sum(list, (d) => d.cost), months: months.length };
+  }
+
+  function renderTravel() {
+    if (!(ok('items') && ok('summary'))) return;
+    const items = data('items');
+    const area = 'Travel & Adventure';
+    const goals = items.filter((g) => g.kind === 'goal' && g.area === area && g.status !== 'Archived');
+    const goalsByKey = Object.fromEntries(items.filter((g) => g.kind === 'goal').map((g) => [g.key, g]));
+    const projects = items.filter((p) => p.kind === 'project' && (p.area === area || (p.goalKeys || []).some((k) => (goalsByKey[k] || {}).area === area)));
+    const list = trips();
+    const line = travelLine();
+    const savings = (data('savings') || []).filter((s) => /travel/i.test(s.Category || ''));
+    const nowM = t.getUTCFullYear() * 12 + t.getUTCMonth();
+    const upcoming = list.filter((x) => x.span.b >= nowM && x.span.a === x.span.b).sort((a, b) => a.span.a - b.span.a);
+    const next = upcoming.find((x) => x.cost > 0) || upcoming[0];
+
+    const res = travelChart(list, line, nowM);
+    const nextYear = goals.filter((g) => g.scope === 'Next Year' && g.status !== 'Done');
+    const done = goals.filter((g) => g.status === 'Done');
+    $('#tv-lead').textContent = [
+      list.length ? plural(list.length, 'trip') + ' in your plan, ' + eur(res.total) + ' in total.' : '',
+      line ? 'Your budget puts ' + eur(line) + ' a month into travel' + (res ? (res.low.bal < 0 ? ', and the pot runs ' + eur(-res.low.bal) + ' short around ' + mLabel(res.low.m) + '.' : ', which keeps the pot above zero all the way.') : '.') : '',
+      nextYear.length ? plural(nextYear.length, 'travel goal') + ' set for next year, ' + plural(done.length, 'adventure') + ' already done.' : '',
+    ].filter(Boolean).join(' ');
+
+    const strip = $('#tv-strip'); strip.replaceChildren();
+    if (next) fig(strip, 'Next trip', next.name, next.when + (next.cost ? ' · ' + (next.raw || eur(next.cost)) : ''), '', true);
+    if (list.length) fig(strip, 'Trip plan', eur(res.total), plural(list.length, 'trip') + ' · ' + eur(res.total / res.months) + '/month');
+    if (line) fig(strip, 'Travel per month', eur(line), res && res.low.bal < 0 ? 'short by ' + eur(-res.low.bal) + ' in ' + mLabel(res.low.m) : 'covers the plan', res && res.low.bal < 0 ? 'is-warn' : 'is-ok');
+    fig(strip, 'Next-year goals', String(nextYear.length), eur(d3.sum(nextYear, (g) => g.budget)) + ' budgeted');
+    fig(strip, 'Done', String(done.length), 'of ' + goals.length + ' travel items on the list');
+
+    $('#tv-plan-note').textContent = line ? '+' + eur(line) + ' each month from the Travel line, minus each trip' : 'Add a Travel line to your budget to see the pot';
+    const v = $('#tv-verdict');
+    if (res && line) {
+      v.className = 'av-verdict ' + (res.low.bal < 0 ? 'is-warn' : 'is-ok');
+      v.textContent = res.low.bal < 0
+        ? 'At ' + eur(line) + ' a month the pot is lowest in ' + mLabel(res.low.m) + ' at ' + eur(res.low.bal) + '. ' + eur(Math.ceil(-res.low.bal / Math.max(1, res.low.m - nowM + 1))) + ' more a month until then, or moving a trip later, closes the gap.'
+        : 'At ' + eur(line) + ' a month the pot never drops below zero; lowest point ' + eur(res.low.bal) + ' in ' + mLabel(res.low.m) + ', ' + eur(res.end.bal) + ' left at the end.';
+    } else v.textContent = '';
+
+    const pb = $('#tv-projects'); pb.replaceChildren();
+    const travelTasks = items.filter((x) => x.kind === 'task' && x.area === area && x.status !== 'Done');
+    for (const p of projects) pb.append(projectCard(p, goalsByKey, travelTasks));
+
+    $('#tv-goals-note').textContent = done.length + ' of ' + goals.length + ' done';
+    goalGroups($('#tv-groups'), goals, (g) => (g.tags && g.tags[0]) || 'Other',
+      ['Wonders of the World', 'Hiking & Peaks', 'City & Culture', 'Road Trip', 'Experiences', 'Sport & Challenge', 'Other']);
+
+    const sb = $('#tv-saving-bars'); sb.replaceChildren();
+    for (const s of savings.sort((a, b) => (b.Target || 0) - (a.Target || 0))) {
+      const row = el('div', 'av-bar'); const T = s.Target || 0, S = s.Saved || 0;
+      row.append(link(s.Goal || 'Untitled', s.url), el('span', 'av-sub', eur(S) + ' of ' + eur(T)));
+      const m = el('div', 'av-meter'); const f = el('span'); f.style.width = (T ? Math.min(1, S / T) : 0) * 100 + '%'; m.append(f); row.append(m);
+      sb.append(row);
+    }
+    if (!savings.length) sb.append(el('p', 'av-empty', 'No travel savings goals.'));
+    skillBars($('#tv-skill-bars'), 'travel', false);
+  }
+
+  // ---------------------------------------------------------------- Health
+  function renderHealth() {
+    if (!(ok('items') && ok('dates'))) return;
+    const items = data('items');
+    const area = 'Health & Fitness';
+    const goals = items.filter((g) => g.kind === 'goal' && g.area === area && g.status !== 'Archived');
+    const goalsByKey = Object.fromEntries(items.filter((g) => g.kind === 'goal').map((g) => [g.key, g]));
+    const projects = items.filter((p) => p.kind === 'project' && (p.area === area || (p.goalKeys || []).some((k) => (goalsByKey[k] || {}).area === area)));
+    const tasks = items.filter((x) => x.kind === 'task' && x.area === area && x.status !== 'Done');
+    const active = goals.filter((g) => g.status === 'Active');
+
+    // Races: dated items in this area, plus race trips in the travel plan.
+    const RACE = /marathon|halb|half|triathlon|hyrox|race|lauf|run|ironman|superhalf|mammut/i;
+    const races = [];
+    for (const d of data('dates')) {
+      const day = parseDay(d.date);
+      if (day && day >= t && (d.area === area || RACE.test(d.label))) races.push({ when: day, label: d.label, url: d.url, exact: true });
+    }
+    const nowM = t.getUTCFullYear() * 12 + t.getUTCMonth();
+    for (const x of trips()) if (RACE.test(x.name) && x.span.b >= nowM) races.push({ when: new Date(Date.UTC(Math.floor(x.span.a / 12), x.span.a % 12, 1)), label: x.name, cost: x.raw, monthOnly: true });
+    races.sort((a, b) => a.when - b.when);
+    const nextRace = races.find((r) => RACE.test(r.label) && !/\b(starts|ends)$/.test(r.label)) || null;
+
+    const training = projects.find((p) => /train|run|lauf/i.test(p.name)) || projects[0];
+    const ts = training && parseDay(training.start), te = training && parseDay(training.end);
+    $('#hv-lead').textContent = [
+      training ? training.name + (ts && t < ts ? ' starts ' + (days(t, ts) <= 1 ? 'tomorrow' : 'in ' + days(t, ts) + ' days') : te ? ' runs until ' + fmtLong(te) : '') + '.' : 'No health project yet.',
+      nextRace ? 'Next race: ' + nextRace.label + ' (' + (nextRace.monthOnly ? d3.utcFormat('%B %Y')(nextRace.when) : fmtLong(nextRace.when)) + ').' : '',
+      active.length ? plural(active.length, 'active goal') + ': ' + active.map((g) => g.name).join('; ') + '.' : '',
+    ].filter(Boolean).join(' ');
+
+    const strip = $('#hv-strip'); strip.replaceChildren();
+    if (training && ts && te) {
+      const share = Math.max(0, Math.min(1, (t - ts) / (te - ts)));
+      fig(strip, training.name.replace(/\s*\(.*?\)/, ''), t < ts ? 'starts ' + fmtShort(ts) : pct(share), t < ts ? days(t, ts) + ' days to go' : Math.ceil(days(t, te) / 7) + ' weeks left');
+    }
+    if (nextRace) {
+      const n = days(t, nextRace.when);
+      fig(strip, 'Next race', nextRace.label, (nextRace.monthOnly ? d3.utcFormat('%B %Y')(nextRace.when) + ' · ≈ ' + Math.round(n / 7) + ' weeks' : fmtLong(nextRace.when) + ' · ' + n + ' days'), '', true);
+    }
+    fig(strip, 'Active goals', String(active.length), goals.filter((g) => g.status === 'Done').length + ' done · ' + goals.filter((g) => g.status === 'Idea').length + ' ideas');
+    const p1 = tasks.filter((x) => x.scope === 'P1' && (x.status === 'Daily' || x.status === 'Weekly'));
+    fig(strip, 'Habits & tasks', String(tasks.filter((x) => x.status === 'Daily' || x.status === 'Weekly').length), p1.length ? plural(p1.length, 'P1 task') : 'this week');
+    const sb = window.SkillTree && window.SkillTree.branch('fitness');
+    if (sb) fig(strip, 'Fitness skills', d3.sum(sb.tracks, (x) => x.done) + ' of ' + d3.sum(sb.tracks, (x) => x.total), d3.sum(sb.tracks, (x) => x.xp) + ' XP · ' + d3.sum(sb.tracks, (x) => x.ready.length) + ' ready');
+
+    const pb = $('#hv-projects'); pb.replaceChildren();
+    for (const p of projects) pb.append(projectCard(p, goalsByKey, tasks.filter((x) => x.status === 'Daily' || x.status === 'Weekly')));
+    if (!projects.length) pb.append(el('p', 'av-empty', 'No health project yet.'));
+
+    const rl = $('#hv-race-list'); rl.replaceChildren();
+    for (const r of races.slice(0, 8)) {
+      const li = el('li', 'av-item');
+      li.append(el('span', 'av-dot'), link(r.label, r.url), el('span', 'av-pill', (r.monthOnly ? d3.utcFormat('%b %Y')(r.when) : fmtShort(r.when)) + (r.cost ? ' · ' + r.cost : '')));
+      rl.append(li);
+    }
+    if (!races.length) rl.append(el('li', 'av-empty', 'No dated races. Add a date to a goal or a race to your trip plan.'));
+
+    const tl = $('#hv-task-list'); tl.replaceChildren();
+    const RANKS = { Daily: 0, Weekly: 1, Capture: 2, 'On-Hold': 3 };
+    for (const x of tasks.slice().sort((a, b) => (RANKS[a.status] ?? 9) - (RANKS[b.status] ?? 9))) {
+      const li = el('li', 'av-item');
+      li.append(el('span', 'av-dot'), link(x.name, x.url), el('span', 'av-pill', [x.status, x.scope].filter(Boolean).join(' · ')));
+      tl.append(li);
+    }
+    if (!tasks.length) tl.append(el('li', 'av-empty', 'No health tasks in the Task Planner.'));
+
+    $('#hv-goals-note').textContent = goals.filter((g) => g.status === 'Done').length + ' of ' + goals.length + ' done';
+    goalGroups($('#hv-groups'), goals, (g) => (g.status === 'Active' ? 'Now' : g.status === 'Done' ? 'Done' : g.scope === 'Next Year' ? 'Next year' : g.scope === 'In 5 years' ? 'In 5 years' : g.scope === 'Big Vision' ? 'Big vision' : 'Someday'),
+      ['Now', 'Next year', 'In 5 years', 'Big vision', 'Someday', 'Done']);
+    skillBars($('#hv-skill-groups'), 'fitness', true);
+  }
+
+  const render = () => {
+    try { if (visible('view-travel')) renderTravel(); } catch (e) { console.error(e); }
+    try { if (visible('view-health')) renderHealth(); } catch (e) { console.error(e); }
+  };
+  dash.onData(render);
+  window.addEventListener('skilltree', render);
+  window.addEventListener('hashchange', () => setTimeout(render, 0));
+})();
+</script>

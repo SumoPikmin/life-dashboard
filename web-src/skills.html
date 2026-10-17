@@ -544,9 +544,25 @@ window.SkillTree = (() => {
     if (branchSel === 'bucket') renderBucket();
     else renderTree(config.branches.find((b) => b.id === branchSel));
     $('#sk-undo').disabled = !undo.length;
+    window.dispatchEvent(new Event('skilltree'));
   }
 
   return {
+    /* Progress of one branch, for the Travel and Health tabs. */
+    branch(id) {
+      const b = config && config.branches.find((x) => x.id === id);
+      if (!b) return null;
+      return {
+        name: b.name,
+        tracks: b.tracks.map((t) => ({
+          name: t.name, total: t.nodes.length,
+          done: t.nodes.filter((n) => stateOf(t, n) === 'done').length,
+          xp: t.nodes.filter((n) => stateOf(t, n) === 'done').reduce((s, n) => s + nodeXp(n), 0),
+          ready: t.nodes.filter((n) => stateOf(t, n) === 'open').map((n) => ({ title: n.title, tier: n.tier, xp: nodeXp(n) })),
+          latest: t.nodes.map((n) => ({ title: n.title, at: st.done[key(t, n)] })).filter((x) => x.at && x.at !== '?').sort((p, q) => q.at.localeCompare(p.at))[0] || null,
+        })),
+      };
+    },
     async init(payload) {
       const base = payload.skilltree || null;
       gistId = payload.skill_gist || null;
