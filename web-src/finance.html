@@ -1,0 +1,281 @@
+  </section>
+  <section class="view" id="view-finance" data-view="finance" hidden>
+<style>
+  .fi { --fi: #3a9b68; --a-health: #e0614f; --a-travel: #e3923a; --a-finance: #3a9b68; --a-social: #d25d93; --a-career: #4a7fd0; --a-learning: #8a66d1; --a-home: #7f8a9b;
+    display: grid; gap: var(--cds-gap-xl); min-width: 0; }
+  .fi a { color: inherit; text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 25%, transparent); text-underline-offset: 3px; }
+  .fi a:hover { text-decoration-color: currentColor; }
+  .fi-head { display: grid; gap: var(--cds-gap-sm); }
+  .fi-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: calc(var(--cds-font-size-title) * 1.35); line-height: 1.05; }
+  .fi-lead { margin: 0; max-width: 64ch; line-height: 1.55; }
+  .fi-links { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .fi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
+  .fi-fig { padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: 2px; align-content: start; box-shadow: -1px 0 0 var(--color-border-line), 0 -1px 0 var(--color-border-line); }
+  .fi-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .fi-big { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .fi-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  .fi-sub.is-ok { color: var(--color-ok); } .fi-sub.is-warn { color: var(--color-warn); }
+  .fi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: var(--cds-gap-md); align-items: start; }
+  .fi-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-md); align-content: start; min-width: 0; }
+  .fi-card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-xs) var(--cds-gap-md); }
+  .fi-card h2 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+  .fi-note { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.5; }
+  .fi-empty { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); padding: var(--cds-pad-md) 0; }
+  .fi-bars { display: grid; gap: var(--cds-gap-sm); }
+  .fi-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px var(--cds-gap-sm); align-items: baseline; }
+  .fi-bar-name { display: flex; align-items: baseline; gap: var(--cds-gap-sm); min-width: 0; overflow-wrap: anywhere; }
+  .fi-bar-val { font-variant-numeric: tabular-nums; font-size: var(--cds-font-size-caption); white-space: nowrap; }
+  .fi-track { grid-column: 1 / -1; height: .5rem; border-radius: 999px; background: color-mix(in oklab, var(--color-fg) 6%, transparent); overflow: hidden; }
+  .fi-track > span { display: block; height: 100%; border-radius: 999px; background: var(--a, var(--fi)); }
+  .fi-dot { width: .6rem; height: .6rem; border-radius: 50%; flex: none; background: var(--a, var(--fi)); transform: translateY(-1px); }
+  .fi-total { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); padding-top: var(--cds-pad-sm); border-top: 1px solid var(--color-border-line); font-weight: var(--cds-font-weight-medium); font-variant-numeric: tabular-nums; }
+  .fi-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .fi-tab { font: inherit; font-size: var(--cds-font-size-caption); cursor: pointer; padding: .15rem .7rem; border-radius: 999px; border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg-muted); }
+  .fi-tab[aria-selected="true"] { color: var(--color-fg); border-color: var(--color-fg-muted); background: color-mix(in oklab, var(--color-fg) 6%, var(--color-panel)); }
+  .fi-split { display: flex; height: 2.25rem; border-radius: 10px; overflow: hidden; gap: 2px; }
+  .fi-split > span { display: flex; align-items: center; padding: 0 .5rem; min-width: 0; font-size: .75rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+  .fi-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: var(--cds-gap-md); }
+  .fi-group { display: grid; gap: 4px; align-content: start; }
+  .fi-group-head { display: flex; align-items: baseline; gap: var(--cds-gap-sm); font-weight: var(--cds-font-weight-medium); }
+  .fi-group-head span:last-child { margin-left: auto; font-variant-numeric: tabular-nums; }
+  .fi-row { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  .fi-trip { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) auto; gap: 3px var(--cds-gap-sm); align-items: baseline; }
+  .fi-trip-when { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .fi-trip .fi-track { grid-column: 2 / -1; }
+  .fi-pill { font-size: var(--cds-font-size-caption); line-height: 1.7; padding: 0 var(--cds-pad-sm); border-radius: 999px; white-space: nowrap; color: var(--color-fg-muted); background: color-mix(in oklab, var(--color-fg) 6%, transparent); }
+  .fi-pill[data-level="ok"] { color: var(--color-ok); background: color-mix(in oklab, var(--color-ok) 12%, transparent); }
+  .fi-fail { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+</style>
+
+<div class="fi">
+  <header class="fi-head">
+    <h1 class="fi-title">Finance</h1>
+    <p class="fi-lead" id="fi-lead">Loading your Finance page…</p>
+    <div class="fi-links" id="fi-links"></div>
+  </header>
+
+  <section class="fi-strip" id="fi-strip" aria-label="Finance figures"></section>
+
+  <div class="fi-grid">
+    <section class="fi-card" id="fi-goals">
+      <div class="fi-card-head"><h2>Next-year goals to fund</h2><span class="fi-note">Budgets from the Impossible List</span></div>
+      <div class="fi-bars" id="fi-goal-bars"></div>
+    </section>
+    <section class="fi-card" id="fi-budget">
+      <div class="fi-card-head"><h2>Monthly budget</h2><div class="fi-tabs" id="fi-budget-tabs" role="tablist" aria-label="Budget version"></div></div>
+      <div id="fi-budget-body"></div>
+    </section>
+  </div>
+
+  <div class="fi-grid">
+    <section class="fi-card" id="fi-savings">
+      <div class="fi-card-head"><h2>Savings goals</h2><span class="fi-note">Saved vs target</span></div>
+      <div class="fi-bars" id="fi-saving-bars"></div>
+    </section>
+    <section class="fi-card" id="fi-travel">
+      <div class="fi-card-head"><h2 id="fi-travel-title">Travel budget</h2><span class="fi-note" id="fi-travel-note"></span></div>
+      <div class="fi-bars" id="fi-trips"></div>
+    </section>
+  </div>
+
+  <div class="fi-grid">
+    <section class="fi-card" id="fi-subs">
+      <div class="fi-card-head"><h2>Subscriptions</h2><span class="fi-note" id="fi-subs-note"></span></div>
+      <div class="fi-bars" id="fi-sub-list"></div>
+    </section>
+    <section class="fi-card" id="fi-fin-goals">
+      <div class="fi-card-head"><h2>Finance goals</h2><span class="fi-note">Impossible List · Finance</span></div>
+      <div class="fi-bars" id="fi-fin-list"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const HUE = { 'Health & Fitness': 'var(--a-health)', 'Travel & Adventure': 'var(--a-travel)', Finance: 'var(--a-finance)', Social: 'var(--a-social)', Career: 'var(--a-career)', Learning: 'var(--a-learning)', 'Home & Admin': 'var(--a-home)' };
+  const GROUP_HUE = ['#4a7fd0', '#e3923a', '#3a9b68', '#8a66d1', '#d25d93', '#7f8a9b', '#c9922e'];
+  const eur = (n) => '€' + d3.format(',.0f')(n);
+  const eur2 = (n) => '€' + d3.format(',.2~f')(n);
+  const pct = d3.format('.0%');
+  const link = (text, url) => {
+    if (!/^https:\/\//.test(url || '')) return el('span', '', text);
+    const a = el('a', '', text); a.href = url; a.target = '_blank'; a.rel = 'noopener'; return a;
+  };
+  const num = (s) => { const m = String(s || '').replace(/\*/g, '').replace(/(\d),(\d{3})/g, '$1$2').match(/-?\d+(?:[.,]\d+)?/); return m ? Number(m[0].replace(',', '.')) : null; };
+  const clean = (s) => String(s || '').replace(/\*\*/g, '').trim();
+  const ok = (id) => dash.data(id).status === 'ok';
+  let budgetIdx = null;
+
+  const bar = (name, value, max, opts = {}) => {
+    const row = el('div', 'fi-bar');
+    if (opts.area) row.style.setProperty('--a', HUE[opts.area] || 'var(--fi)');
+    if (opts.color) row.style.setProperty('--a', opts.color);
+    const nm = el('span', 'fi-bar-name');
+    nm.append(el('span', 'fi-dot'), opts.url ? link(name, opts.url) : el('span', '', name));
+    const track = el('div', 'fi-track'); const fill = el('span');
+    fill.style.width = (max > 0 ? Math.min(1, value / max) * 100 : 0) + '%'; track.append(fill);
+    row.append(nm, el('span', 'fi-bar-val', opts.label || eur(value)), track);
+    return row;
+  };
+  const fig = (label, big, sub, cls) => {
+    const f = el('div', 'fi-fig');
+    f.append(el('span', 'fi-label', label), el('span', 'fi-big', big));
+    if (sub) f.append(el('span', 'fi-sub' + (cls ? ' ' + cls : ''), sub));
+    return f;
+  };
+  const tableFor = (fin, re) => (fin.tables || []).find((t) => re.test(t.heading || ''));
+
+  function travelRows(fin) {
+    const t = tableFor(fin, /travel/i);
+    if (!t) return null;
+    const [head, ...rows] = t.header ? t.rows : [[], ...t.rows];
+    const col = (re, fallback) => { const i = head.findIndex((h) => re.test(h)); return i >= 0 ? i : fallback; };
+    const iWhen = col(/when|wann|date/i, 0), iTrip = col(/trip|reise/i, 1), iCost = col(/estimate|cost|kosten|€/i, 2);
+    const trips = [], total = { value: null };
+    for (const r of rows) {
+      const name = clean(r[iTrip]), value = num(r[iCost]);
+      if (/total|summe|gesamt/i.test(clean(r[iWhen]) + ' ' + name)) { total.value = value; continue; }
+      if (name) trips.push({ when: clean(r[iWhen]), name, value: value || 0, raw: clean(r[iCost]) });
+    }
+    return { heading: t.heading, trips, total: total.value ?? d3.sum(trips, (x) => x.value) };
+  }
+  function subRows(fin) {
+    const t = tableFor(fin, /subscri|abo/i);
+    if (!t) return null;
+    const [head, ...rows] = t.header ? t.rows : [[], ...t.rows];
+    const col = (re, fallback) => { const i = head.findIndex((h) => re.test(h)); return i >= 0 ? i : fallback; };
+    const iName = col(/posten|item|name/i, 1), iMonth = col(/monat|month/i, 2), iTurn = col(/turnus|cycle/i, 0), iDue = col(/fällig|due/i, 5);
+    return rows.filter((r) => clean(r[iName])).map((r) => ({ name: clean(r[iName]), monthly: num(r[iMonth]) || 0, cycle: clean(r[iTurn]), due: clean(r[iDue]) }));
+  }
+
+  function render() {
+    const ready = ok('summary') && ok('items');
+    if (!ready) return;
+    const sum = dash.data('summary').data[0];
+    const items = dash.data('items').data;
+    const fin = ok('finance') ? dash.data('finance').data : { budgets: [], tables: [] };
+    const savings = ok('savings') ? dash.data('savings').data : [];
+    const budgets = fin.budgets || [];
+    if (budgetIdx == null || budgetIdx >= budgets.length) budgetIdx = Math.max(0, budgets.length - 1);
+    const budget = budgets[budgetIdx];
+    const saveGroup = budget ? budget.groups.find((g) => /spar|sav/i.test(g.name)) : null;
+    const travel = travelRows(fin);
+    const subs = subRows(fin) || [];
+    const saved = d3.sum(savings, (s) => s.Saved || 0), target = d3.sum(savings, (s) => s.Target || 0);
+
+    // Lead and links
+    const need = sum.monthly_saving;
+    $('#fi-lead').textContent = 'Next year’s goals add up to ' + eur(sum.next_year_budget) + ', about ' + eur(need) + ' a month. ' +
+      (saveGroup ? 'Your budget sets aside ' + eur(saveGroup.value) + ' a month for saving' + (saveGroup.value >= need ? ', which covers it.' : ', ' + eur(need - saveGroup.value) + ' short of it.') : 'Add a budget link to your Finance page to compare.');
+    const links = $('#fi-links'); links.replaceChildren();
+    const plan = items.find((i) => i.kind === 'project' && i.area === 'Finance');
+    if (fin.url) links.append(link('Finance page in Notion ↗', fin.url));
+    if (plan) links.append(link(plan.name + ' ↗', plan.url));
+
+    // Figures
+    const strip = $('#fi-strip'); strip.replaceChildren();
+    strip.append(fig('Next-year goal budget', eur(sum.next_year_budget), plural(sum.next_year_goals, 'goal') + ' planned'));
+    strip.append(fig('Needed per month', eur(need), 'to fund them over 12 months'));
+    if (saveGroup) strip.append(fig('Saving in your budget', eur(saveGroup.value) + '/mo', saveGroup.value >= need ? 'covers the goals' : eur(need - saveGroup.value) + ' short', saveGroup.value >= need ? 'is-ok' : 'is-warn'));
+    if (travel) strip.append(fig('Travel budget', eur(travel.total), plural(travel.trips.length, 'trip') + ' planned'));
+    if (target) strip.append(fig('Savings goals', pct(saved / target), eur(saved) + ' of ' + eur(target)));
+
+    // Next-year goals to fund
+    const gb = $('#fi-goal-bars'); gb.replaceChildren();
+    const goals = items.filter((g) => g.kind === 'goal' && g.scope === 'Next Year' && g.status !== 'Done' && g.status !== 'Archived')
+      .sort((a, b) => b.budget - a.budget);
+    const maxG = d3.max(goals, (g) => g.budget) || 1;
+    for (const g of goals) gb.append(bar(g.name, g.budget, maxG, { area: g.area, url: g.url, label: g.budget ? eur(g.budget) + (g.status === 'Idea' ? ' · idea' : '') : 'no budget yet' }));
+    if (!goals.length) gb.append(el('p', 'fi-empty', 'No next-year goals on the Impossible List.'));
+    else { const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Total'), el('span', '', eur(sum.next_year_budget) + ' · ' + eur(need) + '/month')); gb.append(tot); }
+
+    // Monthly budget
+    const tabs = $('#fi-budget-tabs'); tabs.replaceChildren();
+    if (budgets.length > 1) budgets.forEach((b, i) => {
+      const t = el('button', 'fi-tab', b.label.replace(/sankey chart/i, '').trim() || 'Budget ' + (i + 1)); t.type = 'button';
+      t.setAttribute('role', 'tab'); t.setAttribute('aria-selected', String(i === budgetIdx));
+      t.addEventListener('click', () => { budgetIdx = i; render(); });
+      tabs.append(t);
+    });
+    const bb = $('#fi-budget-body'); bb.replaceChildren();
+    if (!budget) bb.append(el('p', 'fi-empty', 'No budget link found on your Finance page. Add a finanzfluss.de flow chart link to show it here.'));
+    else {
+      const income = d3.sum(budget.income, (x) => x.value);
+      const spent = d3.sum(budget.groups, (g) => g.value);
+      bb.append(el('p', 'fi-note', 'Income ' + eur(income) + ' a month (' + budget.income.map((x) => x.name + ' ' + eur(x.value)).join(', ') + ')' + (income - spent > 1 ? ' · ' + eur(income - spent) + ' unassigned' : '')));
+      const split = el('div', 'fi-split');
+      budget.groups.forEach((g, i) => {
+        const s = el('span', '', g.name + ' ' + pct(g.value / income));
+        s.style.flex = String(g.value); s.style.background = GROUP_HUE[i % GROUP_HUE.length];
+        split.append(s);
+      });
+      const groups = el('div', 'fi-groups');
+      budget.groups.forEach((g, i) => {
+        const box = el('div', 'fi-group');
+        const h = el('div', 'fi-group-head'); const d = el('span', 'fi-dot'); d.style.background = GROUP_HUE[i % GROUP_HUE.length];
+        h.append(d, el('span', '', g.name), el('span', '', eur2(g.value)));
+        box.append(h);
+        for (const it of g.items) { const r = el('div', 'fi-row'); r.append(el('span', '', it.name), el('span', '', eur2(it.value))); box.append(r); }
+        groups.append(box);
+      });
+      bb.append(split, groups);
+    }
+
+    // Savings goals
+    const sb = $('#fi-saving-bars'); sb.replaceChildren();
+    if (!ok('savings')) sb.append(el('p', 'fi-fail', dash.data('savings').status === 'error' ? 'Savings Goals didn’t load.' : 'Loading…'));
+    else if (!savings.length) sb.append(el('p', 'fi-empty', 'No savings goals yet.'));
+    const byCat = d3.groups(savings.slice().sort((a, b) => (b.Target || 0) - (a.Target || 0)), (s) => s.Category || 'Other');
+    const catHue = { 'Emergency Fund': '#e0614f', Travel: '#e3923a', 'Big Expense': '#4a7fd0' };
+    for (const [cat, list] of byCat) {
+      sb.append(el('span', 'fi-label', cat));
+      for (const s of list) {
+        const t = s.Target || 0, v = s.Saved || 0;
+        sb.append(bar(s.Goal || 'Untitled', v, t, { url: s.url, color: catHue[cat] || 'var(--fi)', label: eur(v) + ' of ' + eur(t) + (t ? ' · ' + pct(v / t) : '') }));
+      }
+    }
+
+    // Travel budget
+    const tb = $('#fi-trips'); tb.replaceChildren();
+    if (!travel) { $('#fi-travel-note').textContent = ''; tb.append(el('p', 'fi-empty', 'No travel budget table found on your Finance page.')); }
+    else {
+      $('#fi-travel-title').textContent = travel.heading.replace(/^[^\w]+/u, '') || 'Travel budget';
+      $('#fi-travel-note').textContent = 'Total ' + eur(travel.total);
+      const maxT = d3.max(travel.trips, (x) => x.value) || 1;
+      for (const x of travel.trips) {
+        const row = el('div', 'fi-trip'); row.style.setProperty('--a', 'var(--a-travel)');
+        const track = el('div', 'fi-track'); const f = el('span'); f.style.width = (x.value / maxT) * 100 + '%'; track.append(f);
+        row.append(el('span', 'fi-trip-when', x.when), el('span', 'fi-bar-name', x.name), el('span', 'fi-bar-val', x.raw || eur(x.value)), track);
+        tb.append(row);
+      }
+    }
+
+    // Subscriptions
+    const sl = $('#fi-sub-list'); sl.replaceChildren();
+    if (!subs.length) { $('#fi-subs-note').textContent = ''; sl.append(el('p', 'fi-empty', 'No subscriptions table found on your Finance page.')); }
+    else {
+      const monthly = d3.sum(subs, (x) => x.monthly);
+      $('#fi-subs-note').textContent = eur2(monthly) + ' a month · ' + eur(monthly * 12) + ' a year';
+      const maxS = d3.max(subs, (x) => x.monthly) || 1;
+      for (const x of subs.sort((a, b) => b.monthly - a.monthly)) sl.append(bar(x.name, x.monthly, maxS, { color: '#7f8a9b', label: eur2(x.monthly) + '/mo' + (x.cycle && !/monat|month/i.test(x.cycle) ? ' · ' + x.cycle + (x.due ? ', ' + x.due : '') : '') }));
+    }
+
+    // Finance goals from the Impossible List
+    const fl = $('#fi-fin-list'); fl.replaceChildren();
+    const fgoals = items.filter((g) => g.kind === 'goal' && g.area === 'Finance' && g.status !== 'Archived')
+      .sort((a, b) => ({ Active: 0, Idea: 1, 'On Hold': 2, Done: 3 }[a.status] ?? 4) - ({ Active: 0, Idea: 1, 'On Hold': 2, Done: 3 }[b.status] ?? 4));
+    for (const g of fgoals) {
+      const row = el('div', 'fi-bar-name'); row.style.setProperty('--a', 'var(--a-finance)');
+      const pill = el('span', 'fi-pill', g.status + (g.scope ? ' · ' + g.scope : '')); if (g.status === 'Active' || g.status === 'Done') pill.dataset.level = 'ok';
+      row.append(el('span', 'fi-dot'), link(g.name, g.url), pill);
+      pill.style.marginLeft = 'auto';
+      fl.append(row);
+    }
+    if (!fgoals.length) fl.append(el('p', 'fi-empty', 'No Finance goals on the Impossible List.'));
+  }
+  const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+  dash.onData(render);
+})();
+</script>

@@ -131,6 +131,145 @@
   ],
   "wiki": {
    "text": "# Life Principles\n---\n1. Sample principle one\n2. Sample principle two\n## Other\n</column>\n# Quotes\n---\nSample quote\n</column>"
+  },
+  "savings": [
+   {
+    "url": "https://app.notion.com/p/samples1",
+    "Goal": "Sample: emergency fund",
+    "Category": "Emergency Fund",
+    "Target": 3000,
+    "Saved": 1800,
+    "Notes": ""
+   },
+   {
+    "url": "https://app.notion.com/p/samples2",
+    "Goal": "Sample: travel fund",
+    "Category": "Travel",
+    "Target": 1200,
+    "Saved": 300,
+    "Notes": ""
+   },
+   {
+    "url": "https://app.notion.com/p/samples3",
+    "Goal": "Sample: new laptop",
+    "Category": "Big Expense",
+    "Target": 900,
+    "Notes": ""
+   }
+  ],
+  "finance": {
+   "url": "https://app.notion.com/p/samplefinance",
+   "budgets": [
+    {
+     "label": "Sample budget",
+     "income": [
+      {
+       "name": "Salary",
+       "value": 3000
+      }
+     ],
+     "groups": [
+      {
+       "name": "Essentials",
+       "value": 1400,
+       "items": [
+        {
+         "name": "Rent",
+         "value": 1000
+        },
+        {
+         "name": "Food",
+         "value": 400
+        }
+       ]
+      },
+      {
+       "name": "Saving",
+       "value": 800,
+       "items": [
+        {
+         "name": "ETF",
+         "value": 500
+        },
+        {
+         "name": "Emergency fund",
+         "value": 300
+        }
+       ]
+      },
+      {
+       "name": "Leisure",
+       "value": 800,
+       "items": [
+        {
+         "name": "Travel",
+         "value": 400
+        },
+        {
+         "name": "Going out",
+         "value": 400
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "tables": [
+    {
+     "heading": "Sample Travel Budget 2027",
+     "header": true,
+     "rows": [
+      [
+       "When",
+       "Trip",
+       "Estimate (€)",
+       "Basis"
+      ],
+      [
+       "Mar 2027",
+       "Sample: city break",
+       "400 (300–500)",
+       "Estimate"
+      ],
+      [
+       "Jul 2027",
+       "Sample: hiking week",
+       "1,000",
+       "Estimate"
+      ],
+      [
+       "",
+       "**Total**",
+       "1,400",
+       ""
+      ]
+     ]
+    },
+    {
+     "heading": "Subscriptions",
+     "header": true,
+     "rows": [
+      [
+       "Turnus",
+       "Posten",
+       "Monatlich",
+       "Gesamtbetrag"
+      ],
+      [
+       "Monatlich",
+       "Sample: music",
+       "9.99 €",
+       "9.99 €"
+      ],
+      [
+       "Jährlich",
+       "Sample: insurance",
+       "4 €",
+       "48 €"
+      ]
+     ]
+    }
+   ]
   }
  },
  "skilltree": {

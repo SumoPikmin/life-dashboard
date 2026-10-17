@@ -68,12 +68,13 @@
 
   // ---------- views
   function route() {
-    const view = (location.hash || '#home').slice(1) === 'skills' ? 'skills' : 'home';
+    const want = (location.hash || '#home').slice(1);
+    const view = ['skills', 'finance'].includes(want) ? want : 'home';
     document.querySelectorAll('.view').forEach((v) => { v.hidden = v.dataset.view !== view; });
     document.querySelectorAll('.side-link').forEach((a) => {
       if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
-    document.title = (view === 'skills' ? 'Skill tree' : 'Life Wiki Dashboard');
+    document.title = { skills: 'Skill tree', finance: 'Finance' }[view] || 'Life Wiki Dashboard';
     if (!booted) return;
     if (view === 'skills') window.SkillTree.shown(); else window.dash.redraw();
     window.scrollTo(0, 0);

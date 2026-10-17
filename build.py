@@ -39,9 +39,11 @@ PBKDF2_ITERATIONS = 600_000
 
 # The Life Wiki page and its databases: (name, database id, data source id).
 LIFE_WIKI_PAGE = "e52fc193f0954ba88c24c996b20e6182"
+FINANCE_PAGE = "37b328fe83348121831ddc036d0fa17c"   # Life Wiki / Active Projects / Finance Plan 2027 / Finance
 PROJECTS = ("Active Projects", "99ac0a23807847ef911c4647ec92f2da", "d7e2eda4-a2e7-4373-80b0-c09440a11edb")
 GOALS = ("Impossible List", "b4cc061661b3469ab576f5e2facb9693", "3cdebe34-6799-462f-82c9-a1507dca1647")
 TASKS = ("Task Planner", "803e0b92530f4beea2f0a5c012bda99b", "7dcac3d2-944f-482a-9394-85a9e2e8b7a2")
+SAVINGS = ("Savings Goals", "99a2abfc9c784ec08035d897f4049774", "13ed9266-4435-4828-88be-6bece34ec549")
 
 
 class NotionError(Exception):
@@ -172,6 +174,50 @@ def page_text(page_id: str) -> str:
     return "\n".join(lines)
 
 
+def parse_sankey(label: str, url: str) -> dict | None:
+    """A finanzfluss.de flow-chart link carries the budget as JSON in its query: i = income, c = cost groups."""
+    from urllib.parse import urlparse, parse_qs
+    q = parse_qs(urlparse(url).query)
+    try:
+        income = [{"name": x["n"].strip(), "value": x["v"]} for x in json.loads(q["i"][0])]
+        groups = [{"name": g["n"].strip(), "value": g["v"],
+                   "items": [{"name": x["n"].strip(), "value": x["v"]} for x in g.get("po") or []]}
+                  for g in json.loads(q["c"][0])]
+    except (KeyError, ValueError, TypeError):
+        return None
+    return {"label": label.strip(), "income": income, "groups": groups}
+
+
+def finance_page(page_id: str) -> dict:
+    """Budget links and tables from the Finance page, each table tagged with the heading above it."""
+    budgets, tables = [], []
+
+    def cells(row: dict) -> list[str]:
+        return [plain(c) for c in row.get("table_row", {}).get("cells", [])]
+
+    def walk(blocks: list[dict], heading: str) -> None:
+        for b in blocks:
+            t = b["type"]
+            body = b.get(t, {})
+            for r in body.get("rich_text") or []:
+                href = (r.get("href") or (r.get("text") or {}).get("link", {}) or {})
+                href = href if isinstance(href, str) else (href or {}).get("url", "")
+                if href and "finanzfluss.de/rechner/flussdiagramm" in href:
+                    parsed = parse_sankey(r.get("plain_text", "Budget"), href)
+                    if parsed:
+                        budgets.append(parsed)
+            if t in ("heading_1", "heading_2", "heading_3"):
+                heading = plain(body.get("rich_text"))
+            if t == "table":
+                rows = [cells(r) for r in block_children(b["id"]) if r["type"] == "table_row"]
+                tables.append({"heading": heading, "header": bool(body.get("has_column_header")), "rows": rows})
+            elif b.get("has_children") and t not in ("child_page", "child_database", "table"):
+                walk(block_children(b["id"]), heading)
+
+    walk(block_children(page_id), "")
+    return {"budgets": budgets, "tables": tables, "url": page_url(page_id)}
+
+
 def diagnose() -> None:
     """Say what the integration can see. Counts and yes/no only: the Actions log of a public repo is public."""
     def visible(path: str) -> str:
@@ -263,6 +309,8 @@ def collect(sample: bool) -> dict:
             "goals": query_rows(GOALS),
             "tasks": query_rows(TASKS),
             "wiki": {"text": page_text(LIFE_WIKI_PAGE)},
+            "savings": query_rows(SAVINGS),
+            "finance": finance_page(FINANCE_PAGE),
         }
     except NotionError as e:
         print(e)
@@ -288,13 +336,17 @@ def main() -> None:
     skills = sum(len(t["nodes"]) for b in (tree.get("config") or {}).get("branches", []) for t in b["tracks"])
     print(f"projects={len(s['projects'])} goals={len(s['goals'])} tasks={len(s['tasks'])} "
           f"wiki_chars={len(s['wiki']['text'])} skills={skills} gist={'yes' if payload.get('skill_gist') else 'no'}")
+    fin = s.get("finance") or {}
+    print(f"savings_goals={len(s.get('savings') or [])} budgets={len(fin.get('budgets') or [])} "
+          f"finance_tables={len(fin.get('tables') or [])} travel_table={'yes' if any('travel' in (t.get('heading') or '').lower() for t in fin.get('tables') or []) else 'no'} "
+          f"subscriptions_table={'yes' if any('subscri' in (t.get('heading') or '').lower() for t in fin.get('tables') or []) else 'no'}")
     blob = encrypt_for_browser(payload, password, deployment_salt())
     assert decrypt_from_browser_format(blob, password)["generated_at"] == payload["generated_at"]
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
     src = ROOT / "web-src"
-    page = "".join((src / f).read_text(encoding="utf-8") for f in ("shell-head.html", "dashboard.html", "skills.html", "shell-tail.html"))
+    page = "".join((src / f).read_text(encoding="utf-8") for f in ("shell-head.html", "dashboard.html", "skills.html", "finance.html", "shell-tail.html"))
     (out / "index.html").write_text(page, encoding="utf-8")
     (out / "data.enc").write_text(json.dumps(blob), encoding="utf-8")
     (out / ".nojekyll").write_text("", encoding="utf-8")
