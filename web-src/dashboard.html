@@ -9,12 +9,12 @@
   .lw a:hover { text-decoration-color: currentColor; }
   .lw-tint { background: color-mix(in oklab, var(--a, var(--a-none)) 8%, var(--color-panel)); border: 1px solid color-mix(in oklab, var(--a, var(--a-none)) 22%, var(--color-border-line)); }
 
-  .lw-hero { display: grid; gap: var(--cds-gap-md); }
+  .lw-hero { display: flex; flex-wrap: wrap; gap: var(--cds-gap-lg) var(--cds-gap-xl); align-items: center; }
   .lw-eyebrow { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); letter-spacing: .04em; }
   .lw-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: calc(var(--cds-font-size-title) * 1.35); line-height: 1.05; text-wrap: balance; }
-  .lw-story { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md) var(--cds-gap-xl); align-items: flex-start; }
-  .lw-takeaway { margin: 0; flex: 1 1 26rem; max-width: 62ch; line-height: 1.55; }
-  .lw-principle { margin: 0; flex: 1 1 18rem; max-width: 34rem; padding: var(--cds-pad-md) var(--cds-pad-lg); border-radius: var(--cds-radius); display: grid; gap: var(--cds-gap-xs); }
+  .lw-story { flex: 1.4 1 24rem; min-width: 0; display: grid; gap: var(--cds-gap-md); align-content: start; }
+  .lw-takeaway { margin: 0; max-width: 62ch; line-height: 1.55; }
+  .lw-principle { margin: 0; max-width: 40rem; padding: var(--cds-pad-md) var(--cds-pad-lg); border-radius: var(--cds-radius); display: grid; gap: var(--cds-gap-xs); }
   .lw-principle-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .lw-principle-text { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-heading); line-height: 1.35; min-height: 1.35em; }
 
@@ -43,6 +43,24 @@
   .lw-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .lw-legend span { display: inline-flex; align-items: center; gap: .35rem; }
   .lw-rows { display: grid; gap: var(--cds-gap-xs); min-height: 18rem; position: relative; }
+  .lw-fold { display: grid; gap: var(--cds-gap-xs); }
+  .lw-fold > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: var(--cds-gap-sm); padding: var(--cds-pad-sm) var(--cds-pad-lg); border-radius: var(--cds-radius); border: 1px dashed var(--color-border-line); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .lw-fold > summary::-webkit-details-marker { display: none; }
+  .lw-fold > summary::before { content: "\25B8"; transition: transform var(--cds-dur-slow); }
+  .lw-fold[open] > summary::before { transform: rotate(90deg); }
+  .lw-fold > summary:hover { color: var(--color-fg); border-color: var(--color-fg-muted); }
+  .lw-fold > summary:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  .lw-fold-dots { display: inline-flex; gap: 3px; margin-left: auto; }
+  .lw-fold-dots .lw-dot { width: .5rem; height: .5rem; }
+
+  /* Energy vs ideas donut */
+  .lw-donut-wrap { flex: 1 1 17rem; max-width: 24rem; margin: 0 auto; display: grid; gap: var(--cds-gap-sm); justify-items: center; }
+  .lw-donut { position: relative; width: 100%; min-height: 15rem; }
+  .lw-donut svg { display: block; margin: 0 auto; overflow: visible; }
+  .lw-donut-key { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .lw-donut-key span { display: inline-flex; align-items: center; gap: .35rem; }
+  .lw-donut-key i { width: .9rem; height: .55rem; border-radius: 2px; display: inline-block; }
+  .lw-donut-gap { margin: 0; text-align: center; font-size: var(--cds-font-size-caption); line-height: 1.45; max-width: 22rem; }
   .lw-row { font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; grid-template-columns: minmax(8.5rem, 11rem) minmax(0, 1fr) auto; gap: var(--cds-gap-xs) var(--cds-gap-md); align-items: center; transition: border-color var(--cds-dur-slow), background var(--cds-dur-slow); }
   .lw-row:hover { border-color: color-mix(in oklab, var(--a) 60%, var(--color-border-line)); }
   .lw-row:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
@@ -114,15 +132,23 @@
 
 <div class="lw">
   <header class="lw-hero" id="overview">
-    <span class="lw-eyebrow" id="lw-today"></span>
-    <h1 class="lw-title">Life Wiki Dashboard</h1>
     <div class="lw-story">
+      <span class="lw-eyebrow" id="lw-today"></span>
+      <h1 class="lw-title">Life Wiki Dashboard</h1>
       <p class="lw-takeaway dash-skeleton">—</p>
       <figure class="lw-principle lw-tint" style="--a: var(--a-learning)">
         <span class="lw-principle-label">Principle of the day</span>
         <span class="lw-principle-text dash-skeleton">—</span>
       </figure>
     </div>
+    <figure class="lw-donut-wrap" id="energy">
+      <div class="lw-donut" id="lw-donut" role="img" aria-label="Where your energy goes compared with where your ideas are, by life area"></div>
+      <div class="lw-donut-key">
+        <span><i style="background: var(--color-fg); opacity: .75"></i>Inner: doing now</span>
+        <span><i style="background: var(--color-fg); opacity: .3"></i>Outer: Impossible List ideas</span>
+      </div>
+      <p class="lw-donut-gap" id="lw-donut-gap"></p>
+    </figure>
   </header>
 
   <section class="lw-strip" id="headline" aria-label="Headline figures">
@@ -470,6 +496,10 @@ dash.calc('dates', {
     return ['quiet', 'Quiet'];
   }
 
+  let foldOpen = false;
+  try { foldOpen = localStorage.getItem('life-fold-open') === '1'; } catch (_) {}
+  const isFolded = (r) => r.area !== 'Unassigned' && r.projects === 0 && r.goals_active === 0;
+
   function map() {
     const box = $('#lw-rows');
     if (hold(box, state('areas', 'items'))) return;
@@ -477,6 +507,18 @@ dash.calc('dates', {
     const items = dash.data('items').data;
     const rows = dash.data('areas').data;
     const cur = currentArea(rows);
+    const folded = rows.filter(isFolded);
+    let fold = null;
+    if (folded.length) {
+      fold = el('details', 'lw-fold');
+      fold.open = foldOpen || (selected === cur && folded.some((r) => r.area === cur));
+      fold.addEventListener('toggle', () => { foldOpen = fold.open; try { localStorage.setItem('life-fold-open', foldOpen ? '1' : ''); } catch (_) {} });
+      const sm = el('summary', '', 'No projects yet \u00b7 ' + plural(folded.length, 'area', 'areas'));
+      const dots = el('span', 'lw-fold-dots');
+      for (const r of folded) dots.append(dot(r.area));
+      sm.append(dots);
+      fold.append(sm);
+    }
     rows.forEach((r, i) => {
       const of = (f) => items.filter((x) => x.area === r.area && f(x));
       const row = paint(el('button', 'lw-row lw-in'), r.area);
@@ -509,8 +551,9 @@ dash.calc('dates', {
       const sum = el('span', 'lw-row-sum', [plural(r.projects, 'project', 'projects'), plural(r.goals_active, 'active goal', 'active goals'),
         plural(r.tasks_open, 'task', 'tasks'), plural(r.goals_idea + r.goals_hold, 'idea', 'ideas'), r.goals_done + ' done'].join(' · '));
       row.append(name, marks, pill, sum);
-      box.append(row);
+      (isFolded(r) ? fold : box).append(row);
     });
+    if (fold) box.append(fold);
   }
   $('#lw-rows').addEventListener('click', (e) => { const row = e.target.closest('.lw-row'); if (row) select(row.dataset.area); });
   $('#lw-rows').addEventListener('mouseover', (e) => {
@@ -620,6 +663,67 @@ dash.calc('dates', {
     if (later.length) body.append(el('p', 'lw-note', plural(later.length, 'more idea', 'more ideas') + ' for later years on the Impossible List.'));
   }
 
+  function donut() {
+    const box = $('#lw-donut');
+    const gapLine = $('#lw-donut-gap');
+    if (hold(box, state('areas'))) { gapLine.textContent = ''; return; }
+    box.classList.remove('dash-skeleton');
+    const all = dash.data('areas').data;
+    const rows = all.filter((r) => r.area !== 'Unassigned');
+    const nowOf = (r) => r.projects + r.goals_active + r.tasks_open;
+    const ideaOf = (r) => r.goals_idea + r.goals_hold;
+    const totalNow = d3.sum(rows, nowOf), totalIdeas = d3.sum(rows, ideaOf);
+    const cur = currentArea(all);
+    const W = Math.max(200, Math.min(box.clientWidth || 300, 300)), R = W / 2 - 4;
+    const svg = d3.select(box).append('svg').attr('width', W).attr('height', W).attr('viewBox', '0 0 ' + W + ' ' + W);
+    const g = svg.append('g').attr('transform', 'translate(' + W / 2 + ',' + W / 2 + ')');
+    const pie = d3.pie().sort(null).value((d) => d.value).padAngle(0.014);
+    const arc = d3.arc().cornerRadius(3);
+    const rings = [
+      { inner: R * 0.5, outer: R * 0.8, opacity: 1, data: rows.map((r) => ({ r, value: nowOf(r) })).filter((d) => d.value) },
+      { inner: R * 0.85, outer: R, opacity: 0.45, data: rows.map((r) => ({ r, value: ideaOf(r) })).filter((d) => d.value) },
+    ];
+    const tipBox = el('div', 'lw-tip'); tipBox.hidden = true; box.append(tipBox);
+    for (const ring of rings) {
+      if (!ring.data.length) {
+        g.append('circle').attr('r', (ring.inner + ring.outer) / 2).style('fill', 'none').style('stroke', 'var(--cds-chart-grid)').style('stroke-width', ring.outer - ring.inner);
+        continue;
+      }
+      g.append('g').selectAll('path').data(pie(ring.data)).join('path')
+        .attr('d', (d) => arc({ ...d, innerRadius: ring.inner, outerRadius: ring.outer }))
+        .style('fill', (d) => color(d.data.r.area)).style('fill-opacity', ring.opacity)
+        .style('stroke', (d) => (d.data.r.area === cur ? 'var(--color-fg)' : 'none')).style('stroke-width', 1.5)
+        .style('cursor', 'pointer')
+        .on('mouseenter', (e, d) => {
+          const r = d.data.r;
+          tipBox.replaceChildren(el('div', 'lw-tip-h', r.area),
+            el('div', '', 'Now: ' + [plural(r.projects, 'project', 'projects'), plural(r.goals_active, 'goal', 'goals'), plural(r.tasks_open, 'task', 'tasks')].join(', ') + (totalNow ? ' (' + FMT.pct(nowOf(r) / totalNow) + ' of your effort)' : '')),
+            el('div', '', 'Ideas: ' + ideaOf(r) + (totalIdeas ? ' (' + FMT.pct(ideaOf(r) / totalIdeas) + ' of your list)' : '')));
+          tipBox.hidden = false;
+        })
+        .on('mousemove', (e) => {
+          const b = box.getBoundingClientRect();
+          tipBox.style.left = Math.max(0, Math.min(e.clientX - b.left + 12, b.width - tipBox.offsetWidth)) + 'px';
+          tipBox.style.top = (e.clientY - b.top + 14) + 'px';
+        })
+        .on('mouseleave', () => { tipBox.hidden = true; })
+        .on('click', (e, d) => { const r = d.data.r; if (isFolded(r)) foldOpen = true; select(r.area); });
+    }
+    g.append('text').attr('y', 6).attr('text-anchor', 'middle')
+      .style('fill', 'var(--color-fg)').style('font-family', 'var(--font-anthropic-serif)').style('font-size', 'calc(var(--cds-font-size-title) * 1.15)')
+      .style('font-variant-numeric', 'tabular-nums').text(totalNow);
+    g.append('text').attr('y', 24).attr('text-anchor', 'middle')
+      .style('fill', 'var(--color-fg-muted)').style('font-size', '0.6875rem').text('things in motion');
+    // The biggest mismatch between an area's share of ideas and its share of current effort.
+    const gaps = rows.filter((r) => ideaOf(r) >= 3)
+      .map((r) => ({ r, gap: (totalIdeas ? ideaOf(r) / totalIdeas : 0) - (totalNow ? nowOf(r) / totalNow : 0) }))
+      .sort((a, b) => b.gap - a.gap);
+    const top = gaps[0];
+    gapLine.textContent = top && top.gap > 0.1
+      ? top.r.area + ' holds ' + FMT.pct(ideaOf(top.r) / totalIdeas) + ' of your ideas but ' + FMT.pct(totalNow ? nowOf(top.r) / totalNow : 0) + ' of what you are doing now.'
+      : 'Your effort is spread roughly in line with your ideas.';
+  }
+
   function insights() {
     const box = $('#lw-insights');
     if (hold(box, state('insights'))) return;
@@ -661,6 +765,6 @@ dash.calc('dates', {
     }
   }
 
-  dash.onData(() => { header(); figures(); map(); detail(); insights(); dates(); });
+  dash.onData(() => { header(); figures(); donut(); map(); detail(); insights(); dates(); });
 })();
 </script>
