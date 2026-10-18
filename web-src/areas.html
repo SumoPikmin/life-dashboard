@@ -79,6 +79,15 @@
   .av-chips { display: flex; flex-wrap: wrap; gap: 4px; }
   .av-chip { font-size: var(--cds-font-size-caption); line-height: 1.7; padding: 0 var(--cds-pad-sm); border-radius: 999px; background: color-mix(in oklab, var(--a) 14%, transparent); }
   .av-empty { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .sv-people { display: grid; gap: var(--cds-gap-sm); }
+  .sv-person { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px var(--cds-gap-sm); padding: .65rem .8rem; border-radius: 10px; background: color-mix(in oklab, var(--color-fg) 3%, var(--color-panel)); border-left: 3px solid var(--cds-chart-muted); }
+  .sv-person[data-level="warn"] { border-left-color: var(--color-warn); }
+  .sv-person[data-level="soon"] { border-left-color: var(--a-social); }
+  .sv-person-name { font-weight: var(--cds-font-weight-medium); min-width: 0; overflow-wrap: anywhere; }
+  .sv-badge { font-size: .75rem; white-space: nowrap; color: var(--color-fg-muted); }
+  .sv-badge.is-warn { color: var(--color-warn); font-weight: var(--cds-font-weight-medium); }
+  .sv-person .av-note { grid-column: 1 / -1; }
+  .sv-bar-over { background: var(--color-warn) !important; }
 
   /* Training: this week, the block, paces, plan */
   .tr-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--cds-gap-xs); }
@@ -194,6 +203,45 @@
   <section class="av-card" id="hv-skills">
     <div class="av-card-head"><h2>Skill tree: health &amp; fitness</h2><a class="av-note" href="#skills">Open skill tree</a></div>
     <div class="av-groups" id="hv-skill-groups"></div>
+  </section>
+</div>
+
+  </section>
+  <section class="view" id="view-social" data-view="social" hidden>
+<div class="av" id="social-view" style="--a: var(--a-social)">
+  <header class="av-head">
+    <div class="av-head-text">
+      <span class="av-eyebrow">Life area</span>
+      <h1 class="av-title">Social</h1>
+      <p class="av-lead" id="sv-lead">Loading…</p>
+    </div>
+    <a class="av-cta" id="sv-crm" href="https://app.notion.com/p/3b2328fe833481ae8cbbe81459baf956" target="_blank" rel="noopener">Open Personal CRM ↗</a>
+  </header>
+  <section class="av-strip" id="sv-strip" aria-label="Social at a glance"></section>
+  <div class="av-grid">
+    <section class="av-card" id="sv-reach">
+      <div class="av-card-head"><h2>Reach out</h2><span class="av-note">Overdue, due soon and new, most overdue first</span></div>
+      <div class="sv-people" id="sv-reach-list"></div>
+    </section>
+    <section class="av-card" id="sv-soon">
+      <div class="av-card-head"><h2>Coming up</h2><span class="av-note">Next contacts and birthdays, 60 days</span></div>
+      <ul class="av-list" id="sv-soon-list"></ul>
+    </section>
+  </div>
+  <div class="av-grid">
+    <section class="av-card" id="sv-recent">
+      <div class="av-card-head"><h2>Recent interactions</h2><span class="av-note" id="sv-recent-note"></span></div>
+      <ul class="av-list" id="sv-recent-list"></ul>
+    </section>
+    <section class="av-card" id="sv-circles">
+      <div class="av-card-head"><h2>Circles</h2><span class="av-note">People per circle; the darker part is overdue</span></div>
+      <div class="av-bars" id="sv-circle-bars"></div>
+    </section>
+  </div>
+  <section class="av-projects" id="sv-projects"></section>
+  <section class="av-card" id="sv-goals">
+    <div class="av-card-head"><h2>Impossible List: social</h2><span class="av-note" id="sv-goals-note"></span></div>
+    <div class="av-groups" id="sv-groups"></div>
   </section>
 </div>
 
@@ -569,6 +617,18 @@
     return { weeks, title: clean(tb.heading).replace(/\s*[—–-]\s*week by week/i, '') };
   }
 
+  window.lifeToday = () => {
+    const tr = data('training');
+    if (!tr) return null;
+    const { weeks, title } = blockWeeks(tr);
+    const current = weeks.find((w) => t >= w.start && days(w.start, t) < 7);
+    const ws = trTable(tr, /weekly (structure|rhythm)/i);
+    const day = DAYS[(t.getUTCDay() + 6) % 7];
+    const row = (ws ? split(ws).rows : []).find((r) => (r[0] || '').trim().slice(0, 3).toLowerCase() === day.toLowerCase()) || [];
+    const plan = current ? { Tue: current.tue, Thu: current.thu, Sun: current.sun }[day] || '' : '';
+    return { day, session: clean(row[1]), notes: clean(row[2]), plan, week: current ? (title ? title + ' ' : '') + 'week ' + current.n + ' of ' + weeks.length : '' };
+  };
+
   function renderTraining() {
     const tr = data('training');
     if (!tr) return;
@@ -779,9 +839,116 @@
     renderTraining();
   }
 
+  // ---------------------------------------------------------------- Social (Personal CRM)
+  const CRM_STATUS = (p) => {
+    const s2 = String(p.Status || '');
+    if (/🔴|overdue/i.test(s2)) return 'over';
+    if (/🟡|due/i.test(s2)) return 'soon';
+    if (/🆕|new/i.test(s2)) return 'new';
+    if (/🔕|no cadence/i.test(s2)) return 'none';
+    return 'ok';
+  };
+  const jsonList = (v) => { try { const x = JSON.parse(v || '[]'); return Array.isArray(x) ? x : []; } catch (_) { return []; } };
+  const nextBirthday = (iso) => {
+    const b = parseDay(iso); if (!b) return null;
+    let d = new Date(Date.UTC(t.getUTCFullYear(), b.getUTCMonth(), b.getUTCDate()));
+    if (d < t) d = new Date(Date.UTC(t.getUTCFullYear() + 1, b.getUTCMonth(), b.getUTCDate()));
+    return d;
+  };
+  window.lifeCRM = () => {
+    const people = data('people') || [];
+    return people.map((p) => ({
+      name: p.Name || 'Someone', url: p.url, tier: p.Tier || '', circles: jsonList(p.Circle), cadence: p.Cadence || '', pref: jsonList(p['Preferred Contact']),
+      state: CRM_STATUS(p), over: typeof p['Days Overdue'] === 'number' ? p['Days Overdue'] : null,
+      last: parseDay(p['Last Touch'] || p['date:Last Contacted:start']), due: parseDay(p['Next Contact Due']), birthday: nextBirthday(p['date:Birthday:start']),
+    }));
+  };
+
+  function renderSocial() {
+    if (!ok('items')) return;
+    const items = data('items');
+    const area = 'Social';
+    const people = window.lifeCRM();
+    const byUrl = Object.fromEntries(people.map((p) => [p.url, p]));
+    const reach = people.filter((p) => p.state === 'over' || p.state === 'soon' || p.state === 'new')
+      .sort((a, b) => ({ over: 0, soon: 1, new: 2 }[a.state] - { over: 0, soon: 1, new: 2 }[b.state]) || (b.over ?? -1e9) - (a.over ?? -1e9));
+    const over = people.filter((p) => p.state === 'over').sort((a, b) => (b.over ?? 0) - (a.over ?? 0)), soon = people.filter((p) => p.state === 'soon');
+    const bdays = people.filter((p) => p.birthday && days(t, p.birthday) <= 60).sort((a, b) => a.birthday - b.birthday);
+
+    const lead = $('#sv-lead');
+    if (!people.length) { delete lead.dataset.level; lead.textContent = 'Your Personal CRM didn\u2019t load, or it has no people yet.'; }
+    else if (over.length) { lead.dataset.level = 'warn'; lead.textContent = plural(over.length, 'friend is', 'friends are') + ' overdue for a catch-up: ' + over.slice(0, 3).map((p) => p.name + (p.over ? ' (' + p.over + ' days)' : '')).join(', ') + (over.length > 3 ? ', …' : '') + '.'; }
+    else { lead.dataset.level = 'ok'; lead.textContent = 'Everyone is on track.' + (soon.length ? ' ' + plural(soon.length, 'catch-up is', 'catch-ups are') + ' due soon.' : ''); }
+
+    const strip = $('#sv-strip'); strip.replaceChildren();
+    fig(strip, 'Overdue', String(over.length), over.length ? 'longest: ' + over[0].name : 'nobody', over.length ? 'is-warn' : 'is-ok');
+    fig(strip, 'Due soon', String(soon.length), soon.length ? soon.map((p) => p.name).slice(0, 2).join(', ') : 'nobody this week');
+    fig(strip, 'On track', String(people.filter((p) => p.state === 'ok').length), 'of ' + people.length + ' people');
+    if (bdays.length) fig(strip, 'Next birthday', bdays[0].name, fmtShort(bdays[0].birthday) + ' · ' + (days(t, bdays[0].birthday) === 0 ? 'today' : 'in ' + days(t, bdays[0].birthday) + ' days'), '', true);
+
+    const rl = $('#sv-reach-list'); rl.replaceChildren();
+    for (const p of reach.slice(0, 10)) {
+      const card = el('div', 'sv-person'); card.dataset.level = p.state === 'over' ? 'warn' : p.state === 'soon' ? 'soon' : '';
+      const name = link(p.name, p.url); name.classList.add('sv-person-name');
+      const badge = el('span', 'sv-badge' + (p.state === 'over' ? ' is-warn' : ''),
+        p.state === 'over' ? (p.over ? p.over + ' days overdue' : 'overdue') : p.state === 'soon' ? (p.due ? 'due ' + (days(t, p.due) <= 0 ? 'today' : 'in ' + days(t, p.due) + ' days') : 'due soon') : 'new: no contact logged');
+      card.append(name, badge, el('span', 'av-note', [p.tier, p.circles.join(', '), p.last ? 'last contact ' + days(p.last, t) + ' days ago' : '', p.cadence && !/no cadence/i.test(p.cadence) ? p.cadence.toLowerCase() : '', p.pref.length ? 'prefers ' + p.pref.join(' / ').toLowerCase() : ''].filter(Boolean).join(' · ')));
+      rl.append(card);
+    }
+    if (!reach.length) rl.append(el('p', 'av-empty', people.length ? 'Nobody to reach out to right now.' : 'No people in your CRM yet.'));
+
+    const sl = $('#sv-soon-list'); sl.replaceChildren();
+    const upcoming = [
+      ...people.filter((p) => p.state === 'ok' && p.due && days(t, p.due) <= 60).map((p) => ({ when: p.due, label: 'Catch up with ' + p.name, url: p.url })),
+      ...bdays.map((p) => ({ when: p.birthday, label: p.name + '\u2019s birthday', url: p.url, bday: true })),
+    ].sort((a, b) => a.when - b.when).slice(0, 10);
+    for (const u of upcoming) {
+      const li = el('li', 'av-item');
+      li.append(el('span', 'av-dot'), link((u.bday ? '\uD83C\uDF82 ' : '') + u.label, u.url), el('span', 'av-pill', fmtShort(u.when) + ' · ' + (days(t, u.when) === 0 ? 'today' : 'in ' + days(t, u.when) + ' d')));
+      sl.append(li);
+    }
+    if (!upcoming.length) sl.append(el('li', 'av-empty', 'Nothing in the next 60 days.'));
+
+    const inter = (data('interactions') || []).map((x) => ({ ...x, d: parseDay(x['date:Date:start']) })).filter((x) => x.d).sort((a, b) => b.d - a.d);
+    const recentList = $('#sv-recent-list'); recentList.replaceChildren();
+    const last30 = inter.filter((x) => days(x.d, t) <= 30).length;
+    $('#sv-recent-note').textContent = last30 + ' in the last 30 days';
+    for (const x of inter.slice(0, 8)) {
+      const who = jsonList(x.Person).map((u) => (byUrl[u] || {}).name).filter(Boolean).join(', ');
+      const li = el('li', 'av-item');
+      li.append(el('span', 'av-dot'), link((who ? who + ': ' : '') + (x.Summary || x.Type || 'Interaction'), x.url), el('span', 'av-pill', [x.Type, fmtShort(x.d)].filter(Boolean).join(' · ')));
+      recentList.append(li);
+    }
+    if (!inter.length) recentList.append(el('li', 'av-empty', 'No interactions logged yet.'));
+
+    const cb = $('#sv-circle-bars'); cb.replaceChildren();
+    const circles = d3.rollups(people.flatMap((p) => (p.circles.length ? p.circles : ['No circle']).map((c) => ({ c, over: p.state === 'over' }))), (v) => ({ n: v.length, over: v.filter((x) => x.over).length }), (x) => x.c)
+      .sort((a, b) => b[1].n - a[1].n);
+    const maxC = d3.max(circles, (c) => c[1].n) || 1;
+    for (const [c, v] of circles) {
+      const row = el('div', 'av-bar');
+      row.append(el('span', '', c), el('span', 'av-sub', v.n + (v.over ? ' · ' + v.over + ' overdue' : '')));
+      const m = el('div', 'av-meter'); m.style.display = 'flex';
+      const okPart = el('span'); okPart.style.width = ((v.n - v.over) / maxC) * 100 + '%';
+      const overPart = el('span', 'sv-bar-over'); overPart.style.width = (v.over / maxC) * 100 + '%';
+      m.append(overPart, okPart); row.append(m);
+      cb.append(row);
+    }
+    if (!circles.length) cb.append(el('p', 'av-empty', 'No circles yet.'));
+
+    const goalsByKey = Object.fromEntries(items.filter((g) => g.kind === 'goal').map((g) => [g.key, g]));
+    const pb = $('#sv-projects'); pb.replaceChildren();
+    for (const pr of items.filter((x) => x.kind === 'project' && (x.area === area || (x.goalKeys || []).some((k) => (goalsByKey[k] || {}).area === area)))) pb.append(projectCard(pr, goalsByKey, items.filter((x) => x.kind === 'task' && x.area === area && (x.status === 'Daily' || x.status === 'Weekly'))));
+    const goals = items.filter((g) => g.kind === 'goal' && g.area === area && g.status !== 'Archived');
+    $('#sv-goals-note').textContent = goals.filter((g) => g.status === 'Done').length + ' of ' + goals.length + ' done';
+    goalGroups($('#sv-groups'), goals, (g) => (g.status === 'Active' ? 'Now' : g.status === 'Done' ? 'Done' : g.scope === 'Next Year' ? 'Next year' : g.scope === 'In 5 years' ? 'In 5 years' : 'Someday'),
+      ['Now', 'Next year', 'In 5 years', 'Someday', 'Done']);
+  }
+
   const render = () => {
     try { if (visible('view-travel')) renderTravel(); } catch (e) { console.error(e); }
     try { if (visible('view-health')) renderHealth(); } catch (e) { console.error(e); }
+    try { if (visible('view-social')) renderSocial(); } catch (e) { console.error(e); }
   };
   dash.onData(render);
   window.addEventListener('skilltree', render);

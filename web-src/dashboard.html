@@ -9,7 +9,27 @@
   .lw a:hover { text-decoration-color: currentColor; }
   .lw-tint { background: color-mix(in oklab, var(--a, var(--a-none)) 8%, var(--color-panel)); border: 1px solid color-mix(in oklab, var(--a, var(--a-none)) 22%, var(--color-border-line)); }
 
-  .lw-hero { display: flex; flex-wrap: wrap; gap: var(--cds-gap-lg) var(--cds-gap-xl); align-items: center; }
+  .lw-hero { display: flex; flex-wrap: wrap; gap: var(--cds-gap-lg) var(--cds-gap-xl); align-items: start; }
+  .lw-brief-card { flex: 1 1 20rem; max-width: 32rem; gap: var(--cds-gap-sm); }
+  .lw-brief-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-sm); }
+  .lw-brief { display: grid; }
+  .lw-brief-row { display: grid; grid-template-columns: 1.9rem minmax(0, 1fr); gap: 1px .7rem; align-items: start; padding: .7rem 0; border-top: 1px dashed var(--color-border-line); color: inherit; text-decoration: none !important; }
+  .lw-brief-row:first-child { border-top: 0; padding-top: .2rem; }
+  a.lw-brief-row:hover .lw-brief-v { text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 30%, transparent); text-underline-offset: 3px; }
+  .lw-brief-ic { grid-row: span 2; width: 1.9rem; height: 1.9rem; border-radius: 9px; display: grid; place-items: center; color: var(--a); background: color-mix(in oklab, var(--a) 15%, transparent); }
+  .lw-brief-ic svg { width: 1.05rem; height: 1.05rem; }
+  .lw-brief-k { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); letter-spacing: .03em; }
+  .lw-brief-k.is-warn { color: var(--color-warn); }
+  .lw-brief-v { font-weight: var(--cds-font-weight-medium); line-height: 1.4; min-width: 0; overflow-wrap: anywhere; }
+  .lw-brief-v small { display: block; font-weight: 400; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.45; margin-top: 1px; }
+  .lw-compare { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-md) var(--cds-pad-lg); }
+  .lw-compare summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem var(--cds-gap-md); }
+  .lw-compare summary .lw-h3::before { content: "\25B8"; display: inline-block; width: 1em; color: var(--color-fg-muted); transition: transform var(--cds-dur-slow); }
+  .lw-compare[open] summary .lw-h3::before { transform: rotate(90deg); }
+  .lw-compare summary::-webkit-details-marker { display: none; }
+  .lw-compare summary { list-style: none; }
+  .lw-compare .lw-donut-wrap { max-width: 40rem; margin: var(--cds-gap-md) auto 0; }
+  .lw-compare .lw-donut-gap { margin: 0 auto; }
   .lw-eyebrow { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); letter-spacing: .04em; }
   .lw-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: calc(var(--cds-font-size-title) * 1.35); line-height: 1.05; text-wrap: balance; }
   .lw-story { flex: 1.4 1 24rem; min-width: 0; display: grid; gap: var(--cds-gap-md); align-content: start; }
@@ -73,7 +93,7 @@
 
   /* Two shares per area, mirrored: inner measure grows left, outer measure grows right, one scale. */
   .lw-donut-wrap { flex: 1 1 20rem; max-width: 30rem; margin: 0; display: grid; gap: var(--cds-gap-sm); align-content: start; }
-  .lw-donut { position: relative; width: 100%; min-height: 12rem; }
+  .lw-donut { position: relative; width: 100%; min-height: 6rem; }
   .lw-bf { display: grid; gap: 3px; }
   .lw-bf-head, .lw-bf-row { display: grid; grid-template-columns: minmax(0, 1fr) 5.75rem minmax(0, 1fr); gap: var(--cds-gap-sm); align-items: center; }
   .lw-bf-head { font-size: .6875rem; color: var(--color-fg-muted); letter-spacing: .03em; padding: 0 var(--cds-pad-sm) 2px; }
@@ -106,9 +126,13 @@
   .lw-sep { width: 1px; height: .9rem; margin: 0 4px; background: var(--color-border-line); }
   .lw-m { display: inline-flex; flex: none; line-height: 0; color: var(--a); }
   .lw-m svg { display: block; }
-  .lw-legend .lw-m svg { opacity: .9; }
+  .lw-legend .lw-m svg { opacity: .9; width: 1.05rem; height: 1.05rem; }
+  .lw-legend .lw-m.is-task svg { width: .7rem; height: .7rem; }
+  .lw-legend .lw-m.is-idea svg, .lw-legend .lw-m.is-done svg { width: .95rem; height: .95rem; }
   .lw-legend .lw-m { --a: var(--color-fg); }
-  .lw-legend { gap: var(--cds-gap-xs) var(--cds-gap-lg); }
+  .lw-legend { gap: .5rem 1.4rem; font-size: .875rem; color: var(--color-fg); padding: .55rem .8rem; border-radius: 10px; background: color-mix(in oklab, var(--color-fg) 3%, var(--color-panel)); }
+  .lw-legend span { gap: .45rem; }
+  .lw-legend em { font-style: normal; color: var(--color-fg-muted); }
   .lw-row .lw-marks { grid-column: 1 / -1; }
   .lw-row-note { grid-column: 1 / -1; display: flex; align-items: baseline; gap: .4rem; font-size: var(--cds-font-size-caption); line-height: 1.4; }
   .lw-row-note::before { content: ""; flex: none; width: .45rem; height: .45rem; border-radius: 50%; background: var(--cds-chart-muted); transform: translateY(-1px); }
@@ -133,7 +157,8 @@
   .lw-later summary { cursor: pointer; }
   .lw-later ul { list-style: none; margin: .4rem 0 0; padding: 0; display: grid; gap: 3px; }
   .lw-groups { display: grid; gap: var(--cds-gap-md); }
-  .lw-group { display: grid; gap: .6rem; }
+  .lw-group { display: grid; gap: .6rem; align-content: start; }
+  .lw-themes { align-items: start; }
   #lw-insights, #lw-dates { gap: 1.4rem; }
   .lw-point { display: grid; gap: 5px; padding: .7rem .85rem; border-radius: 10px; background: color-mix(in oklab, var(--color-fg) 3%, var(--color-panel)); border-left: 3px solid var(--cds-chart-muted); }
   .lw-point[data-level="warn"] { border-left-color: var(--color-warn); }
@@ -214,15 +239,10 @@
         <span class="lw-principle-text dash-skeleton">—</span>
       </figure>
     </div>
-    <figure class="lw-donut-wrap" id="energy">
-      <div class="lw-lenses" id="lw-lenses" role="tablist" aria-label="Compare"></div>
-      <div class="lw-donut" id="lw-donut" role="img"></div>
-      <div class="lw-donut-key">
-        <span><i style="background: var(--color-fg); opacity: .75"></i>Left: <span id="lw-key-in"></span></span>
-        <span><i style="background: var(--color-fg); opacity: .3"></i>Right: <span id="lw-key-out"></span></span>
-      </div>
-      <p class="lw-donut-gap" id="lw-donut-gap"></p>
-    </figure>
+    <aside class="lw-card lw-brief-card" id="lw-brief" aria-label="Today">
+      <div class="lw-brief-head"><span class="lw-principle-label">Today</span><span class="lw-note" id="lw-brief-day"></span></div>
+      <div class="lw-brief" id="lw-brief-list"></div>
+    </aside>
   </header>
 
   <section class="lw-stats" id="lw-stats" aria-label="Headline figures"></section>
@@ -239,6 +259,18 @@
       </div>
       <article class="lw-detail" id="lw-detail" aria-live="polite"></article>
     </div>
+    <details class="lw-compare" id="energy">
+      <summary><span class="lw-h3">Compare areas</span><span class="lw-note">Two shares per area side by side: money vs dreams, done vs open, this week vs this year</span></summary>
+      <figure class="lw-donut-wrap">
+        <div class="lw-lenses" id="lw-lenses" role="tablist" aria-label="Compare"></div>
+        <div class="lw-donut" id="lw-donut" role="img"></div>
+        <div class="lw-donut-key">
+          <span><i style="background: var(--color-fg); opacity: .75"></i>Left: <span id="lw-key-in"></span></span>
+          <span><i style="background: var(--color-fg); opacity: .3"></i>Right: <span id="lw-key-out"></span></span>
+        </div>
+        <p class="lw-donut-gap" id="lw-donut-gap"></p>
+      </figure>
+    </details>
   </section>
 
   <section class="lw-section" id="agenda">
@@ -513,8 +545,8 @@ dash.calc('dates', {
 
   (() => {
     const box = $('#lw-legend');
-    for (const [cls, label] of [['is-project', 'Project'], ['is-goal', 'Active goal'], ['is-task', 'Task this week'], ['is-idea', 'Idea (Impossible List)'], ['is-done', 'Done']]) {
-      const s = el('span'); s.append(markEl(cls), document.createTextNode(label)); box.append(s);
+    for (const [cls, label, note] of [['is-project', 'Project', 'a plan in Active Projects'], ['is-goal', 'Active goal', 'Impossible List, in progress'], ['is-task', 'Task this week', 'Task Planner'], ['is-idea', 'Idea', 'Impossible List, not started'], ['is-done', 'Done', '']]) {
+      const s = el('span'); s.append(markEl(cls), document.createTextNode(label)); if (note) s.append(el('em', '', '(' + note + ')')); box.append(s);
     }
   })();
 
@@ -984,6 +1016,81 @@ dash.calc('dates', {
     }
   }
 
-  dash.onData(() => { header(); figures(); donut(); map(); detail(); tasks(); insights(); dates(); });
+  /* Today: the training session, tasks, the next date and who to call, each linking to where it lives. */
+  const ICON = {
+    train: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-5 4 10 2.5-5H21"/></svg>',
+    rest: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>',
+    task: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.4 2.4 4.6-5"/></svg>',
+    date: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10h16M9 3.5v4M15 3.5v4"/></svg>',
+    people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="16.5" cy="9.5" r="2.4"/><path d="M15.5 14.2A4.6 4.6 0 0 1 20.5 19"/></svg>',
+    cake: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16v-7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2z"/><path d="M4 15.5c2 1.3 4 1.3 6 0s4-1.3 6 0 3 1 4 .5M12 11V8M12 5.5v-.01"/></svg>',
+  };
+  function brief() {
+    const box = $('#lw-brief-list');
+    if (hold(box, state('items'))) return;
+    box.classList.remove('dash-skeleton');
+    $('#lw-brief-day').textContent = d3.utcFormat('%A')(t);
+    const row = (icon, area, k, v, sub, href, warn) => {
+      const r = paint(el(href ? 'a' : 'div', 'lw-brief-row'), area);
+      if (href) {
+        r.href = href;
+        if (href.startsWith('#') && document.querySelector(href)) r.addEventListener('click', (e) => { e.preventDefault(); jump(href); });
+      }
+      const ic = el('span', 'lw-brief-ic'); ic.innerHTML = ICON[icon];
+      const val = el('span', 'lw-brief-v', v); if (sub) val.append(el('small', '', sub));
+      r.append(ic, el('span', 'lw-brief-k' + (warn ? ' is-warn' : ''), k), val);
+      box.append(r);
+    };
+
+    // Training
+    const tr = window.lifeToday ? window.lifeToday() : null;
+    if (tr && (tr.session || tr.plan)) {
+      const rest = /rest/i.test(tr.session) && !tr.plan;
+      row(rest ? 'rest' : 'train', 'Health & Fitness', 'Training · ' + tr.day, rest ? 'Rest day' : tr.plan || tr.session,
+        [tr.plan && tr.session ? tr.session : '', tr.notes && tr.notes !== '—' ? tr.notes : '', tr.week].filter(Boolean).join(' · '), '#health');
+    }
+
+    // Tasks: everything daily plus this week's P1s
+    const items = dash.data('items').data;
+    const open = items.filter((x) => x.kind === 'task' && (x.status === 'Daily' || (x.status === 'Weekly' && x.scope === 'P1')));
+    const daily = open.filter((x) => x.status === 'Daily'), p1 = open.filter((x) => x.status === 'Weekly');
+    if (open.length) {
+      const names = [...p1, ...daily].map((x) => x.name);
+      row('task', p1.length ? (p1[0].area) : daily[0].area, [daily.length ? plural(daily.length, 'daily task', 'daily tasks') : '', p1.length ? p1.length + ' P1 this week' : ''].filter(Boolean).join(' · '),
+        names.slice(0, 3).join(' · ') + (names.length > 3 ? ' +' + (names.length - 3) : ''), '', '#agenda', p1.length > 0);
+    } else row('task', 'Unassigned', 'Tasks', 'Nothing daily or P1 this week', '', '#agenda');
+
+    // The next dated item
+    if (state('dates') === 'ok') {
+      const next = dash.data('dates').data.map((r) => ({ ...r, d: parseDay(r.date) })).filter((r) => r.d && r.d >= t)[0];
+      if (next) {
+        const n = daysBetween(t, next.d);
+        row('date', next.area, 'Next up · ' + (n === 0 ? 'today' : n === 1 ? 'tomorrow' : 'in ' + n + ' days'), next.label, fmtLong(next.d) + (next.area !== 'Unassigned' ? ' · ' + next.area : ''), '#agenda', n <= 3);
+      }
+    }
+
+    // Personal CRM
+    const crm = window.lifeCRM ? window.lifeCRM() : [];
+    if (crm.length) {
+      const over = crm.filter((p) => p.state === 'over').sort((a, b) => (b.over ?? 0) - (a.over ?? 0));
+      if (over.length) row('people', 'Social', 'Reach out · ' + over.length + ' overdue', over.slice(0, 3).map((p) => p.name).join(', ') + (over.length > 3 ? ' +' + (over.length - 3) : ''),
+        (over[0].over ? over.slice(0, 3).map((p) => p.over).filter(Boolean).join(', ') + ' days overdue' : '') + (over[0].pref.length ? ' · ' + over[0].name + ' prefers ' + over[0].pref.join(' / ').toLowerCase() : ''), '#social', true);
+      else row('people', 'Social', 'Reach out', 'Everyone is on track', crm.filter((p) => p.state === 'soon').length ? crm.filter((p) => p.state === 'soon').length + ' due soon' : '', '#social');
+      const bd = crm.filter((p) => p.birthday && daysBetween(t, p.birthday) <= 14).sort((a, b) => a.birthday - b.birthday);
+      if (bd.length) {
+        const n = daysBetween(t, bd[0].birthday);
+        row('cake', 'Social', 'Birthday · ' + (n === 0 ? 'today' : n === 1 ? 'tomorrow' : 'in ' + n + ' days'), bd.map((p) => p.name).slice(0, 2).join(', '), fmtShort(bd[0].birthday) + (bd.length > 2 ? ' · +' + (bd.length - 2) + ' more' : ''), '#social', n <= 2);
+      }
+    }
+  }
+
+  // Remember whether the comparison panel is open.
+  (() => {
+    const d = $('#energy');
+    try { d.open = localStorage.getItem('life-compare-open') === '1'; } catch (_) {}
+    d.addEventListener('toggle', () => { try { localStorage.setItem('life-compare-open', d.open ? '1' : '0'); } catch (_) {} });
+  })();
+
+  dash.onData(() => { header(); brief(); figures(); donut(); map(); detail(); tasks(); insights(); dates(); });
 })();
 </script>

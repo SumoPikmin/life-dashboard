@@ -46,6 +46,8 @@ PROJECTS = ("Active Projects", "99ac0a23807847ef911c4647ec92f2da", "d7e2eda4-a2e
 GOALS = ("Impossible List", "b4cc061661b3469ab576f5e2facb9693", "3cdebe34-6799-462f-82c9-a1507dca1647")
 TASKS = ("Task Planner", "803e0b92530f4beea2f0a5c012bda99b", "7dcac3d2-944f-482a-9394-85a9e2e8b7a2")
 SAVINGS = ("Savings Goals", "99a2abfc9c784ec08035d897f4049774", "13ed9266-4435-4828-88be-6bece34ec549")
+PEOPLE = ("People", "d5da55d42cd6447cbd65d61199c5faa2", "3d4d70af-c2b6-49b5-abc4-d246c45f5453")            # Personal CRM
+INTERACTIONS = ("Interactions", "a5896f9c16904bc8b20a138691dd3f6b", "0ecd0642-84ad-4d0e-ace5-2aec687aefa2")
 
 
 class NotionError(Exception):
@@ -114,8 +116,13 @@ def prop_columns(name: str, prop: dict) -> dict:
         return out
     if kind in ("number", "url", "email", "phone_number"):
         return {name: v}
-    if kind == "formula":
-        return {name: (v or {}).get((v or {}).get("type"))}
+    if kind in ("formula", "rollup"):
+        inner = (v or {}).get((v or {}).get("type"))
+        if isinstance(inner, dict):  # a date result
+            inner = inner.get("start")
+        if isinstance(inner, list):  # an array rollup: keep it simple
+            inner = None
+        return {name: inner}
     return {}
 
 
@@ -347,6 +354,12 @@ def collect(sample: bool) -> dict:
             "finance": finance_page(FINANCE_PAGE),
             "plan": finance_page(PLAN_PAGE),
         }
+        for key, src in (("people", PEOPLE), ("interactions", INTERACTIONS)):
+            try:
+                sources[key] = query_rows(src)
+            except NotionError as e:  # the CRM is optional: the rest of the dashboard still builds
+                print(f"Could not read {src[0]} ({e.code}); the Social tab will be empty")
+                sources[key] = []
         training = next((r for r in sources["projects"] if re.search(r"train", r.get("Name") or "", re.I)), None)
         sources["training"] = page_structure(training["url"].rsplit("/", 1)[-1]) if training else {"tables": [], "lines": {}}
     except NotionError as e:
@@ -373,6 +386,7 @@ def main() -> None:
     skills = sum(len(t["nodes"]) for b in (tree.get("config") or {}).get("branches", []) for t in b["tracks"])
     print(f"projects={len(s['projects'])} goals={len(s['goals'])} tasks={len(s['tasks'])} "
           f"wiki_chars={len(s['wiki']['text'])} skills={skills} gist={'yes' if payload.get('skill_gist') else 'no'}")
+    print(f"people={len(s.get('people') or [])} interactions={len(s.get('interactions') or [])}")
     tr = s.get("training") or {}
     print(f"training_tables={[t.get('heading') for t in tr.get('tables') or []]} training_sections={list((tr.get('lines') or {}).keys())}")
     fin = s.get("finance") or {}

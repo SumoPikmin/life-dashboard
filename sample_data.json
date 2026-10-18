@@ -545,7 +545,102 @@
      ]
     }
    ]
-  }
+  },
+  "people": [
+   {
+    "url": "https://app.notion.com/p/samplepa",
+    "Name": "Sample: Alex",
+    "Tier": "Inner Circle",
+    "Circle": "[\"Family\"]",
+    "Cadence": "Weekly",
+    "Status": "🔴 Overdue",
+    "Days Overdue": 9,
+    "Last Touch": "2026-10-02",
+    "Next Contact Due": "2026-10-09",
+    "date:Birthday:start": "1990-10-25",
+    "Preferred Contact": "[\"Call\"]",
+    "Location": "",
+    "Notes": ""
+   },
+   {
+    "url": "https://app.notion.com/p/samplepb",
+    "Name": "Sample: Bo",
+    "Tier": "Close",
+    "Circle": "[\"School/Uni\"]",
+    "Cadence": "Monthly",
+    "Status": "🟡 Due soon",
+    "Days Overdue": -3,
+    "Last Touch": "2026-09-24",
+    "Next Contact Due": "2026-10-24",
+    "date:Birthday:start": "",
+    "Preferred Contact": "[\"Text\"]",
+    "Location": "",
+    "Notes": ""
+   },
+   {
+    "url": "https://app.notion.com/p/samplepc",
+    "Name": "Sample: Cam",
+    "Tier": "Casual",
+    "Circle": "[\"Erasmus\"]",
+    "Cadence": "Quarterly",
+    "Status": "🟢 On track",
+    "Days Overdue": -60,
+    "Last Touch": "2026-09-18",
+    "Next Contact Due": "2026-12-17",
+    "date:Birthday:start": "1992-11-30",
+    "Preferred Contact": "[\"Text\"]",
+    "Location": "",
+    "Notes": ""
+   },
+   {
+    "url": "https://app.notion.com/p/samplepd",
+    "Name": "Sample: Dee",
+    "Tier": "Close",
+    "Circle": "[\"Sports & Hobbies\"]",
+    "Cadence": "Every 2 Weeks",
+    "Status": "🔴 Overdue",
+    "Days Overdue": 21,
+    "Last Touch": "2026-09-13",
+    "Next Contact Due": "2026-09-27",
+    "date:Birthday:start": "",
+    "Preferred Contact": "[\"Meet up\"]",
+    "Location": "",
+    "Notes": ""
+   },
+   {
+    "url": "https://app.notion.com/p/samplepe",
+    "Name": "Sample: Eli",
+    "Tier": "Casual",
+    "Circle": "[\"Travel\"]",
+    "Cadence": "Yearly",
+    "Status": "🆕 New",
+    "Days Overdue": null,
+    "Last Touch": null,
+    "Next Contact Due": null,
+    "date:Birthday:start": "",
+    "Preferred Contact": "[\"Text\"]",
+    "Location": "",
+    "Notes": ""
+   }
+  ],
+  "interactions": [
+   {
+    "url": "https://app.notion.com/p/sampleia",
+    "Summary": "Sample: coffee catch-up",
+    "Type": "Hang out",
+    "date:Date:start": "2026-10-02",
+    "Person": "[\"https://app.notion.com/p/samplepa\"]",
+    "Notes": ""
+   },
+   {
+    "url": "https://app.notion.com/p/sampleib",
+    "Summary": "Sample: call",
+    "Type": "Call",
+    "date:Date:start": "2026-09-24",
+    "Person": "[\"https://app.notion.com/p/samplepb\"]",
+    "Notes": ""
+   }
+  ]
  },
  "skilltree": {
   "config": {
