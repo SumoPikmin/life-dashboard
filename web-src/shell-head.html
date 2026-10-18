@@ -44,16 +44,44 @@
 
   /* App frame: sidebar + views. Below 860px the sidebar becomes a top bar. */
   .app { display: grid; grid-template-columns: 15rem minmax(0, 1fr); min-height: 100vh; min-height: 100dvh; }
-  .side { position: sticky; top: 0; height: 100vh; height: 100dvh; background: var(--side-bg); border-right: 1px solid var(--color-border-line); display: flex; flex-direction: column; gap: 1.5rem; padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1rem 1.25rem max(1rem, env(safe-area-inset-left, 0px)); }
-  .side-brand { display: grid; gap: .35rem; padding: 0 .5rem; }
-  .side-title { font-family: var(--font-anthropic-serif); font-size: 1.35rem; line-height: 1.1; }
-  .side-swatch { display: flex; gap: 3px; }
-  .side-swatch span { width: 1rem; height: .25rem; border-radius: 999px; }
-  .side-nav { display: grid; gap: .25rem; }
-  .side-link { display: flex; align-items: center; gap: .65rem; padding: .55rem .65rem; border-radius: 10px; color: var(--color-fg-muted); text-decoration: none; font-weight: 500; }
-  .side-link svg { width: 1.1rem; height: 1.1rem; flex: none; }
-  .side-link:hover { color: var(--color-fg); background: color-mix(in oklab, var(--color-fg) 6%, transparent); }
-  .side-link[aria-current="page"] { color: var(--color-fg); background: var(--color-panel); box-shadow: 0 1px 2px rgba(0, 0, 0, .06), inset 0 0 0 1px var(--color-border-line); }
+  .side { position: sticky; top: 0; height: 100vh; height: 100dvh; background: var(--side-bg); border-right: 1px solid var(--color-border-line); display: flex; flex-direction: column; gap: 1.4rem; padding: calc(1rem + env(safe-area-inset-top, 0px)) .85rem 1.25rem max(.85rem, env(safe-area-inset-left, 0px)); }
+  /* Brand card: area-colour glow, a ring of the seven areas around today's date. */
+  .side-brand { position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: center; gap: .75rem; padding: .85rem .9rem 1rem; border-radius: 16px; color: var(--color-fg); text-decoration: none;
+    background:
+      radial-gradient(120% 90% at 0% 0%, color-mix(in oklab, #e3923a 32%, transparent), transparent 60%),
+      radial-gradient(110% 90% at 100% 0%, color-mix(in oklab, #4a7fd0 28%, transparent), transparent 62%),
+      radial-gradient(120% 100% at 100% 100%, color-mix(in oklab, #8a66d1 28%, transparent), transparent 60%),
+      radial-gradient(110% 100% at 0% 100%, color-mix(in oklab, #d25d93 26%, transparent), transparent 60%),
+      var(--color-panel);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-fg) 8%, transparent), 0 8px 22px -14px rgba(0, 0, 0, .35); }
+  .side-brand::after { content: ""; position: absolute; inset: auto 0 0 0; height: 3px; background: linear-gradient(90deg, #e0614f, #e3923a, #3a9b68, #d25d93, #4a7fd0, #8a66d1, #7f8a9b); }
+  .side-brand:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  .side-logo { width: 2.85rem; height: 2.85rem; flex: none; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .12)); }
+  .side-logo .ring { transform-box: view-box; transform-origin: 20px 20px; transform: rotate(-96deg); }
+  .side-logo .ring circle { fill: none; stroke-width: 4.6; stroke-linecap: round; }
+  .side-logo .hub { fill: var(--color-panel); }
+  .side-logo text { font-family: var(--font-anthropic-serif); font-size: 14px; font-weight: 500; fill: var(--color-fg); }
+  @media (prefers-reduced-motion: no-preference) {
+    .side-logo .ring { transition: transform .9s var(--cds-ease-out); }
+    .side-brand:hover .side-logo .ring { transform: rotate(-44.57deg); }
+  }
+  .side-brand-text { display: grid; gap: 2px; min-width: 0; }
+  .side-title { font-family: var(--font-anthropic-serif); font-size: 1.4rem; line-height: 1.05; letter-spacing: -.01em; }
+  .side-date { font-size: .75rem; color: var(--color-fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Nav: each view carries its life-area colour (--c). */
+  .side-nav { display: grid; gap: 1.1rem; }
+  .side-group { display: grid; gap: .2rem; }
+  .side-label { padding: 0 .6rem .15rem; font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--color-fg-muted); }
+  .side-link { --c: var(--color-fg-muted); display: flex; align-items: center; gap: .65rem; padding: .35rem .5rem; border-radius: 11px; color: var(--color-fg-muted); text-decoration: none; font-weight: 500; transition: background .15s, color .15s; }
+  .side-ico { width: 1.9rem; height: 1.9rem; flex: none; display: grid; place-items: center; border-radius: 9px; color: var(--c); background: color-mix(in oklab, var(--c) 15%, transparent); transition: background .15s, color .15s, box-shadow .15s; }
+  .side-ico svg { width: 1.05rem; height: 1.05rem; }
+  .side-link:hover { color: var(--color-fg); background: color-mix(in oklab, var(--c) 9%, transparent); }
+  .side-link[aria-current="page"] { color: var(--color-fg); background: color-mix(in oklab, var(--c) 12%, var(--color-panel)); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 30%, transparent); }
+  .side-link[aria-current="page"] .side-ico { color: #fff; background: var(--c); box-shadow: 0 4px 12px -4px color-mix(in oklab, var(--c) 75%, transparent); }
+  .side-link[data-view="home"] { --c: var(--color-fg); }
+  .side-link[data-view="home"] .side-ico { background: color-mix(in oklab, var(--color-fg) 8%, transparent); }
+  .side-link[data-view="home"][aria-current="page"] .side-ico { background: conic-gradient(from 210deg, #e0614f, #e3923a, #3a9b68, #4a7fd0, #8a66d1, #d25d93, #e0614f); box-shadow: 0 4px 12px -4px rgba(0, 0, 0, .35); }
+  .side-badge { margin-left: auto; min-width: 1.3rem; height: 1.25rem; padding: 0 .4rem; display: grid; place-items: center; border-radius: 999px; font-size: .7rem; font-weight: 600; color: #fff; background: var(--c); }
   .side-link:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
   .side-foot { margin-top: auto; display: grid; gap: .6rem; padding: 0 .5rem; }
   .side-sync { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; align-items: baseline; gap: .45rem; line-height: 1.35; }
@@ -69,12 +97,17 @@
   @media (max-width: 860px) {
     .app { grid-template-columns: minmax(0, 1fr); }
     .side { position: sticky; z-index: 30; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; padding: calc(.5rem + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) .5rem max(16px, env(safe-area-inset-left, 0px)); border-right: 0; border-bottom: 1px solid var(--color-border-line); }
-    .side-brand { padding: 0; }
+    .side-brand { gap: .55rem; padding: .3rem .7rem .4rem .35rem; border-radius: 12px; }
+    .side-logo { width: 2rem; height: 2rem; }
     .side-title { font-size: 1.1rem; }
-    .side-swatch { display: none; }
-    .side-nav { order: 3; flex-basis: 100%; display: flex; flex-wrap: nowrap; gap: .25rem; overflow-x: auto; scrollbar-width: none; margin: 0 -4px; padding: 2px 4px; }
+    .side-date { font-size: .6875rem; }
+    .side-nav { order: 3; flex-basis: 100%; display: flex; flex-wrap: nowrap; gap: .3rem; overflow-x: auto; scrollbar-width: none; margin: 0 -4px; padding: 2px 4px; }
     .side-nav::-webkit-scrollbar { display: none; }
-    .side-link { padding: .35rem .65rem; white-space: nowrap; flex: none; }
+    .side-group { display: contents; }
+    .side-label { display: none; }
+    .side-link { padding: .25rem .6rem .25rem .3rem; gap: .45rem; white-space: nowrap; flex: none; }
+    .side-ico { width: 1.6rem; height: 1.6rem; border-radius: 7px; }
+    .side-badge { margin-left: .1rem; }
     .side-foot { margin: 0 0 0 auto; flex: 1 1 auto; display: flex; align-items: center; justify-content: flex-end; gap: .75rem; padding: 0; min-width: 0; }
     .side-sync { min-width: 0; font-size: .75rem; }
     .side-btns { flex-wrap: nowrap; }
@@ -159,37 +192,59 @@ window.dash = (() => {
 
 <div class="app" id="app" hidden>
   <aside class="side" aria-label="Navigation">
-    <div class="side-brand">
-      <span class="side-title">Life Wiki</span>
-      <div class="side-swatch" aria-hidden="true">
-        <span style="background:#e0614f"></span><span style="background:#e3923a"></span><span style="background:#3a9b68"></span><span style="background:#d25d93"></span><span style="background:#4a7fd0"></span><span style="background:#8a66d1"></span><span style="background:#7f8a9b"></span>
-      </div>
-    </div>
+    <a class="side-brand" href="#home" aria-label="Life Wiki, home">
+      <svg class="side-logo" viewBox="0 0 40 40" aria-hidden="true">
+        <circle class="hub" cx="20" cy="20" r="11.5"/>
+        <g class="ring">
+          <circle cx="20" cy="20" r="15" stroke="#e0614f" stroke-dasharray="6.6 87.65" stroke-dashoffset="0"/>
+          <circle cx="20" cy="20" r="15" stroke="#e3923a" stroke-dasharray="6.6 87.65" stroke-dashoffset="-13.46"/>
+          <circle cx="20" cy="20" r="15" stroke="#3a9b68" stroke-dasharray="6.6 87.65" stroke-dashoffset="-26.93"/>
+          <circle cx="20" cy="20" r="15" stroke="#d25d93" stroke-dasharray="6.6 87.65" stroke-dashoffset="-40.39"/>
+          <circle cx="20" cy="20" r="15" stroke="#4a7fd0" stroke-dasharray="6.6 87.65" stroke-dashoffset="-53.86"/>
+          <circle cx="20" cy="20" r="15" stroke="#8a66d1" stroke-dasharray="6.6 87.65" stroke-dashoffset="-67.32"/>
+          <circle cx="20" cy="20" r="15" stroke="#7f8a9b" stroke-dasharray="6.6 87.65" stroke-dashoffset="-80.78"/>
+        </g>
+        <text x="20" y="24.8" text-anchor="middle" id="side-day"></text>
+      </svg>
+      <span class="side-brand-text">
+        <span class="side-title">Life Wiki</span>
+        <span class="side-date" id="side-date"></span>
+      </span>
+    </a>
     <nav class="side-nav">
-      <a class="side-link" href="#home" data-view="home">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/></svg>
-        Home
-      </a>
-      <a class="side-link" href="#travel" data-view="travel">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13.5 21 6l-4.5 14-4.2-6.3z"/><path d="M12.3 13.7 21 6"/></svg>
-        Travel
-      </a>
-      <a class="side-link" href="#health" data-view="health">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2.5-5 4 10 2.5-5H21"/></svg>
-        Health &amp; fitness
-      </a>
-      <a class="side-link" href="#social" data-view="social">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="16.5" cy="9.5" r="2.4"/><path d="M15.5 14.2A4.6 4.6 0 0 1 20.5 19"/></svg>
-        Social
-      </a>
-      <a class="side-link" href="#finance" data-view="finance">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 6.5A7 7 0 1 0 17.5 17.5"/><path d="M5 10.5h8M5 13.5h8"/></svg>
-        Finance
-      </a>
-      <a class="side-link" href="#skills" data-view="skills">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="18" r="2.2"/><circle cx="12" cy="12.5" r="1.4"/><path d="M12 7.2v3.9M11 13.5l-3.8 2.7M13 13.5l3.8 2.7"/></svg>
-        Skill tree
-      </a>
+      <div class="side-group">
+        <a class="side-link" href="#home" data-view="home">
+          <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/></svg></span>
+          Home
+        </a>
+      </div>
+      <div class="side-group">
+        <span class="side-label">Life areas</span>
+        <a class="side-link" href="#travel" data-view="travel" style="--c:#e3923a">
+          <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13.5 21 6l-4.5 14-4.2-6.3z"/><path d="M12.3 13.7 21 6"/></svg></span>
+          Travel
+        </a>
+        <a class="side-link" href="#health" data-view="health" style="--c:#e0614f">
+          <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2.5-5 4 10 2.5-5H21"/></svg></span>
+          Health &amp; fitness
+        </a>
+        <a class="side-link" href="#social" data-view="social" style="--c:#d25d93">
+          <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="16.5" cy="9.5" r="2.4"/><path d="M15.5 14.2A4.6 4.6 0 0 1 20.5 19"/></svg></span>
+          Social
+          <span class="side-badge" id="side-badge-social" hidden></span>
+        </a>
+        <a class="side-link" href="#finance" data-view="finance" style="--c:#3a9b68">
+          <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 6.5A7 7 0 1 0 17.5 17.5"/><path d="M5 10.5h8M5 13.5h8"/></svg></span>
+          Finance
+        </a>
+      </div>
+      <div class="side-group">
+        <span class="side-label">Growth</span>
+        <a class="side-link" href="#skills" data-view="skills" style="--c:#8a66d1">
+          <span class="side-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="18" r="2.2"/><circle cx="12" cy="12.5" r="1.4"/><path d="M12 7.2v3.9M11 13.5l-3.8 2.7M13 13.5l3.8 2.7"/></svg></span>
+          Skill tree
+        </a>
+      </div>
     </nav>
     <div class="side-foot">
       <span class="side-sync" id="shell-sync">Loading…</span>
@@ -199,6 +254,23 @@ window.dash = (() => {
       </div>
     </div>
   </aside>
+  <script>
+  /* Brand card date + Social overdue badge. */
+  (() => {
+    const d = new Date();
+    const u = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    u.setUTCDate(u.getUTCDate() + 4 - (u.getUTCDay() || 7));
+    const week = Math.ceil(((u - Date.UTC(u.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
+    document.getElementById('side-day').textContent = d.getDate();
+    document.getElementById('side-date').textContent = d.toLocaleDateString('en-GB', { weekday: 'long' }) +' \u00b7 week ' + week;
+    dash.onData(() => {
+      const b = document.getElementById('side-badge-social');
+      let n = 0;
+      try { n = window.lifeCRM ? window.lifeCRM().filter((p) => p.state === 'over').length : 0; } catch (_) {}
+      b.textContent = n; b.hidden = !n; b.title = n + ' overdue to contact';
+    });
+  })();
+  </script>
 
   <main id="dash-root">
   <section class="view" id="view-home" data-view="home">
