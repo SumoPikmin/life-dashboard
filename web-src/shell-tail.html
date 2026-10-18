@@ -62,7 +62,12 @@
   function updateSync() {
     if (!lastGen) return;
     const el = $('#shell-sync');
-    el.textContent = 'Notion synced ' + ago(lastGen) + ' · every 3 h';
+    // The workflow runs at :07 past every third hour (UTC).
+    const nowD = new Date(), next = new Date(nowD);
+    next.setUTCMinutes(7, 0, 0);
+    while (next <= nowD || next.getUTCHours() % 3 !== 0) next.setUTCHours(next.getUTCHours() + 1, 7, 0, 0);
+    const mins = Math.round((next - nowD) / 60000);
+    el.textContent = 'Notion synced ' + ago(lastGen) + ' · next in ' + (mins < 60 ? mins + ' min' : Math.round(mins / 60) + ' h');
     el.classList.toggle('is-stale', (Date.now() - new Date(lastGen)) / 36e5 > 8);
   }
 
@@ -109,7 +114,6 @@
     }
   }
 
-  $('#shell-refresh').addEventListener('click', () => refresh(true));
   $('#shell-lock').addEventListener('click', () => { forget(); location.reload(); });
   setInterval(updateSync, 60000);
   setInterval(() => { if (!document.hidden) refresh(false); }, 10 * 60000);

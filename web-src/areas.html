@@ -11,7 +11,18 @@
   .av-eyebrow { display: inline-flex; align-items: center; gap: .4rem; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .av-eyebrow::before { content: ""; width: .7rem; height: .7rem; border-radius: 3px; background: var(--a); }
   .av-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: calc(var(--cds-font-size-title) * 1.35); line-height: 1.05; }
-  .av-lead { margin: 0; max-width: 66ch; line-height: 1.55; }
+  .av-lead { margin: 0; max-width: 72ch; line-height: 1.5; padding: .75rem 1rem; border-radius: 10px; background: color-mix(in oklab, var(--a) 8%, var(--color-panel)); border-left: 3px solid var(--a); }
+  .av-lead[data-level="warn"] { border-left-color: var(--color-warn); background: color-mix(in oklab, var(--color-warn) 8%, var(--color-panel)); }
+  .av-lead[data-level="ok"] { border-left-color: var(--color-ok); background: color-mix(in oklab, var(--color-ok) 7%, var(--color-panel)); }
+  .hv-races { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); gap: var(--cds-gap-sm); }
+  .hv-race { display: grid; gap: 3px; padding: .75rem .9rem; border-radius: 10px; border: 1px solid color-mix(in oklab, var(--a) 25%, var(--color-border-line)); background: color-mix(in oklab, var(--a) 5%, var(--color-panel)); }
+  .hv-race-n { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .hv-race-n small { font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-left: .25rem; }
+  .hv-race-name { font-weight: var(--cds-font-weight-medium); line-height: 1.3; }
+  .hv-race-meta { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.45; }
+  .hv-habit-group { font-size: .6875rem; letter-spacing: .05em; text-transform: uppercase; color: var(--color-fg-muted); margin-top: .25rem; }
+  .hv-fresh { margin-left: auto; font-size: .75rem; color: var(--color-fg-muted); white-space: nowrap; }
+  .hv-fresh.is-stale { color: var(--color-warn); }
   .av-cta { display: inline-flex; align-items: center; gap: .5rem; padding: .6rem 1rem; border-radius: 12px; background: var(--a); color: #fff !important; text-decoration: none !important; font-weight: var(--cds-font-weight-medium); white-space: nowrap; }
   .av-cta:hover { filter: brightness(1.05); }
   .av-cta:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 3px; }
@@ -168,11 +179,11 @@
   <section class="av-projects" id="hv-projects"></section>
   <div class="av-grid">
     <section class="av-card" id="hv-races">
-      <div class="av-card-head"><h2>Races and events</h2><span class="av-note">Dated items and planned race trips</span></div>
-      <ul class="av-list" id="hv-race-list"></ul>
+      <div class="av-card-head"><h2>Races</h2><span class="av-note">Countdown, goal and training block for each</span></div>
+      <div class="hv-races" id="hv-race-list"></div>
     </section>
     <section class="av-card" id="hv-tasks">
-      <div class="av-card-head"><h2>Habits and tasks</h2><span class="av-note">Task Planner · Health &amp; Fitness</span></div>
+      <div class="av-card-head"><h2>Habits</h2><span class="av-note">When you last worked on each (Task Planner)</span></div>
       <ul class="av-list" id="hv-task-list"></ul>
     </section>
   </div>
@@ -248,7 +259,7 @@
   };
 
   /* A project card: period with today, linked goals, next action, related tasks. */
-  function projectCard(p, goalsByKey, tasks) {
+  function projectCard(p, goalsByKey, tasks, extra = {}) {
     const card = el('article', 'av-proj');
     const s = parseDay(p.start), e = parseDay(p.end);
     let tag = 'Ongoing', share = null;
@@ -271,7 +282,7 @@
       for (const g of linked) {
         const li = el('li', 'av-item');
         const d = el('span', 'av-dot' + (g.status === 'Done' ? ' is-done' : g.status === 'Idea' ? ' is-idea' : ''));
-        const pill = el('span', 'av-pill', [g.status, g.budget ? eur(g.budget) : ''].filter(Boolean).join(' · '));
+        const pill = el('span', 'av-pill', [g.status, g.budget ? eur(g.budget) : '', extra.goalNote ? extra.goalNote(g) : ''].filter(Boolean).join(' · '));
         if (g.status === 'Active') pill.dataset.level = 'active';
         if (g.status === 'Done') pill.dataset.level = 'ok';
         li.append(d, link(g.name, g.url), pill); ul.append(li);
@@ -280,6 +291,7 @@
       const budget = d3.sum(linked, (g) => g.budget);
       if (budget) add('Goal budgets', eur(budget));
     }
+    for (const [k, v] of extra.rows || []) add(k, v);
     if (tasks && tasks.length) add('Open tasks', tasks.map((x) => x.name + (x.scope ? ' (' + x.scope + ')' : '')).join(' · '));
     card.append(dl);
     return card;
@@ -315,7 +327,7 @@
     for (const tr of b.tracks) {
       if (asGroups) {
         const g = el('div', 'av-group');
-        const head = el('div', 'av-group-head'); head.append(el('span', '', tr.name), el('span', '', tr.done + ' of ' + tr.total + ' · ' + tr.xp + ' XP'));
+        const head = el('div', 'av-group-head'); head.append(el('span', '', tr.name), el('span', '', tr.done + ' of ' + tr.total + ' unlocked'));
         const meter = el('div', 'av-meter'); const f = el('span'); f.style.width = (tr.done / tr.total) * 100 + '%'; meter.append(f);
         g.append(head, meter);
         if (tr.latest) g.append(el('span', 'av-note', 'Latest: ' + tr.latest.title + ' (' + tr.latest.at + ')'));
@@ -485,11 +497,14 @@
     const res = travelChart(list, line, nowM);
     const nextYear = goals.filter((g) => g.scope === 'Next Year' && g.status !== 'Done');
     const done = goals.filter((g) => g.status === 'Done');
-    $('#tv-lead').textContent = [
-      list.length ? plural(list.length, 'trip') + ' in your plan, ' + eur(res.total) + ' in total.' : '',
-      line ? 'Your budget puts ' + eur(line) + ' a month into travel' + (res ? (res.low.bal < 0 ? ', and the pot runs ' + eur(-res.low.bal) + ' short around ' + mLabel(res.low.m) + '.' : ', which keeps the pot above zero all the way.') : '.') : '',
-      nextYear.length ? plural(nextYear.length, 'travel goal') + ' set for next year, ' + plural(done.length, 'adventure') + ' already done.' : '',
-    ].filter(Boolean).join(' ');
+    const lead = $('#tv-lead');
+    if (res && line) {
+      lead.dataset.level = res.low.bal < 0 ? 'warn' : 'ok';
+      lead.textContent = res.low.bal < 0
+        ? 'Your trip plan isn\u2019t fully funded: at ' + eur(line) + ' a month the travel pot drops to ' + eur(res.low.bal) + ' in ' + mLabel(res.low.m) + '. '
+          + eur(Math.ceil(-res.low.bal / Math.max(1, res.low.m - nowM + 1))) + ' more a month until then, or moving a trip later, closes the gap.'
+        : 'Your trip plan is funded: at ' + eur(line) + ' a month the pot never drops below zero, with ' + eur(res.end.bal) + ' left at the end.';
+    } else { delete lead.dataset.level; lead.textContent = list.length ? 'Add a Travel line to your budget to see whether the plan is funded.' : 'Add a "Travel Budget" table to your Finance page to plan trips here.'; }
 
     const strip = $('#tv-strip'); strip.replaceChildren();
     if (next) fig(strip, 'Next trip', next.name, next.when + (next.cost ? ' · ' + (next.raw || eur(next.cost)) : ''), '', true);
@@ -499,13 +514,7 @@
     fig(strip, 'Done', String(done.length), 'of ' + goals.length + ' travel items on the list');
 
     $('#tv-plan-note').textContent = line ? '+' + eur(line) + ' each month from the Travel line, minus each trip' : 'Add a Travel line to your budget to see the pot';
-    const v = $('#tv-verdict');
-    if (res && line) {
-      v.className = 'av-verdict ' + (res.low.bal < 0 ? 'is-warn' : 'is-ok');
-      v.textContent = res.low.bal < 0
-        ? 'At ' + eur(line) + ' a month the pot is lowest in ' + mLabel(res.low.m) + ' at ' + eur(res.low.bal) + '. ' + eur(Math.ceil(-res.low.bal / Math.max(1, res.low.m - nowM + 1))) + ' more a month until then, or moving a trip later, closes the gap.'
-        : 'At ' + eur(line) + ' a month the pot never drops below zero; lowest point ' + eur(res.low.bal) + ' in ' + mLabel(res.low.m) + ', ' + eur(res.end.bal) + ' left at the end.';
-    } else v.textContent = '';
+    $('#tv-verdict').hidden = true;
 
     const pb = $('#tv-projects'); pb.replaceChildren();
     const travelTasks = items.filter((x) => x.kind === 'task' && x.area === area && x.status !== 'Done');
@@ -690,15 +699,21 @@
     const nowM = t.getUTCFullYear() * 12 + t.getUTCMonth();
     for (const x of trips()) if (RACE.test(x.name) && x.span.a > nowM) races.push({ when: new Date(Date.UTC(Math.floor(x.span.a / 12), x.span.a % 12, 1)), label: x.name, cost: x.raw, monthOnly: true });
     races.sort((a, b) => a.when - b.when);
-    const nextRace = races.find((r) => RACE.test(r.label) && !/\b(starts|ends)$/.test(r.label)) || null;
+    const realRaces = races.filter((r) => RACE.test(r.label) && !/\b(starts|ends)$/.test(r.label));
+    const nextRace = realRaces[0] || null;
 
     const training = projects.find((p) => /train|run|lauf/i.test(p.name)) || projects[0];
     const ts = training && parseDay(training.start), te = training && parseDay(training.end);
-    $('#hv-lead').textContent = [
-      training ? training.name + (ts && t < ts ? ' starts ' + (days(t, ts) <= 1 ? 'tomorrow' : 'in ' + days(t, ts) + ' days') : te ? ' runs until ' + fmtLong(te) : '') + '.' : 'No health project yet.',
-      nextRace ? 'Next race: ' + nextRace.label + ' (' + (nextRace.monthOnly ? d3.utcFormat('%B %Y')(nextRace.when) : fmtLong(nextRace.when)) + ').' : '',
-      active.length ? plural(active.length, 'active goal') + ': ' + active.map((g) => g.name).join('; ') + '.' : '',
-    ].filter(Boolean).join(' ');
+    const tr = data('training');
+    const { weeks, title: blockTitle } = tr ? blockWeeks(tr) : { weeks: [], title: '' };
+    const curWeek = weeks.find((w) => t >= w.start && days(w.start, t) < 7), nextWeek = weeks.find((w) => w.start > t);
+    const hl = $('#hv-lead');
+    hl.textContent = curWeek
+      ? 'This week: ' + (blockTitle || 'block') + ' week ' + curWeek.n + ' of ' + weeks.length + ' (' + [curWeek.phase, curWeek.km].filter(Boolean).join(', ') + '). Key sessions: Tue ' + curWeek.tue + '; Sun ' + curWeek.sun + '.'
+      : nextWeek
+        ? 'Before the ' + (blockTitle || 'next') + ' block starts on ' + fmtLong(nextWeek.start) + ' (in ' + Math.ceil(days(t, nextWeek.start) / 7) + ' weeks), follow your weekly structure below.'
+        : training ? training.name + (te ? ' runs until ' + fmtLong(te) : '') + '.' : 'No training plan yet.';
+    if (nextRace) hl.textContent += ' Next race: ' + nextRace.label + ', ' + (nextRace.monthOnly ? d3.utcFormat('%B %Y')(nextRace.when) : fmtLong(nextRace.when)) + '.';
 
     const strip = $('#hv-strip'); strip.replaceChildren();
     if (training && ts && te) {
@@ -713,26 +728,47 @@
     const p1 = tasks.filter((x) => x.scope === 'P1' && (x.status === 'Daily' || x.status === 'Weekly'));
     fig(strip, 'Habits & tasks', String(tasks.filter((x) => x.status === 'Daily' || x.status === 'Weekly').length), p1.length ? plural(p1.length, 'P1 task') : 'this week');
     const sb = window.SkillTree && window.SkillTree.branch('fitness');
-    if (sb) fig(strip, 'Fitness skills', d3.sum(sb.tracks, (x) => x.done) + ' of ' + d3.sum(sb.tracks, (x) => x.total), d3.sum(sb.tracks, (x) => x.xp) + ' XP · ' + d3.sum(sb.tracks, (x) => x.ready.length) + ' ready');
+    if (sb) fig(strip, 'Fitness skills', d3.sum(sb.tracks, (x) => x.done) + ' of ' + d3.sum(sb.tracks, (x) => x.total), d3.sum(sb.tracks, (x) => x.ready.length) + ' ready to unlock');
 
     const pb = $('#hv-projects'); pb.replaceChildren();
-    for (const p of projects) pb.append(projectCard(p, goalsByKey, tasks.filter((x) => x.status === 'Daily' || x.status === 'Weekly')));
+    // A goal's race: a race whose name shares a distinctive word with the goal (e.g. "Bologna").
+    const raceFor = (g) => realRaces.find((r) => (g.name.match(/[A-Za-zÀ-ž]{5,}/g) || []).some((w) => !/\b(half|marathon|triathlon|summer|autumn|march)\b/i.test(w) && r.label.toLowerCase().includes(w.toLowerCase())));
+    const weeksTo = (d) => Math.max(0, Math.round(days(t, d) / 7));
+    for (const p of projects) {
+      const rows = [];
+      if (weeks.length && /train|run|lauf/i.test(p.name)) rows.push(['Current block', (blockTitle || 'Block') + ': ' + weeks.length + ' weeks, ' + fmtShort(weeks[0].start) + ' \u2192 ' + fmtShort(weeks[weeks.length - 1].start) + (curWeek ? ' · now week ' + curWeek.n : nextWeek ? ' · starts in ' + weeksTo(nextWeek.start) + ' weeks' : '')]);
+      pb.append(projectCard(p, goalsByKey, null, { rows, goalNote: (g) => { const r = raceFor(g); return r ? 'race in ' + weeksTo(r.when) + ' wk' : ''; } }));
+    }
     if (!projects.length) pb.append(el('p', 'av-empty', 'No health project yet.'));
 
     const rl = $('#hv-race-list'); rl.replaceChildren();
-    for (const r of races.slice(0, 8)) {
-      const li = el('li', 'av-item');
-      li.append(el('span', 'av-dot'), link(r.label, r.url), el('span', 'av-pill', (r.monthOnly ? d3.utcFormat('%b %Y')(r.when) : fmtShort(r.when)) + (r.cost ? ' · ' + r.cost : '')));
-      rl.append(li);
+    for (const r of realRaces.slice(0, 6)) {
+      const card = el('div', 'hv-race');
+      const n = el('div', 'hv-race-n', String(weeksTo(r.when))); n.append(el('small', '', weeksTo(r.when) === 1 ? 'week to go' : 'weeks to go'));
+      card.append(n, r.url ? link(r.label, r.url) : el('div', 'hv-race-name', r.label));
+      if (r.url) card.lastChild.classList.add('hv-race-name');
+      const goal = goals.find((g) => g.status !== 'Done' && raceFor(g) === r);
+      const inBlock = blockTitle && (blockTitle.match(/[A-Za-zÀ-ž]{5,}/g) || []).some((w) => r.label.toLowerCase().includes(w.toLowerCase()));
+      const meta = [(r.monthOnly ? d3.utcFormat('%B %Y')(r.when) : fmtLong(r.when)) + (r.cost ? ' · ' + r.cost : ''), goal ? 'Goal: ' + goal.name : '', inBlock ? 'Training: ' + blockTitle + ' block' : ''].filter(Boolean);
+      for (const m of meta) card.append(el('div', 'hv-race-meta', m));
+      rl.append(card);
     }
-    if (!races.length) rl.append(el('li', 'av-empty', 'No dated races. Add a date to a goal or a race to your trip plan.'));
+    if (!realRaces.length) rl.append(el('p', 'av-empty', 'No races planned. Add a race to your trip plan or a dated race to a goal.'));
 
     const tl = $('#hv-task-list'); tl.replaceChildren();
-    const RANKS = { Daily: 0, Weekly: 1, Capture: 2, 'On-Hold': 3 };
-    for (const x of tasks.slice().sort((a, b) => (RANKS[a.status] ?? 9) - (RANKS[b.status] ?? 9))) {
-      const li = el('li', 'av-item');
-      li.append(el('span', 'av-dot'), link(x.name, x.url), el('span', 'av-pill', [x.status, x.scope].filter(Boolean).join(' · ')));
-      tl.append(li);
+    const LIMIT = { Daily: 2, Weekly: 9 };
+    for (const [status, label] of [['Daily', 'Every day'], ['Weekly', 'This week'], ['Capture', 'Later'], ['On-Hold', 'On hold']]) {
+      const list = tasks.filter((x) => x.status === status);
+      if (!list.length) continue;
+      tl.append(el('li', 'hv-habit-group', label));
+      for (const x of list) {
+        const li = el('li', 'av-item');
+        const last = parseDay(x.start), ago = last ? days(last, t) : null;
+        const fresh = el('span', 'hv-fresh' + (ago != null && LIMIT[status] != null && ago > LIMIT[status] ? ' is-stale' : ''),
+          ago == null ? 'not logged yet' : ago === 0 ? 'done today' : ago === 1 ? 'yesterday' : ago + ' days ago');
+        li.append(el('span', 'av-dot'), link(x.name + (x.scope ? ' (' + x.scope + ')' : ''), x.url), fresh);
+        tl.append(li);
+      }
     }
     if (!tasks.length) tl.append(el('li', 'av-empty', 'No health tasks in the Task Planner.'));
 

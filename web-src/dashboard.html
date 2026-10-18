@@ -22,6 +22,23 @@
   .lw-lens[aria-selected="true"] { color: var(--color-fg); border-color: var(--color-fg-muted); background: color-mix(in oklab, var(--color-fg) 7%, var(--color-panel)); }
   .lw-lens:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
 
+  .lw-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--cds-gap-sm); }
+  .lw-stat { font: inherit; color: inherit; text-align: left; cursor: pointer; display: grid; gap: 3px; align-content: start; padding: var(--cds-pad-md) var(--cds-pad-lg); border-radius: var(--cds-radius); border: 1px solid var(--color-border-line); background: var(--color-panel); text-decoration: none !important; position: relative; transition: border-color var(--cds-dur-slow), transform var(--cds-dur-slow); }
+  .lw-stat:hover { border-color: var(--s, var(--color-fg-muted)); transform: translateY(-1px); }
+  .lw-stat:focus-visible { outline: 2px solid var(--s, var(--color-fg)); outline-offset: 2px; }
+  .lw-stat::after { content: "\2192"; position: absolute; top: .55rem; right: .8rem; color: var(--color-fg-muted); font-size: .8rem; }
+  .lw-stat-l { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); padding-right: 1rem; }
+  .lw-stat-n { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .lw-stat-n small { font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-left: .25rem; }
+  .lw-stat-s { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.4; }
+  .lw-stat-s.is-warn { color: var(--color-warn); } .lw-stat-s.is-ok { color: var(--color-ok); }
+  .lw-stat-bar { height: .3rem; border-radius: 999px; background: color-mix(in oklab, var(--s, var(--color-fg)) 14%, transparent); overflow: hidden; margin-top: 3px; }
+  .lw-stat-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--s, var(--color-fg)); }
+  .lw-agenda { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--cds-gap-xl); align-items: start; }
+  @media (max-width: 900px) { .lw-agenda { grid-template-columns: minmax(0, 1fr); } }
+  .lw-themes { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.5rem 2rem !important; }
+  .lw-fold-sum { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.4; }
+  .lw-mk-l { font-size: .6875rem; color: var(--color-fg-muted); margin-right: 2px; letter-spacing: .02em; }
   .lw-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
   .lw-fig { padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: 2px; align-content: start; box-shadow: -1px 0 0 var(--color-border-line), 0 -1px 0 var(--color-border-line); }
   .lw-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
@@ -85,23 +102,21 @@
   .lw-row[aria-pressed="true"] { border-color: var(--a); background: color-mix(in oklab, var(--a) 9%, var(--color-panel)); box-shadow: inset 0 3px 0 var(--a); }
   .lw-row-name { display: flex; align-items: center; gap: var(--cds-gap-sm); font-weight: var(--cds-font-weight-medium); min-width: 0; }
   .lw-row-name span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .lw-marks { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-height: 1rem; }
+  .lw-marks { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; min-height: 1.1rem; }
   .lw-sep { width: 1px; height: .9rem; margin: 0 4px; background: var(--color-border-line); }
-  .lw-m { display: inline-block; flex: none; background: var(--a); }
-  .lw-m.is-project { width: .8rem; height: .8rem; border-radius: 3px; }
-  .lw-m.is-goal { width: .8rem; height: .8rem; border-radius: 50%; }
-  .lw-m.is-task { width: .3rem; height: .8rem; border-radius: 2px; opacity: .75; }
-  .lw-m.is-idea { width: .5rem; height: .5rem; border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--a) 55%, transparent); }
-  .lw-m.is-done { width: .5rem; height: .5rem; border-radius: 50%; background: color-mix(in oklab, var(--a) 40%, transparent); }
-  .lw-more { font-size: .6875rem; color: var(--color-fg-muted); margin-left: 2px; }
-  .lw-legend .lw-m { --a: var(--color-fg-muted); }
+  .lw-m { display: inline-flex; flex: none; line-height: 0; color: var(--a); }
+  .lw-m svg { display: block; }
+  .lw-legend .lw-m svg { opacity: .9; }
+  .lw-legend .lw-m { --a: var(--color-fg); }
+  .lw-legend { gap: var(--cds-gap-xs) var(--cds-gap-lg); }
   .lw-row .lw-marks { grid-column: 1 / -1; }
   .lw-row-note { grid-column: 1 / -1; display: flex; align-items: baseline; gap: .4rem; font-size: var(--cds-font-size-caption); line-height: 1.4; }
   .lw-row-note::before { content: ""; flex: none; width: .45rem; height: .45rem; border-radius: 50%; background: var(--cds-chart-muted); transform: translateY(-1px); }
   .lw-row-note[data-level="warn"] { color: var(--color-warn); } .lw-row-note[data-level="warn"]::before { background: var(--color-warn); }
   .lw-row-note[data-level="ok"]::before { background: var(--color-ok); }
   .lw-row-note[data-level="info"]::before { background: var(--a, var(--cds-chart-muted)); }
-  .lw-row .lw-row-note { grid-row: 1; grid-column: 2; justify-self: end; text-align: right; max-width: 12rem; }
+  .lw-row .lw-row-name { grid-column: 1 / -1; }
+  .lw-row .lw-row-note { grid-column: 1 / -1; }
   .lw-detail-notes { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin-top: .25rem; }
   .lw-detail-notes .lw-row-note { grid-column: auto; }
   .lw-tasks { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: var(--cds-gap-md); align-items: start; }
@@ -210,39 +225,12 @@
     </figure>
   </header>
 
-  <section class="lw-strip" id="headline" aria-label="Headline figures">
-    <div class="lw-fig">
-      <span class="lw-label">Active projects</span>
-      <span class="lw-big dash-skeleton" data-source="summary" data-field="projects" data-fmt="int">—</span>
-      <span class="lw-sub">across <span data-source="summary" data-field="project_areas" data-fmt="int">—</span> life areas</span>
-    </div>
-    <div class="lw-fig">
-      <span class="lw-label">Active goals</span>
-      <span class="lw-big dash-skeleton" data-source="summary" data-field="goals_active" data-fmt="int">—</span>
-      <span class="lw-sub"><span data-source="summary" data-field="next_year_goals" data-fmt="int">—</span> planned for next year</span>
-    </div>
-    <div class="lw-fig">
-      <span class="lw-label">Impossible List done</span>
-      <span class="lw-big dash-skeleton" data-source="summary" data-field="goals_done" data-fmt="int">—</span>
-      <span class="lw-sub"><span data-source="summary" data-field="done_share" data-fmt="pct">—</span> of <span data-source="summary" data-field="goals_total" data-fmt="int">—</span> items</span>
-    </div>
-    <div class="lw-fig">
-      <span class="lw-label">Tasks this week</span>
-      <span class="lw-big dash-skeleton" data-source="summary" data-field="tasks_open" data-fmt="int">—</span>
-      <span class="lw-sub"><span data-source="summary" data-field="tasks_daily" data-fmt="int">—</span> daily · <span data-source="summary" data-field="tasks_capture" data-fmt="int">—</span> in Capture</span>
-    </div>
-    <a class="lw-fig" href="#finance" aria-label="Next-year goal budget, open Finance">
-      <span class="lw-label">Next-year goal budget</span>
-      <span class="lw-big dash-skeleton" data-source="summary" data-field="next_year_budget" data-fmt="eur">—</span>
-      <span class="lw-sub">≈ <span data-source="summary" data-field="monthly_saving" data-fmt="eur">—</span> a month to save</span>
-      <span class="lw-fig-go">Open finance →</span>
-    </a>
-  </section>
+  <section class="lw-stats" id="lw-stats" aria-label="Headline figures"></section>
 
   <section class="lw-section" id="areas">
     <div class="lw-section-head">
       <h2 class="lw-h2">Life areas</h2>
-      <span class="lw-note">Every mark is one real item. Hover a mark for its name, click an area to open it.</span>
+      <span class="lw-note">Click an area to open its projects</span>
     </div>
     <div class="lw-mapwrap">
       <div class="lw-map">
@@ -253,27 +241,27 @@
     </div>
   </section>
 
-  <section class="lw-section" id="tasks">
+  <section class="lw-section" id="agenda">
     <div class="lw-section-head">
-      <h2 class="lw-h2">Daily &amp; weekly</h2>
-      <span class="lw-note">From your Task Planner, P1 first. Review these before the week starts.</span>
+      <h2 class="lw-h2">This week &amp; coming up</h2>
+      <span class="lw-note">Task Planner (P1 first) and dated items for the next 90 days</span>
     </div>
-    <div class="lw-card"><div class="lw-tasks" id="lw-tasks"></div></div>
+    <div class="lw-card lw-agenda">
+      <div class="lw-tasks" id="lw-tasks"></div>
+      <div class="lw-task-col" id="lw-upcoming">
+        <div class="lw-task-col-head"><strong>Coming up</strong><span class="lw-note">next 90 days</span></div>
+        <ul class="lw-list" id="lw-dates"></ul>
+      </div>
+    </div>
   </section>
 
-  <div class="lw-grid2">
-    <section class="lw-card" id="insights">
-      <h3 class="lw-h3">Worth a look</h3>
-      <ul class="lw-list" id="lw-insights"></ul>
-    </section>
-    <section class="lw-card" id="coming-up">
-      <div class="lw-section-head">
-        <h3 class="lw-h3">Coming up</h3>
-        <span class="lw-note">Next 90 days</span>
-      </div>
-      <ul class="lw-list" id="lw-dates"></ul>
-    </section>
-  </div>
+  <section class="lw-section" id="insights">
+    <div class="lw-section-head">
+      <h2 class="lw-h2">Worth a look</h2>
+      <span class="lw-note">Recomputed from Notion on every sync</span>
+    </div>
+    <div class="lw-card"><ul class="lw-list lw-themes" id="lw-insights"></ul></div>
+  </section>
 </div>
 
 <script>
@@ -424,14 +412,10 @@ dash.calc('insights', {
     const capture = tasks.filter((t) => t.status === 'Capture');
     if (capture.length >= 5) add('info', '', s(capture.length, 'item') + ' in Capture', 'Waiting to be sorted into Daily, Weekly or On-Hold.', 'Housekeeping');
 
-    const quiet = main.filter((a) => a.projects === 0 && a.goals_active === 0 && a.goals_idea + a.goals_hold > 0);
-    if (quiet.length) add('info', quiet.length === 1 ? quiet[0].area : '', s(quiet.length, 'area') + ' with ideas but nothing active', 'Each has ideas on the Impossible List, but no project or active goal.', 'Balance', quiet.map((a) => ({ name: a.area + ' · ' + s(a.goals_idea + a.goals_hold, 'idea'), url: '', area: a.area })));
     const ideas = main.map((a) => [a.area, a.goals_idea]).sort((x, y) => y[1] - x[1]);
     const allIdeas = main.reduce((t, a) => t + a.goals_idea, 0);
     if (ideas[0] && ideas[0][1]) add('info', ideas[0][0], 'Most of your ideas are in ' + ideas[0][0], ideas[0][1] + ' of ' + allIdeas + ' Impossible List ideas.', 'Balance');
 
-    const budget = goals.filter((g) => g.scope === 'Next Year' && g.status !== 'Done' && g.status !== 'Archived').reduce((t, g) => t + g.budget, 0);
-    if (budget) add('ok', 'Finance', '€' + budget.toLocaleString('en') + ' budgeted for next year', 'About €' + Math.round(budget / 12).toLocaleString('en') + ' a month to set aside. Details in Finance.', 'Money');
     const rank = { warn: 0, info: 1, ok: 2 };
     return out.sort((a, b) => rank[a.level] - rank[b.level]);
   },
@@ -478,6 +462,16 @@ dash.calc('dates', {
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const paint = (node, area) => { node.style.setProperty('--a', color(area)); return node; };
   const dot = (area) => paint(el('span', 'lw-dot'), area);
+  /* Marks: ■ project · ★ active goal · ● task this week · ☆ idea · ✓ done */
+  const STAR = 'M6 .8l1.55 3.3 3.6.42-2.66 2.47.7 3.56L6 8.8 2.81 10.55l.7-3.56L.85 4.52l3.6-.42z';
+  const MARK = {
+    'is-project': '<svg width="13" height="13" viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="2.4" fill="currentColor"/></svg>',
+    'is-goal': '<svg width="15" height="15" viewBox="0 0 12 12"><path d="' + STAR + '" fill="currentColor"/></svg>',
+    'is-task': '<svg width="9" height="9" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>',
+    'is-idea': '<svg width="12" height="12" viewBox="0 0 12 12"><path d="' + STAR + '" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" opacity=".75"/></svg>',
+    'is-done': '<svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5.4" fill="currentColor" opacity=".22"/><path d="M3.4 6.2l1.8 1.8 3.4-3.7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
+  const markEl = (cls) => { const m = el('i', 'lw-m ' + cls); m.innerHTML = MARK[cls]; return m; };
   const link = (text, url, cls = 'lw-name') => {
     if (!/^https:\/\//.test(url || '')) return el('span', cls, text);
     const a = el('a', cls, text); a.href = url; a.target = '_blank'; a.rel = 'noopener'; return a;
@@ -519,8 +513,8 @@ dash.calc('dates', {
 
   (() => {
     const box = $('#lw-legend');
-    for (const [cls, label] of [['is-project', 'Active project'], ['is-goal', 'Active goal'], ['is-task', 'Task this week'], ['is-idea', 'Idea on the Impossible List'], ['is-done', 'Done']]) {
-      const s = el('span'); s.append(el('i', 'lw-m ' + cls), document.createTextNode(label)); box.append(s);
+    for (const [cls, label] of [['is-project', 'Project'], ['is-goal', 'Active goal'], ['is-task', 'Task this week'], ['is-idea', 'Idea (Impossible List)'], ['is-done', 'Done']]) {
+      const s = el('span'); s.append(markEl(cls), document.createTextNode(label)); box.append(s);
     }
   })();
 
@@ -545,14 +539,64 @@ dash.calc('dates', {
     } else if (w.status !== 'loading') { q.classList.remove('dash-skeleton'); q.textContent = 'Add Life Principles to your Life Wiki page to see one here.'; }
   }
 
+  /* Monthly budget lines from the latest budget link on the Finance page. */
+  function budgetLines() {
+    const fin = dash.data('finance').status === 'ok' ? dash.data('finance').data : null;
+    const b = fin && (fin.budgets || []).slice(-1)[0];
+    if (!b) return { travel: 0, saving: 0, savingItems: [] };
+    const items = b.groups.flatMap((g) => g.items);
+    const save = b.groups.find((g) => /spar|sav/i.test(g.name));
+    return { travel: d3.sum(items.filter((x) => /travel|reise|urlaub/i.test(x.name)), (x) => x.value), saving: save ? save.value : 0, savingItems: save ? save.items : [] };
+  }
+  const jump = (sel) => { const n = document.querySelector(sel); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+
   function figures() {
-    const s = dash.data('summary');
-    document.querySelectorAll('[data-source="summary"][data-field]').forEach((node) => {
-      if (s.status !== 'ok') return;
-      const v = (s.data[0] || {})[node.dataset.field];
-      node.classList.remove('dash-skeleton');
-      node.textContent = v == null ? '—' : (FMT[node.dataset.fmt] || String)(v);
-    });
+    const box = $('#lw-stats');
+    if (state('summary', 'items') !== 'ok') { box.classList.add('dash-skeleton'); box.style.minHeight = '5.5rem'; return; }
+    box.classList.remove('dash-skeleton'); box.style.minHeight = '';
+    const d = dash.data('summary').data[0];
+    const items = dash.data('items').data;
+    const lines = budgetLines();
+    const nyIdeas = items.filter((x) => x.kind === 'goal' && x.scope === 'Next Year' && x.status === 'Idea').length;
+    const p1 = items.filter((x) => x.kind === 'task' && x.scope === 'P1' && (x.status === 'Daily' || x.status === 'Weekly')).length;
+    const covered = d.next_year_budget ? Math.min(1, (lines.travel * 12) / d.next_year_budget) : 0;
+    const stats = [
+      { label: 'Active projects', n: d.projects, sub: 'in ' + plural(d.project_areas, 'life area', 'life areas'), color: 'var(--a-career)', go: () => jump('#areas') },
+      { label: 'Active goals', n: d.goals_active, sub: nyIdeas ? plural(nyIdeas, 'next-year goal', 'next-year goals') + ' not started' : 'every next-year goal started', cls: nyIdeas ? 'is-warn' : 'is-ok',
+        bar: d.goals_active + nyIdeas ? d.goals_active / (d.goals_active + nyIdeas) : 0, color: 'var(--a-health)', go: () => jump('#areas') },
+      { label: 'This week', n: d.tasks_open, small: 'tasks', sub: [p1 ? p1 + ' P1' : '', d.tasks_capture ? d.tasks_capture + ' in Capture' : ''].filter(Boolean).join(' · ') || 'nothing urgent', color: 'var(--a-learning)', go: () => jump('#agenda') },
+      { label: 'Impossible List', n: d.goals_done, small: 'of ' + d.goals_total + ' done', bar: d.done_share, sub: FMT.pct(d.done_share) + ' of your list', color: 'var(--a-travel)',
+        go: () => { if (window.SkillTree && window.SkillTree.openTab) window.SkillTree.openTab('bucket'); location.hash = '#skills'; } },
+      { label: 'Next-year budget', n: FMT.eur(d.next_year_budget), sub: FMT.eur(d.monthly_saving) + '/month · ' + (lines.travel ? 'Travel line covers ' + FMT.pct(covered) : 'no Travel line'),
+        cls: covered < 1 ? 'is-warn' : 'is-ok', bar: covered, color: 'var(--a-finance)', go: () => { location.hash = '#finance'; } },
+    ];
+    box.replaceChildren();
+    for (const x of stats) {
+      const b = el('button', 'lw-stat'); b.type = 'button'; b.style.setProperty('--s', x.color);
+      const n = el('span', 'lw-stat-n', String(x.n)); if (x.small) n.append(el('small', '', x.small));
+      b.append(el('span', 'lw-stat-l', x.label), n, el('span', 'lw-stat-s' + (x.cls ? ' ' + x.cls : ''), x.sub));
+      if (x.bar != null) { const bar = el('span', 'lw-stat-bar'); const f = el('span'); f.style.width = Math.max(0, Math.min(1, x.bar)) * 100 + '%'; bar.append(f); b.append(bar); }
+      b.addEventListener('click', x.go);
+      box.append(b);
+    }
+  }
+
+  /* The money point needs the budget, so it is built here rather than in the calc. */
+  function moneyPoint() {
+    if (state('summary', 'items') !== 'ok') return [];
+    const d = dash.data('summary').data[0];
+    if (!d.next_year_budget) return [];
+    const lines = budgetLines();
+    const need = d.next_year_budget / 12, gap = need - lines.travel;
+    const top = dash.data('items').data.filter((g) => g.kind === 'goal' && g.scope === 'Next Year' && g.status !== 'Done' && g.status !== 'Archived' && g.budget)
+      .sort((a, b) => b.budget - a.budget).slice(0, 4);
+    return [{
+      level: lines.travel ? (gap > 0 ? 'warn' : 'ok') : 'info', area: 'Finance', theme: 'Money',
+      title: 'Next year’s goals need ' + FMT.eur(Math.round(need)) + ' a month',
+      detail: FMT.eur(d.next_year_budget) + ' in goal budgets. ' + (lines.travel ? 'The Travel line puts in ' + FMT.eur(lines.travel) + ' a month' + (gap > 0 ? ', ' + FMT.eur(Math.round(gap)) + ' short.' : ', which covers it.') : 'No Travel line in your budget yet.') +
+        (lines.saving ? ' Your ' + FMT.eur(lines.saving) + ' of saving stays for ' + lines.savingItems.map((x) => x.name).join(' and ') + '.' : ''),
+      chips: top.map((g) => ({ name: g.name + ' · ' + FMT.eur(g.budget), url: g.url, area: g.area })),
+    }];
   }
 
   /* What is worth knowing about one area right now, most pressing first: [level, text]. */
@@ -610,17 +654,18 @@ dash.calc('dates', {
 
       const marks = el('span', 'lw-marks');
       const add = (list, cls, kind) => list.forEach((x) => {
-        const m = el('i', 'lw-m ' + cls);
+        const m = markEl(cls);
         m.dataset.tip = JSON.stringify([kind, x.name]);
         m.setAttribute('aria-label', kind + ': ' + x.name);
         marks.append(m);
       });
       const now = [of((x) => x.kind === 'project'), of((x) => x.kind === 'goal' && x.status === 'Active'), of((x) => x.kind === 'task' && (x.status === 'Daily' || x.status === 'Weekly'))];
+      marks.append(el('span', 'lw-mk-l', 'Now'));
       add(now[0], 'is-project', 'Project');
       add(now[1], 'is-goal', 'Active goal');
       add(now[2], 'is-task', 'Task this week');
       if (!now.some((l) => l.length)) marks.append(el('span', 'lw-more', 'Nothing active'));
-      marks.append(el('span', 'lw-sep'));
+      marks.append(el('span', 'lw-sep'), el('span', 'lw-mk-l', 'List'));
       const ideas = of((x) => x.kind === 'goal' && (x.status === 'Idea' || x.status === 'On Hold'));
       add(ideas.slice(0, 24), 'is-idea', 'Idea');
       if (ideas.length > 24) marks.append(el('span', 'lw-more', '+' + (ideas.length - 24)));
@@ -639,7 +684,8 @@ dash.calc('dates', {
       title.append(el('strong', '', (foldOpen ? '\u25BE ' : '\u25B8 ') + 'No projects yet'), document.createTextNode(' \u00b7 ' + plural(folded.length, 'area', 'areas')));
       const dots = el('span', 'lw-fold-dots');
       for (const r of folded) dots.append(dot(r.area));
-      tile.append(title, dots);
+      const sum = el('span', 'lw-fold-sum', folded.map((r) => (SHORT[r.area] || r.area) + ' ' + (r.goals_idea + r.goals_hold ? plural(r.goals_idea + r.goals_hold, 'idea', 'ideas') : 'nothing yet')).join(' · '));
+      tile.append(title, dots, sum);
       box.append(tile);
       if (foldOpen) later.forEach((row) => box.append(row));
     }
@@ -730,33 +776,6 @@ dash.calc('dates', {
       }
     }
 
-    // Tasks
-    const rankP = { P1: 0, P2: 1, P3: 2 };
-    const tasks = items.filter((x) => x.kind === 'task' && (x.status === 'Daily' || x.status === 'Weekly'))
-      .sort((a, b) => (a.status === 'Daily' ? 0 : 1) - (b.status === 'Daily' ? 0 : 1) || (rankP[a.scope] ?? 9) - (rankP[b.scope] ?? 9));
-    if (tasks.length) {
-      const tb = block('This week');
-      const tl = el('ul', 'lw-list'); tb.append(tl);
-      for (const x of tasks) {
-        const li = el('li', 'lw-item');
-        li.append(dot(area), link(x.name, x.url), el('span', 'lw-tag' + (x.scope === 'P1' ? ' is-p1' : ''), [x.status, x.scope].filter(Boolean).join(' · ')));
-        tl.append(li);
-      }
-    }
-
-    // Dates in this area
-    const ds = dash.data('dates').data.map((d) => ({ ...d, d: parseDay(d.date) }))
-      .filter((d) => d.area === area && d.d && d.d >= t && daysBetween(t, d.d) <= 120).slice(0, 4);
-    if (ds.length) {
-      const db = block('Coming up');
-      const dl = el('ul', 'lw-list'); db.append(dl);
-      for (const d of ds) {
-        const li = el('li', 'lw-item');
-        li.append(dot(area), link(d.label, d.url), el('span', 'lw-tag', fmtShort(d.d)));
-        dl.append(li);
-      }
-    }
-
     const later = items.filter((x) => x.kind === 'goal' && (x.status === 'Idea' || x.status === 'On Hold') && x.scope !== 'Next Year');
     if (later.length) body.append(el('p', 'lw-note', plural(later.length, 'more idea', 'more ideas') + ' for later years on the Impossible List.'));
   }
@@ -828,9 +847,6 @@ dash.calc('dates', {
     { id: 'week', tab: 'This week vs this year', inner: 'Tasks this week', outer: 'Next-year goals', centre: 'tasks this week', fmt: (v) => String(v), minOuter: 1,
       innerOf: (r) => r.tasks_open, outerOf: (r) => r.next_year,
       innerPhrase: 'this week’s tasks', outerPhrase: 'next year’s goals', even: 'This week’s tasks line up with next year’s goals.', empty: 'Add life areas to your tasks to compare.' },
-    { id: 'skills', tab: 'Skills vs dreams', inner: 'Skill XP earned', outer: 'Impossible List ideas', centre: 'skill XP', fmt: (v) => d3.format(',')(v), minOuter: 3,
-      innerOf: (r, c) => c.xp[r.area] || 0, outerOf: (r) => r.goals_idea + r.goals_hold,
-      innerPhrase: 'your skill XP', outerPhrase: 'your ideas', even: 'Your skills are spread roughly like your ideas.', empty: 'The skill tree is still loading.' },
     { id: 'effort', tab: 'Effort vs dreams', inner: 'Doing now', outer: 'Impossible List ideas', centre: 'things in motion', fmt: (v) => String(v), minOuter: 3,
       innerOf: (r) => r.projects + r.goals_active + r.tasks_open, outerOf: (r) => r.goals_idea + r.goals_hold,
       innerPhrase: 'what you are doing now', outerPhrase: 'your ideas', even: 'Your effort is spread roughly in line with your ideas.', empty: 'Nothing active yet.' },
@@ -858,13 +874,13 @@ dash.calc('dates', {
       box.append(b);
     }
   }
-  window.addEventListener('skilltree', () => { if (lensId === 'skills') donut(); });
+  
 
   function insights() {
     const box = $('#lw-insights');
     if (hold(box, state('insights'))) return;
     box.classList.remove('dash-skeleton');
-    const rows = dash.data('insights').data;
+    const rows = [...dash.data('insights').data, ...moneyPoint()];
     if (!rows.length) { box.append(el('li', 'lw-note', 'Nothing flagged.')); return; }
     // Grouped by theme: what to plan, what to tidy, how your areas balance, money.
     const THEMES = [['Plans', 'Plans to firm up', 'var(--color-warn)'], ['Housekeeping', 'Housekeeping', 'var(--cds-chart-axis)'],

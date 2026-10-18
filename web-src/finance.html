@@ -9,7 +9,14 @@
   .fi a:hover { text-decoration-color: currentColor; }
   .fi-head { display: grid; gap: var(--cds-gap-sm); }
   .fi-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: calc(var(--cds-font-size-title) * 1.35); line-height: 1.05; }
-  .fi-lead { margin: 0; max-width: 66ch; line-height: 1.55; }
+  .fi-lead { margin: 0; max-width: 72ch; line-height: 1.5; padding: .75rem 1rem; border-radius: 10px; border-left: 3px solid var(--fi); background: color-mix(in oklab, var(--fi) 7%, var(--color-panel)); }
+  .fi-lead[data-level="warn"] { border-left-color: var(--color-warn); background: color-mix(in oklab, var(--color-warn) 8%, var(--color-panel)); }
+  .fi-sub-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--cds-gap-sm); padding: .55rem 0; border-bottom: 1px dashed var(--color-border-line); font-size: .875rem; }
+  .fi-sub-row:last-child { border-bottom: 0; }
+  .fi-sub-row .fi-note { grid-column: 1 / -1; }
+  .fi-sub-row .is-warn { color: var(--color-warn); }
+  .fi-go { justify-self: start; font: inherit; font-size: var(--cds-font-size-caption); cursor: pointer; padding: .3rem .8rem; border-radius: 999px; border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg); text-decoration: none !important; }
+  .fi-go:hover { border-color: var(--p-travel); }
   .fi-links { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .fi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
   .fi-fig { padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: 3px; align-content: start; box-shadow: -1px 0 0 var(--color-border-line), 0 -1px 0 var(--color-border-line); }
@@ -209,8 +216,10 @@
     if (!t) return [];
     const [head, ...rows] = t.header ? t.rows : [[], ...t.rows];
     const col = (re, fallback) => { const i = head.findIndex((h) => re.test(h)); return i >= 0 ? i : fallback; };
-    const iName = col(/posten|item|name/i, 1), iMonth = col(/monat|month/i, 2), iTurn = col(/turnus|cycle/i, 0), iDue = col(/fällig|due/i, 5);
-    return rows.filter((r) => clean(r[iName])).map((r) => ({ name: clean(r[iName]), monthly: num(r[iMonth]) || 0, cycle: clean(r[iTurn]), due: clean(r[iDue]) }));
+    const iName = col(/posten|item|name/i, 1), iMonth = col(/monat|month/i, 2), iTurn = col(/turnus|cycle/i, 0), iDue = col(/fällig|due/i, 5),
+      iTotal = col(/gesamt|total/i, 3), iCancel = col(/kündig|cancel/i, 4);
+    return rows.filter((r) => clean(r[iName])).map((r) => ({ name: clean(r[iName]), monthly: num(r[iMonth]) || 0, cycle: clean(r[iTurn]), due: clean(r[iDue]),
+      total: num(r[iTotal]), cancel: clean(r[iCancel]) }));
   }
 
   function render() {
@@ -244,11 +253,13 @@
 
     // Lead + links
     const nw = track && track.netWorth, ef = track && track.emergency;
-    $('#fi-lead').textContent = [
-      saving ? 'You put ' + eur(saving) + ' a month into saving and investing' + (saveGroup.items.length ? ' (' + saveGroup.items.map((x) => x.name + ' ' + eur(x.value)).join(', ') + ')' : '') + '.' : '',
-      travelLine ? eur(travelLine) + ' a month goes to travel' + (travelNeed ? (travelGap > 0 ? ', ' + eur(travelGap) + ' a month short of next year’s travel goals.' : ', enough for next year’s travel goals.') : '.') : '',
-      otherNeed ? 'Your other goals (' + otherGoals.map((g) => g.name.replace(/\s*\(.*?\)\s*/g, ' ').trim()).slice(0, 3).join(', ') + ') need ' + eur(otherNeed / 12) + ' a month' + (otherLine ? '.' : ', and no budget line pays for them yet.') : '',
-    ].filter(Boolean).join(' ');
+    // One verdict: the most pressing gap, or that the plan holds.
+    const lead = $('#fi-lead');
+    const gaps = [];
+    if (budget && travelNeed && travelGap > 0) gaps.push('Next year’s travel goals need ' + eur(travelGap) + ' a month more than the Travel line gives (' + eur(travelLine) + ').');
+    if (otherNeed && otherLine < otherNeed / 12) gaps.push('Your other goals (' + otherGoals.map((g) => g.name.replace(/\s*\(.*?\)\s*/g, ' ').trim()).slice(0, 2).join(', ') + (otherGoals.length > 2 ? ', …' : '') + ') need ' + eur(otherNeed / 12 - otherLine) + ' a month that nothing in the budget covers.');
+    if (gaps.length) { lead.dataset.level = 'warn'; lead.textContent = gaps.join(' '); }
+    else { delete lead.dataset.level; lead.textContent = budget ? 'Your budget covers next year’s goals' + (saving ? ', and you save ' + eur(saving) + ' a month on top.' : '.') : 'Add a budget link to your Finance page to compare.'; }
     const links = $('#fi-links'); links.replaceChildren();
     const planProject = items.find((i) => i.kind === 'project' && i.area === 'Finance');
     if (fin.url) links.append(link('Finance page in Notion ↗', fin.url));
@@ -258,9 +269,12 @@
     const strip = $('#fi-strip'); strip.replaceChildren();
     strip.append(fig('Net worth', nw ? eurK(nw.value) : '—', nw ? (track.netWorthTarget ? pct(nw.value / track.netWorthTarget) + ' of ' + eurK(track.netWorthTarget) + ' goal' : nw.at) : 'add it to the Tracking table', { share: nw && track.netWorthTarget ? nw.value / track.netWorthTarget : null, color: 'var(--p-save)' }));
     strip.append(fig('Emergency fund', ef ? eur(ef.value) : '—', ef ? (track.emergencyTarget ? pct(ef.value / track.emergencyTarget) + ' of ' + eur(track.emergencyTarget) : ef.at) : 'add it to the Tracking table', { share: ef && track.emergencyTarget ? ef.value / track.emergencyTarget : null, color: 'var(--p-save)' }));
-    if (saving) strip.append(fig('Saved per month', eur(saving), saveGroup.items.map((x) => x.name + ' ' + eur(x.value)).join(' · ')));
-    if (budget) strip.append(fig('Travel per month', eur(travelLine), travelNeed ? (travelGap > 0 ? eur(travelGap) + '/mo short' : 'covers travel goals') : '', { cls: travelNeed ? (travelGap > 0 ? 'is-warn' : 'is-ok') : '' }));
-    if (otherNeed) strip.append(fig('Other goals', eur(otherNeed), eur(otherNeed / 12) + '/mo · ' + (otherLine ? eur(otherLine) + '/mo budgeted' : 'no budget line'), { cls: otherLine >= otherNeed / 12 ? 'is-ok' : 'is-warn' }));
+    // The strip is your position; the monthly flows live in the three sections below.
+    const income = budget ? d3.sum(budget.income, (x) => x.value) : 0;
+    if (income) strip.append(fig('Income', eur(income) + '/mo', 'net, from your budget'));
+    if (income && saving) strip.append(fig('Saving rate', pct(saving / income), eur(saving) + ' a month saved and invested', { share: saving / income, color: 'var(--p-save)' }));
+    const nyTotal = d3.sum(nextYear, (g) => g.budget);
+    if (nyTotal) strip.append(fig('Next-year goals', eur(nyTotal), eur(nyTotal / 12) + ' a month · ' + nextYear.length + ' goals'));
 
     // Pillar 1: saving & investing
     {
@@ -300,15 +314,16 @@
           : 'The Travel line covers these, with ' + eur(-travelGap * 12) + ' to spare over the year.'));
       }
       if (travel && travel.trips.length) {
-        const tb = block(body, travel.heading || 'Trip plan');
-        for (const x of travel.trips) {
-          const row = el('div', 'fi-trip');
-          row.append(el('span', 'fi-trip-when', x.when), el('span', '', x.name), el('span', 'fi-bar-val', x.raw || eur(x.value)));
-          tb.append(row);
-        }
+        // The trip-by-trip timeline lives on the Travel tab; here only what it costs per month.
+        const tb = block(body, 'Trip plan');
+        const perMonth = travel.months ? travel.total / travel.months : 0;
         const tot = el('div', 'fi-total');
-        tot.append(el('span', '', 'Trip plan total'), el('span', '', eur(travel.total) + (travel.months ? ' · ' + eur(travel.total / travel.months) + '/month over ' + travel.months + ' months' : '')));
+        tot.append(el('span', '', plural(travel.trips.length, 'trip') + (travel.months ? ' over ' + travel.months + ' months' : '')), el('span', '', eur(travel.total) + (perMonth ? ' · ' + eur(perMonth) + '/month' : '')));
         tb.append(tot);
+        if (perMonth && travelLine) tb.append(el('p', 'fi-verdict ' + (perMonth > travelLine ? 'is-warn' : 'is-ok'), perMonth > travelLine
+          ? 'The plan costs ' + eur(perMonth - travelLine) + ' a month more than the Travel line.' : 'The Travel line covers the trip plan.'));
+        const go = el('a', 'fi-go', 'See the trip timeline in Travel →'); go.href = '#travel';
+        tb.append(go);
       }
     }
 
@@ -388,8 +403,25 @@
     else {
       const monthly = d3.sum(subs, (x) => x.monthly);
       $('#fi-subs-note').textContent = eur2(monthly) + ' a month · ' + eur(monthly * 12) + ' a year';
-      const maxS = d3.max(subs, (x) => x.monthly) || 1;
-      for (const x of subs.sort((a, b) => b.monthly - a.monthly)) sl.append(bar(x.name, x.monthly, maxS, { color: '#7f8a9b', label: eur2(x.monthly) + '/mo' + (x.cycle && !/monat|month/i.test(x.cycle) ? ' · ' + x.cycle + (x.due ? ', ' + x.due : '') : '') }));
+      // When each yearly one renews next, and any cancellation deadline.
+      const MONTHS = { jan: 0, januar: 0, feb: 1, februar: 1, mar: 2, märz: 2, maerz: 2, march: 2, apr: 3, april: 3, may: 4, mai: 4, jun: 5, juni: 5, june: 5, jul: 6, juli: 6, july: 6,
+        aug: 7, august: 7, sep: 8, sept: 8, september: 8, oct: 9, okt: 9, oktober: 9, october: 9, nov: 10, november: 10, dec: 11, dez: 11, dezember: 11, december: 11 };
+      const now = new Date(), curM = now.getMonth();
+      const nextIn = (due) => { const w = (String(due).toLowerCase().match(/[a-zä]+/) || [])[0]; const m = MONTHS[w]; return m == null ? null : (m - curM + 12) % 12; };
+      const MN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const rows = subs.map((x) => ({ ...x, yearly: x.cycle && !/monat|month/i.test(x.cycle), inM: nextIn(x.due) }))
+        .sort((a, b) => (b.cancel ? 1 : 0) - (a.cancel ? 1 : 0) || (a.inM ?? 99) - (b.inM ?? 99));
+      for (const x of rows) {
+        const r = el('div', 'fi-sub-row');
+        r.append(el('span', '', x.name), el('span', 'fi-bar-val', eur2(x.monthly) + '/mo' + (x.yearly && x.total ? ' · ' + eur2(x.total) + '/yr' : '')));
+        const notes = [];
+        if (x.yearly && x.inM != null) notes.push(x.inM === 0 ? 'renews this month' : 'renews in ' + MN[(curM + x.inM) % 12] + ' (in ' + x.inM + (x.inM === 1 ? ' month)' : ' months)'));
+        else if (!x.yearly) notes.push('monthly');
+        const n = el('span', 'fi-note', notes.join(' · '));
+        if (x.cancel) { const c = el('span', 'is-warn', (notes.length ? ' · ' : '') + 'cancel ' + x.cancel.replace(/^vor\s+/i, 'before ')); n.append(c); }
+        r.append(n);
+        sl.append(r);
+      }
     }
   }
   dash.onData(render);

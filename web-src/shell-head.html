@@ -62,6 +62,7 @@
   .side-btns { display: flex; gap: .4rem; flex-wrap: wrap; }
   .shell-btn { font-size: var(--cds-font-size-caption); cursor: pointer; color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: 999px; padding: .2rem .75rem; }
   .shell-btn:hover { border-color: var(--color-fg-muted); }
+  a.shell-btn { text-decoration: none; display: inline-block; }
   .shell-btn:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
   #dash-root { min-width: 0; padding-block: 2rem 3.5rem; padding-left: max(16px, min(3vw, 2.5rem)); padding-right: max(16px, env(safe-area-inset-right, 0px), min(3vw, 2.5rem)); }
   .view { max-width: 1240px; margin: 0 auto; }
@@ -189,7 +190,7 @@ window.dash = (() => {
     <div class="side-foot">
       <span class="side-sync" id="shell-sync">Loading…</span>
       <div class="side-btns">
-        <button type="button" class="shell-btn" id="shell-refresh">Refresh</button>
+        <a class="shell-btn" id="shell-sync-now" href="https://github.com/SumoPikmin/life-dashboard/actions/workflows/sync.yml" target="_blank" rel="noopener" title="Opens GitHub: click Run workflow to sync from Notion now">Sync now ↗</a>
         <button type="button" class="shell-btn" id="shell-lock">Lock</button>
       </div>
     </div>
