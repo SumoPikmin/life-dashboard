@@ -341,68 +341,130 @@
     if (!list.length) { box.append(el('p', 'av-empty', 'No trip plan found: add a "Travel Budget" table to your Finance page.')); return null; }
     const first = Math.min(start, d3.min(list, (x) => x.span.a)), last = d3.max(list, (x) => x.span.b);
     const months = d3.range(first, last + 1);
-    // Running travel pot: +line each month, minus each trip (a range spreads evenly over its months).
+    // Running travel pot: +line each month from now, minus each trip (a range spreads evenly over its months).
     const out = new Map(months.map((m) => [m, 0]));
     for (const x of list) { const n = x.span.b - x.span.a + 1; for (let m = x.span.a; m <= x.span.b; m++) out.set(m, (out.get(m) || 0) + x.cost / n); }
     let bal = 0; const series = [];
-    for (const m of months) { if (m >= start) bal += line; bal -= out.get(m) || 0; series.push({ m, bal, out: out.get(m) || 0 }); }
-    const W = Math.max(300, box.clientWidth || 700), lanes = 3, laneH = 26, top = 8, chartH = 130, axisH = 22;
-    const H = top + lanes * laneH + 10 + chartH + axisH;
-    const x = d3.scaleLinear([first - 0.5, last + 0.5], [8, W - 8]);
-    const svg = d3.select(box).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
-    // month grid + labels
-    const g0 = svg.append('g');
-    for (const m of months) {
-      g0.append('line').attr('x1', x(m - 0.5)).attr('x2', x(m - 0.5)).attr('y1', top).attr('y2', H - axisH).style('stroke', 'var(--cds-chart-grid)');
-      if (W / months.length > 34 || m % 2 === first % 2) g0.append('text').attr('x', x(m)).attr('y', H - 6).attr('text-anchor', 'middle')
-        .style('fill', 'var(--color-fg-muted)').style('font-size', '0.6875rem').text(m % 12 === 0 ? mLabel(m) : MONTH_NAMES[m % 12]);
+    for (const m of months) { const inc = m >= start ? line : 0; bal += inc - (out.get(m) || 0); series.push({ m, bal, inc, out: out.get(m) || 0 }); }
+
+    const W = Math.max(300, box.clientWidth || 700);
+    const narrow = W < 560;
+    const M = { l: narrow ? 40 : 52, r: 14 };
+    const x = d3.scaleLinear([first - 0.5, last + 0.5], [M.l, W - M.r]);
+    const colW = (W - M.l - M.r) / months.length;
+    const kEur = (v) => (Math.abs(v) >= 1000 ? '€' + d3.format('.1~f')(v / 1000) + 'k' : '€' + Math.round(v));
+
+    // ---- trips: pack into as many rows as needed so nothing overlaps
+    const svg = d3.select(box).append('svg').attr('width', W).attr('viewBox', `0 0 ${W} 100`);
+    const measure = svg.append('text').style('font-size', '0.75rem').attr('x', -9999).attr('y', -9999);
+    const textW = (s) => { measure.text(s); return measure.node().getComputedTextLength(); };
+    const maxChars = narrow ? 24 : 36;
+    const r = d3.scaleSqrt([0, d3.max(list, (d) => d.cost) || 1], [4, narrow ? 9 : 11]);
+    const placed = list.slice().sort((p, q) => p.span.a - q.span.a || q.cost - p.cost).map((tr) => {
+      const point = tr.span.a === tr.span.b;
+      const name = tr.name.length > maxChars ? tr.name.slice(0, maxChars - 1) + '…' : tr.name;
+      const label = name + (tr.cost ? '  ' + kEur(tr.cost) : '');
+      const x0 = point ? x(tr.span.a) - r(tr.cost) : x(tr.span.a - 0.45);
+      const x1 = point ? x(tr.span.a) + r(tr.cost) : x(tr.span.b + 0.45);
+      const lw = textW(label);
+      const inside = !point && x1 - x0 > lw + 16;
+      // labels go right of the mark; near the right edge they flip to the left
+      const flip = !inside && x1 + 6 + lw > W - M.r;
+      const from = flip ? x0 - 6 - lw : x0, end = inside || flip ? x1 : x1 + 6 + lw;
+      return { tr, point, label, x0, x1, from, end, inside, flip, lw };
+    });
+    measure.remove();
+    const laneEnds = [];
+    for (const p of placed) {
+      let lane = laneEnds.findIndex((e) => e < p.from - 10);
+      if (lane < 0) { lane = laneEnds.length; laneEnds.push(0); }
+      laneEnds[lane] = p.end; p.lane = lane;
     }
+    const laneH = 30, tripTop = 40, tripsH = laneEnds.length * laneH + 6;
+    const axisY = tripTop + tripsH + 8, axisH = 34;
+    const potTop = axisY + axisH + 22, potH = narrow ? 150 : 180, H = potTop + potH + 10;
+    svg.attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+
+    const muted = (sel) => sel.style('fill', 'var(--color-fg-muted)').style('font-size', '0.6875rem');
+    // month columns and labels (between the two panels), year labels under them
+    const grid = svg.append('g');
+    months.forEach((m, i) => {
+      if (i % 2 === 0) grid.append('rect').attr('x', x(m - 0.5)).attr('y', tripTop - 4).attr('width', colW).attr('height', H - tripTop - 6)
+        .style('fill', 'var(--color-fg)').style('fill-opacity', 0.025);
+      const show = !narrow || m % 12 === 0 || i === 0 || i % 2 === 0;
+      if (show) muted(grid.append('text').attr('x', x(m)).attr('y', axisY + 13).attr('text-anchor', 'middle')).text(narrow ? MONTH_NAMES[m % 12][0] : MONTH_NAMES[m % 12]);
+      if (m % 12 === 0 || i === 0) grid.append('text').attr('x', x(m) - (narrow ? 4 : colW / 2 - 2)).attr('y', axisY + 28)
+        .style('fill', 'var(--color-fg)').style('font-size', '0.6875rem').style('font-weight', 600).text(Math.floor(m / 12));
+    });
+    grid.append('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', axisY).attr('y2', axisY).style('stroke', 'var(--cds-chart-axis)');
+    muted(svg.append('text').attr('x', M.l).attr('y', 12)).style('font-weight', 600).style('letter-spacing', '.04em').text('TRIPS');
+    muted(svg.append('text').attr('x', M.l).attr('y', potTop - 8)).style('font-weight', 600).style('letter-spacing', '.04em').text('TRAVEL POT AT THE END OF EACH MONTH');
+
     const nowM = t.getUTCFullYear() * 12 + t.getUTCMonth();
-    if (nowM >= first && nowM <= last) g0.append('line').attr('x1', x(nowM)).attr('x2', x(nowM)).attr('y1', top).attr('y2', H - axisH)
-      .style('stroke', 'var(--cds-chart-reference)').style('stroke-dasharray', '3 3');
-    // trips: lanes so labels don't collide
-    const tip = el('div', 'av-tip'); tip.hidden = true; box.append(tip);
-    const laneEnd = Array(lanes).fill(-Infinity);
-    const r = d3.scaleSqrt([0, d3.max(list, (d) => d.cost) || 1], [3, 11]);
-    const gt = svg.append('g');
-    for (const tr of list.slice().sort((p, q) => p.span.a - q.span.a)) {
-      const x0 = x(tr.span.a - (tr.span.a === tr.span.b ? 0 : 0.45)), x1 = x(tr.span.b + (tr.span.a === tr.span.b ? 0 : 0.45));
-      let lane = laneEnd.findIndex((end) => end < x0 - 4); if (lane < 0) lane = laneEnd.indexOf(Math.min(...laneEnd));
-      const y = top + lane * laneH + laneH / 2;
-      const node = gt.append('g').style('cursor', 'default');
-      if (tr.span.a === tr.span.b) node.append('circle').attr('cx', x0).attr('cy', y).attr('r', r(tr.cost)).style('fill', 'var(--a-travel)').style('fill-opacity', 0.85);
-      else node.append('rect').attr('x', x0).attr('y', y - 5).attr('width', Math.max(6, x1 - x0)).attr('height', 10).attr('rx', 5).style('fill', 'var(--a-travel)').style('fill-opacity', 0.45);
-      const label = node.append('text').attr('x', (tr.span.a === tr.span.b ? x0 + r(tr.cost) + 4 : x0 + 4)).attr('y', y + 4)
-        .style('fill', 'var(--color-fg)').style('font-size', '0.6875rem').text(tr.name);
-      const lw = label.node().getComputedTextLength();
-      laneEnd[lane] = Math.max(x1, (tr.span.a === tr.span.b ? x0 + r(tr.cost) + 4 : x0 + 4) + lw);
-      node.on('mouseenter', (e) => {
-        tip.replaceChildren(el('div', 'av-tip-h', tr.when), el('div', '', tr.name), el('div', '', tr.raw || eur(tr.cost)));
-        tip.hidden = false;
-        const b = box.getBoundingClientRect();
-        tip.style.left = Math.max(0, Math.min(e.clientX - b.left + 10, b.width - tip.offsetWidth)) + 'px'; tip.style.top = (e.clientY - b.top + 12) + 'px';
-      }).on('mouseleave', () => { tip.hidden = true; });
+    if (nowM >= first && nowM <= last) {
+      const nx = x(nowM - 0.5) + colW * (t.getUTCDate() / 31);
+      svg.append('line').attr('x1', nx).attr('x2', nx).attr('y1', tripTop - 8).attr('y2', H - 10).style('stroke', 'var(--color-fg)').style('stroke-opacity', 0.5).style('stroke-dasharray', '3 3');
+      svg.append('text').attr('x', nx + 4).attr('y', tripTop - 12).style('fill', 'var(--color-fg)').style('font-size', '0.625rem').text('today');
     }
-    // balance line
-    const cTop = top + lanes * laneH + 10, cBot = cTop + chartH;
-    const ext = d3.extent(series, (d) => d.bal); const y = d3.scaleLinear([Math.min(0, ext[0]), Math.max(0, ext[1])], [cBot - 4, cTop + 14]).nice();
-    const gc = svg.append('g');
-    gc.append('line').attr('x1', 8).attr('x2', W - 8).attr('y1', y(0)).attr('y2', y(0)).style('stroke', 'var(--cds-chart-axis)');
-    gc.append('text').attr('x', 8).attr('y', cTop + 8).style('fill', 'var(--color-fg-muted)').style('font-size', '0.6875rem').text('Travel pot after each month');
+
+    // trips
+    const tip = el('div', 'av-tip'); tip.hidden = true; box.append(tip);
+    const showTip = (e, lines) => {
+      tip.replaceChildren(...lines.map((s2, i) => el('div', i ? '' : 'av-tip-h', s2)));
+      tip.hidden = false;
+      const b = box.getBoundingClientRect();
+      tip.style.left = Math.max(0, Math.min(e.clientX - b.left + 12, b.width - tip.offsetWidth)) + 'px';
+      tip.style.top = (e.clientY - b.top + 14) + 'px';
+    };
+    const gt = svg.append('g');
+    for (const p of placed) {
+      const y = tripTop + p.lane * laneH + laneH / 2;
+      const g = gt.append('g').style('cursor', 'default');
+      if (p.point) g.append('circle').attr('cx', x(p.tr.span.a)).attr('cy', y).attr('r', r(p.tr.cost)).style('fill', 'var(--a-travel)');
+      else g.append('rect').attr('x', p.x0).attr('y', y - 9).attr('width', Math.max(8, p.x1 - p.x0)).attr('height', 18).attr('rx', 9)
+        .style('fill', 'var(--a-travel)').style('fill-opacity', 0.28);
+      const tx = p.inside ? p.x0 + 9 : p.flip ? p.x0 - 6 : p.x1 + 6;
+      g.append('text').attr('x', tx).attr('y', y + 4).attr('text-anchor', p.flip ? 'end' : 'start')
+        .style('fill', 'var(--color-fg)').style('font-size', '0.75rem').text(p.label);
+      g.on('mousemove', (e) => showTip(e, [p.tr.when, p.tr.name, p.tr.raw || eur(p.tr.cost)]))
+        .on('mouseleave', () => { tip.hidden = true; });
+    }
+
+    // travel pot
+    const ext = d3.extent(series, (d) => d.bal);
+    const y = d3.scaleLinear([Math.min(0, ext[0]), Math.max(0, ext[1])], [potTop + potH, potTop + 8]).nice(4);
+    const gp = svg.append('g');
+    for (const v of y.ticks(4)) {
+      gp.append('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', y(v)).attr('y2', y(v))
+        .style('stroke', v === 0 ? 'var(--cds-chart-axis)' : 'var(--cds-chart-grid)').style('stroke-width', v === 0 ? 1.2 : 1);
+      muted(gp.append('text').attr('x', M.l - 6).attr('y', y(v) + 4).attr('text-anchor', 'end')).text(kEur(v));
+    }
     const area = d3.area().x((d) => x(d.m)).y0(y(0)).y1((d) => y(d.bal));
     const lineGen = d3.line().x((d) => x(d.m)).y((d) => y(d.bal));
     const id = 'tvclip' + Math.random().toString(36).slice(2, 7);
     const defs = svg.append('defs');
     defs.append('clipPath').attr('id', id + 'p').append('rect').attr('x', 0).attr('y', 0).attr('width', W).attr('height', y(0));
     defs.append('clipPath').attr('id', id + 'n').append('rect').attr('x', 0).attr('y', y(0)).attr('width', W).attr('height', H);
-    gc.append('path').attr('d', area(series)).attr('clip-path', `url(#${id}p)`).style('fill', 'var(--a-travel)').style('fill-opacity', 0.18);
-    gc.append('path').attr('d', area(series)).attr('clip-path', `url(#${id}n)`).style('fill', 'var(--color-bad)').style('fill-opacity', 0.18);
-    gc.append('path').attr('d', lineGen(series)).style('fill', 'none').style('stroke', 'var(--a-travel)').style('stroke-width', 2).style('stroke-linejoin', 'round');
+    gp.append('path').attr('d', area(series)).attr('clip-path', `url(#${id}p)`).style('fill', 'var(--a-travel)').style('fill-opacity', 0.16);
+    gp.append('path').attr('d', area(series)).attr('clip-path', `url(#${id}n)`).style('fill', 'var(--color-bad)').style('fill-opacity', 0.16);
+    gp.append('path').attr('d', lineGen(series)).style('fill', 'none').style('stroke', 'var(--a-travel)').style('stroke-width', 2).style('stroke-linejoin', 'round');
+    gp.selectAll('circle').data(series).join('circle').attr('cx', (d) => x(d.m)).attr('cy', (d) => y(d.bal)).attr('r', 2.5)
+      .style('fill', (d) => (d.bal < 0 ? 'var(--color-bad)' : 'var(--a-travel)'));
     const low = series.reduce((p, q) => (q.bal < p.bal ? q : p), series[0]);
-    gc.append('circle').attr('cx', x(low.m)).attr('cy', y(low.bal)).attr('r', 4).style('fill', low.bal < 0 ? 'var(--color-bad)' : 'var(--a-travel)');
-    gc.append('text').attr('x', Math.min(W - 60, x(low.m) + 6)).attr('y', y(low.bal) + (low.bal < 0 ? 14 : -8)).style('fill', 'var(--color-fg)').style('font-size', '0.6875rem').text(eur(low.bal));
     const endP = series[series.length - 1];
-    gc.append('text').attr('x', W - 8).attr('y', y(endP.bal) - 8).attr('text-anchor', 'end').style('fill', 'var(--color-fg-muted)').style('font-size', '0.6875rem').text('end ' + eur(endP.bal));
+    const tag = (d, text, below) => {
+      const tx = Math.max(M.l + 4, Math.min(W - M.r - 4, x(d.m)));
+      gp.append('text').attr('x', tx).attr('y', y(d.bal) + (below ? 16 : -9)).attr('text-anchor', tx > W - 70 ? 'end' : 'middle')
+        .style('fill', d.bal < 0 ? 'var(--color-bad)' : 'var(--color-fg)').style('font-size', '0.6875rem').style('font-weight', 600).text(text);
+    };
+    tag(low, (low.bal < 0 ? 'lowest ' : 'lowest ') + eur(low.bal), low.bal < 0);
+    if (endP !== low) tag(endP, 'end ' + eur(endP.bal), false);
+    // hover a month for its numbers
+    gp.selectAll('rect.hit').data(series).join('rect').attr('class', 'hit').attr('x', (d) => x(d.m - 0.5)).attr('width', colW)
+      .attr('y', potTop).attr('height', potH).style('fill', 'transparent')
+      .on('mousemove', (e, d) => showTip(e, [mLabel(d.m), (d.inc ? '+' + eur(d.inc) + ' from the Travel line' : 'before the budget starts'),
+        d.out ? '−' + eur(d.out) + ' for trips' : 'no trips', 'Pot: ' + eur(d.bal)]))
+      .on('mouseleave', () => { tip.hidden = true; });
     return { low, end: endP, total: d3.sum(list, (d) => d.cost), months: months.length };
   }
 

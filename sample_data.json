@@ -203,7 +203,7 @@
        "items": [
         {
          "name": "Travel",
-         "value": 400
+         "value": 450
         },
         {
          "name": "Going out",
@@ -216,7 +216,7 @@
    ],
    "tables": [
     {
-     "heading": "Sample Travel Budget 2027",
+     "heading": "Sample Travel Budget Oct 2026 – Dec 2027",
      "header": true,
      "rows": [
       [
@@ -226,21 +226,75 @@
        "Basis"
       ],
       [
-       "Mar 2027",
-       "Sample: city break",
+       "Oct 2026",
+       "Sample: local race",
+       "0",
+       "Local"
+      ],
+      [
+       "Nov/Dec 2026",
+       "Sample: city weekend",
        "400 (300–500)",
        "Estimate"
       ],
       [
-       "Jul 2027",
-       "Sample: hiking week",
-       "1,000",
+       "Mar 2027",
+       "Sample: half marathon trip",
+       "550 (480–650)",
+       "Estimate"
+      ],
+      [
+       "H1 2027",
+       "Sample: friends reunion",
+       "300 (250–400)",
+       "Estimate"
+      ],
+      [
+       "May 2027",
+       "Sample: long-haul trip, 16 days",
+       "3,000 (2,500–3,800)",
+       "Estimate"
+      ],
+      [
+       "Aug 2027",
+       "Sample: lake weekends",
+       "300 (200–400)",
+       "Estimate"
+      ],
+      [
+       "Sep 2027",
+       "Sample: hiking trip (9 days)",
+       "1,000 (800–1,200)",
+       "Estimate"
+      ],
+      [
+       "Oct/Nov 2027",
+       "Sample: surf trip",
+       "700 (530–810)",
+       "Estimate"
+      ],
+      [
+       "Dec 2027",
+       "Sample: Christmas",
+       "150 (100–250)",
+       "Estimate"
+      ],
+      [
+       "During 2027",
+       "Sample: family visit",
+       "400 (300–500)",
+       "Estimate"
+      ],
+      [
+       "During 2027",
+       "Sample: small trips",
+       "450 (300–600)",
        "Estimate"
       ],
       [
        "",
-       "**Total**",
-       "1,400",
+       "Total",
+       "7,250",
        ""
       ]
      ]
