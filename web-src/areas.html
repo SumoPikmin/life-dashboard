@@ -88,6 +88,30 @@
   .sv-badge.is-warn { color: var(--color-warn); font-weight: var(--cds-font-weight-medium); }
   .sv-person .av-note { grid-column: 1 / -1; }
   .sv-bar-over { background: var(--color-warn) !important; }
+  .sv-person { grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; }
+  .cl-btn { font: inherit; font-size: .8125rem; cursor: pointer; white-space: nowrap; padding: .3rem .7rem; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--a-social, #d25d93) 45%, var(--color-border-line)); background: var(--color-panel); color: var(--color-fg); }
+  .cl-btn:hover { background: color-mix(in oklab, var(--a-social, #d25d93) 12%, var(--color-panel)); }
+  .cl-btn:focus-visible { outline: 2px solid var(--a-social, #d25d93); outline-offset: 2px; }
+  .cl-btn.is-tick { padding: .2rem .6rem; }
+  .cl-btn.is-waiting { border-style: dashed; color: var(--color-fg-muted); cursor: default; }
+  .cl-pending { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .cl-pending a { color: inherit; }
+  .cl-dialog { border: 1px solid var(--color-border-line); border-radius: 16px; padding: 0; width: min(26rem, calc(100vw - 2rem)); background: var(--color-panel); color: var(--color-fg); box-shadow: 0 18px 50px rgba(0,0,0,.25); font-family: var(--font-anthropic-sans); }
+  .cl-dialog::backdrop { background: rgba(20, 16, 12, .35); }
+  .cl-form { display: grid; gap: .9rem; padding: 1.1rem 1.2rem 1rem; }
+  .cl-form h2 { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: 1.35rem; }
+  .cl-form label { display: grid; gap: .3rem; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .cl-form input, .cl-form select { font: inherit; font-size: .9375rem; color: var(--color-fg); background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: 9px; padding: .5rem .65rem; min-width: 0; }
+  .cl-types { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .cl-type { font: inherit; font-size: .875rem; cursor: pointer; padding: .35rem .75rem; border-radius: 999px; border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg); }
+  .cl-type[aria-checked="true"] { background: color-mix(in oklab, #d25d93 18%, var(--color-panel)); border-color: #d25d93; }
+  .cl-row { display: grid; grid-template-columns: minmax(0, 1fr) 9.5rem; gap: .6rem; }
+  .cl-msg { margin: 0; font-size: var(--cds-font-size-caption); min-height: 1em; color: var(--color-fg-muted); }
+  .cl-msg.is-bad { color: var(--color-bad, #c0392b); }
+  .cl-actions { display: flex; justify-content: flex-end; gap: .5rem; }
+  .cl-actions button { font: inherit; cursor: pointer; padding: .5rem 1rem; border-radius: 10px; border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg); }
+  .cl-actions .is-primary { background: #d25d93; border-color: #d25d93; color: #fff; font-weight: var(--cds-font-weight-medium); }
+  .cl-actions .is-primary[disabled] { opacity: .6; cursor: wait; }
 
   /* Training: this week, the block, paces, plan */
   .tr-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--cds-gap-xs); }
@@ -214,13 +238,15 @@
       <span class="av-eyebrow">Life area</span>
       <h1 class="av-title">Social</h1>
       <p class="av-lead" id="sv-lead">Loading…</p>
+      <p class="cl-pending" id="sv-pending" hidden></p>
     </div>
     <a class="av-cta" id="sv-crm" href="https://app.notion.com/p/3b2328fe833481ae8cbbe81459baf956" target="_blank" rel="noopener">Open Personal CRM ↗</a>
   </header>
   <section class="av-strip" id="sv-strip" aria-label="Social at a glance"></section>
   <div class="av-grid">
     <section class="av-card" id="sv-reach">
-      <div class="av-card-head"><h2>Reach out</h2><span class="av-note">Overdue, due soon and new, most overdue first</span></div>
+      <div class="av-card-head"><h2>Reach out</h2><button type="button" class="cl-btn" id="sv-log-any">+ Log a contact</button></div>
+      <p class="av-note">Overdue, due soon and new, most overdue first. Tap ✓ after you talk to someone.</p>
       <div class="sv-people" id="sv-reach-list"></div>
     </section>
     <section class="av-card" id="sv-soon">
@@ -617,16 +643,23 @@
     return { weeks, title: clean(tb.heading).replace(/\s*[—–-]\s*week by week/i, '') };
   }
 
-  window.lifeToday = () => {
+  window.lifeWeek = () => {
     const tr = data('training');
     if (!tr) return null;
     const { weeks, title } = blockWeeks(tr);
     const current = weeks.find((w) => t >= w.start && days(w.start, t) < 7);
     const ws = trTable(tr, /weekly (structure|rhythm)/i);
-    const day = DAYS[(t.getUTCDay() + 6) % 7];
-    const row = (ws ? split(ws).rows : []).find((r) => (r[0] || '').trim().slice(0, 3).toLowerCase() === day.toLowerCase()) || [];
-    const plan = current ? { Tue: current.tue, Thu: current.thu, Sun: current.sun }[day] || '' : '';
-    return { day, session: clean(row[1]), notes: clean(row[2]), plan, week: current ? (title ? title + ' ' : '') + 'week ' + current.n + ' of ' + weeks.length : '' };
+    const base = ws ? split(ws).rows : [];
+    const monday = new Date(t); monday.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7));
+    return {
+      week: current ? (title ? title + ' · ' : '') + 'wk ' + current.n + '/' + weeks.length : '',
+      km: current ? current.km : '',
+      days: DAYS.map((day, i) => {
+        const date = new Date(monday); date.setUTCDate(monday.getUTCDate() + i);
+        const row = base.find((r) => (r[0] || '').trim().slice(0, 3).toLowerCase() === day.toLowerCase()) || [];
+        return { day, date, session: clean(row[1]), notes: clean(row[2]), plan: current ? { Tue: current.tue, Thu: current.thu, Sun: current.sun }[day] || '' : '' };
+      }),
+    };
   };
 
   function renderTraining() {
@@ -855,16 +888,181 @@
     if (d < t) d = new Date(Date.UTC(t.getUTCFullYear() + 1, b.getUTCMonth(), b.getUTCDate()));
     return d;
   };
+
+  /* Quick logging. Notion's API can't be called from a browser, so a logged contact is sealed with the dashboard
+     key and appended to crm-queue.json in the skill-tree gist; the next sync turns it into an Interaction. Until
+     then it is applied here, so the person leaves "Reach out" at once. */
+  const CRM_FILE = 'crm-queue.json';
+  const LOG_TYPES = ['Call', 'Text', 'Hang out', 'Video', 'Voice note', 'Other'];
+  const SYNC_URL = 'https://github.com/SumoPikmin/life-dashboard/actions/workflows/sync.yml';
+  const crmQ = { src: undefined, pending: [], loading: false };
+  const crmInfo = () => data('crm') || {};
+  const ghToken = () => (window.SkillTree && window.SkillTree.token ? window.SkillTree.token() : null);
+  const isoDay = (d) => d.toISOString().slice(0, 10);
+  const localDay = () => { const n = new Date(); return new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())); };
+  async function gistApi(method, body) {
+    const tok = ghToken();
+    const res = await fetch('https://api.github.com/gists/' + crmInfo().gist, {
+      method, cache: 'no-store',
+      headers: { Accept: 'application/vnd.github+json', ...(tok ? { Authorization: 'Bearer ' + tok } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!res.ok) throw new Error(res.status === 401 ? 'GitHub rejected the saved token' : res.status === 404 ? 'the token can\u2019t see the gist' : 'GitHub answered ' + res.status);
+    return res.json();
+  }
+  async function readQueue() {
+    const f = ((await gistApi('GET')).files || {})[CRM_FILE];
+    let raw = f ? f.content : '';
+    if (f && f.truncated && f.raw_url) raw = await (await fetch(f.raw_url, { cache: 'no-store' })).text();
+    try { return JSON.parse(raw || '{}').entries || []; } catch (_) { return []; }
+  }
+  async function loadQueue() {
+    if (!crmInfo().gist || crmQ.loading) return;
+    crmQ.loading = true;
+    try {
+      const done = new Set(crmInfo().synced || []), out = [];
+      for (const e of await readQueue()) {
+        if (done.has(e.ref)) continue;
+        try { out.push({ ref: e.ref, ...JSON.parse(await window.lifeVault.open(e.box)) }); } catch (_) { /* sealed with another password */ }
+      }
+      const local = crmQ.pending.filter((x) => x.local && !out.some((o) => o.ref === x.ref));
+      crmQ.pending = [...out, ...local];
+      dash.redraw();
+    } catch (e) { console.warn('CRM queue', e); } finally { crmQ.loading = false; }
+  }
+  const refreshQueue = () => { if (crmInfo() !== crmQ.src) { crmQ.src = crmInfo(); loadQueue(); } };
+
+  async function logContact(person, c) {
+    if (!crmInfo().gist) throw new Error('This dashboard has no gist set up (SKILLTREE_GIST)');
+    if (!ghToken()) throw new Error('NO_TOKEN');
+    const ref = Array.from(crypto.getRandomValues(new Uint8Array(10)), (b) => (b % 36).toString(36)).join('');
+    const contact = { person: person.url, name: person.name, type: c.type, date: c.date, note: c.note };
+    const entry = { ref, at: new Date().toISOString(), box: await window.lifeVault.seal(JSON.stringify(contact)) };
+    crmQ.pending.push({ ref, local: true, ...contact });
+    dash.redraw();
+    try {
+      const done = new Set(crmInfo().synced || []);
+      const keep = (await readQueue()).filter((e) => !done.has(e.ref)); // drop what a sync already put in Notion
+      keep.push(entry);
+      await gistApi('PATCH', { files: { [CRM_FILE]: { content: JSON.stringify({ v: 1, entries: keep }, null, 1) } } });
+    } catch (e) {
+      crmQ.pending = crmQ.pending.filter((x) => x.ref !== ref);
+      dash.redraw();
+      throw e;
+    }
+  }
+
   window.lifeCRM = () => {
     const people = data('people') || [];
-    return people.map((p) => ({
+    const list = people.map((p) => ({
       name: p.Name || 'Someone', url: p.url, tier: p.Tier || '', circles: jsonList(p.Circle), cadence: p.Cadence || '', pref: jsonList(p['Preferred Contact']),
-      state: CRM_STATUS(p), over: typeof p['Days Overdue'] === 'number' ? p['Days Overdue'] : null,
-      last: parseDay(p['Last Touch'] || p['date:Last Contacted:start']), due: parseDay(p['Next Contact Due']), birthday: nextBirthday(p['date:Birthday:start']),
+      state: CRM_STATUS(p), over: typeof p['Days Overdue'] === 'number' ? p['Days Overdue'] : null, cadenceDays: typeof p['Cadence Days'] === 'number' ? p['Cadence Days'] : null,
+      last: parseDay(p['Last Touch'] || p['date:Last Contacted:start']), due: parseDay(p['Next Contact Due']), birthday: nextBirthday(p['date:Birthday:start']), waiting: 0,
     }));
+    // Contacts logged here but not in Notion yet.
+    for (const x of crmQ.pending) {
+      const p = list.find((q) => q.url === x.person);
+      const d = parseDay(x.date);
+      if (!p || !d) continue;
+      p.waiting++;
+      if (p.last && p.last >= d) continue;
+      p.last = d;
+      if (p.cadenceDays) {
+        p.due = new Date(+d + p.cadenceDays * 864e5);
+        const late = days(p.due, t);
+        p.over = late > 0 ? late : null;
+        p.state = late > 0 ? 'over' : -late < 7 ? 'soon' : 'ok';
+      } else if (p.state !== 'none') { p.state = 'ok'; p.over = null; }
+    }
+    return list;
+  };
+  window.lifeCRMLog = {
+    open: (person) => openLog(person),
+    pending: () => crmQ.pending.slice(),
+    enabled: () => !!crmInfo().gist,
+    syncUrl: SYNC_URL,
   };
 
+  // The log dialog
+  let dlg = null, dlgPerson = null;
+  function buildDialog() {
+    dlg = el('dialog', 'cl-dialog');
+    dlg.innerHTML = '<form class="cl-form" method="dialog">'
+      + '<h2>Log a contact</h2>'
+      + '<label>Who<select name="who"></select></label>'
+      + '<div class="cl-types" role="radiogroup" aria-label="How"></div>'
+      + '<div class="cl-row"><label>Note (optional)<input name="note" type="text" maxlength="300" placeholder="What did you talk about?" autocomplete="off"></label>'
+      + '<label>When<input name="date" type="date"></label></div>'
+      + '<p class="cl-msg" role="status"></p>'
+      + '<div class="cl-actions"><button type="button" data-act="cancel">Cancel</button><button type="submit" class="is-primary">✓ Save</button></div>'
+      + '</form>';
+    document.body.append(dlg);
+    const types = dlg.querySelector('.cl-types');
+    for (const ty of LOG_TYPES) {
+      const b = el('button', 'cl-type', ty); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.type = ty;
+      b.addEventListener('click', () => types.querySelectorAll('.cl-type').forEach((x) => x.setAttribute('aria-checked', String(x === b))));
+      types.append(b);
+    }
+    dlg.querySelector('[data-act="cancel"]').addEventListener('click', () => dlg.close());
+    dlg.querySelector('form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const f = ev.target, msg = dlg.querySelector('.cl-msg'), save = f.querySelector('.is-primary');
+      const who = (window.lifeCRM() || []).find((p) => p.url === f.who.value);
+      const type = (types.querySelector('[aria-checked="true"]') || {}).dataset?.type || 'Other';
+      if (!who) { msg.className = 'cl-msg is-bad'; msg.textContent = 'Pick a person.'; return; }
+      save.disabled = true; msg.className = 'cl-msg'; msg.textContent = 'Saving…';
+      try {
+        await logContact(who, { type, date: f.date.value || isoDay(localDay()), note: f.note.value.trim() });
+        dlg.close();
+      } catch (e) {
+        msg.className = 'cl-msg is-bad';
+        if (e.message === 'NO_TOKEN') {
+          msg.textContent = 'To log from this device, add your GitHub token once (the same one the skill tree uses). ';
+          const a = el('a', '', 'Add token'); a.href = '#skills'; a.addEventListener('click', () => { dlg.close(); setTimeout(() => window.SkillTree && window.SkillTree.openSettings && window.SkillTree.openSettings(), 50); });
+          msg.append(a);
+        } else msg.textContent = 'Not saved: ' + e.message + '.';
+      } finally { save.disabled = false; }
+    });
+  }
+  const PREF_TYPE = [[/call|phone/i, 'Call'], [/video|facetime/i, 'Video'], [/voice/i, 'Voice note'], [/text|message|whatsapp|signal|chat/i, 'Text'], [/meet|hang|person|visit/i, 'Hang out']];
+  function openLog(person) {
+    if (!dlg) buildDialog();
+    const people = (window.lifeCRM() || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+    const sel = dlg.querySelector('select');
+    sel.replaceChildren(el('option', '', 'Choose…'));
+    sel.firstChild.value = '';
+    for (const p of people) { const o = el('option', '', p.name); o.value = p.url; sel.append(o); }
+    sel.value = person ? person.url : '';
+    dlg.querySelector('label').hidden = !!person;
+    dlg.querySelector('h2').textContent = person ? 'Talked to ' + person.name : 'Log a contact';
+    const pref = person && person.pref[0] ? (PREF_TYPE.find(([re]) => re.test(person.pref[0])) || [0, 'Other'])[1] : 'Call';
+    dlg.querySelectorAll('.cl-type').forEach((x) => x.setAttribute('aria-checked', String(x.dataset.type === pref)));
+    dlg.querySelector('[name="note"]').value = '';
+    dlg.querySelector('[name="date"]').value = isoDay(localDay());
+    dlg.querySelector('[name="date"]').max = isoDay(localDay());
+    const msg = dlg.querySelector('.cl-msg'); msg.className = 'cl-msg';
+    msg.textContent = !crmInfo().gist ? 'Logging needs the skill-tree gist (SKILLTREE_GIST); it isn\u2019t set for this build.' : ghToken() ? '' : 'This device has no GitHub token yet; you\u2019ll be asked for it when you save.';
+    dlg.showModal();
+    (person ? dlg.querySelector('.is-primary') : sel).focus();
+  }
+  const tickButton = (p) => {
+    if (p.waiting) { const w = el('span', 'cl-btn is-waiting', '✓ logged'); w.title = 'Waiting for the next sync to reach Notion'; return w; }
+    const b = el('button', 'cl-btn is-tick', '✓'); b.type = 'button'; b.title = 'I talked to ' + p.name; b.setAttribute('aria-label', 'Log a contact with ' + p.name);
+    b.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openLog(p); });
+    return b;
+  };
+  window.lifeCRMLog.tick = tickButton;
+  const pendingNote = (box) => {
+    const n = crmQ.pending.length;
+    box.hidden = !n; box.replaceChildren();
+    if (!n) return;
+    const a = el('a', '', 'Sync now \u2197'); a.href = SYNC_URL; a.target = '_blank'; a.rel = 'noopener';
+    box.append(document.createTextNode(plural(n, 'contact', 'contacts') + ' waiting to sync to Notion · '), a);
+  };
+  window.lifeCRMLog.pendingNote = pendingNote;
+
   function renderSocial() {
+    refreshQueue();
     if (!ok('items')) return;
     const items = data('items');
     const area = 'Social';
@@ -892,10 +1090,15 @@
       const name = link(p.name, p.url); name.classList.add('sv-person-name');
       const badge = el('span', 'sv-badge' + (p.state === 'over' ? ' is-warn' : ''),
         p.state === 'over' ? (p.over ? p.over + ' days overdue' : 'overdue') : p.state === 'soon' ? (p.due ? 'due ' + (days(t, p.due) <= 0 ? 'today' : 'in ' + days(t, p.due) + ' days') : 'due soon') : 'new: no contact logged');
-      card.append(name, badge, el('span', 'av-note', [p.tier, p.circles.join(', '), p.last ? 'last contact ' + days(p.last, t) + ' days ago' : '', p.cadence && !/no cadence/i.test(p.cadence) ? p.cadence.toLowerCase() : '', p.pref.length ? 'prefers ' + p.pref.join(' / ').toLowerCase() : ''].filter(Boolean).join(' · ')));
+      card.append(name, badge, tickButton(p), el('span', 'av-note', [p.tier, p.circles.join(', '), p.last ? 'last contact ' + days(p.last, t) + ' days ago' : '', p.cadence && !/no cadence/i.test(p.cadence) ? p.cadence.toLowerCase() : '', p.pref.length ? 'prefers ' + p.pref.join(' / ').toLowerCase() : ''].filter(Boolean).join(' · ')));
       rl.append(card);
     }
     if (!reach.length) rl.append(el('p', 'av-empty', people.length ? 'Nobody to reach out to right now.' : 'No people in your CRM yet.'));
+
+    pendingNote($('#sv-pending'));
+    const logAny = $('#sv-log-any');
+    if (!logAny.dataset.wired) { logAny.dataset.wired = '1'; logAny.addEventListener('click', () => openLog(null)); }
+    logAny.hidden = !crmInfo().gist;
 
     const sl = $('#sv-soon-list'); sl.replaceChildren();
     const upcoming = [
@@ -913,13 +1116,18 @@
     const recentList = $('#sv-recent-list'); recentList.replaceChildren();
     const last30 = inter.filter((x) => days(x.d, t) <= 30).length;
     $('#sv-recent-note').textContent = last30 + ' in the last 30 days';
+    for (const x of crmQ.pending.slice().reverse()) {
+      const li = el('li', 'av-item');
+      li.append(el('span', 'av-dot is-idea'), el('span', '', x.name + ': ' + (x.note || x.type)), el('span', 'av-pill', 'waiting to sync · ' + fmtShort(parseDay(x.date))));
+      recentList.append(li);
+    }
     for (const x of inter.slice(0, 8)) {
       const who = jsonList(x.Person).map((u) => (byUrl[u] || {}).name).filter(Boolean).join(', ');
       const li = el('li', 'av-item');
       li.append(el('span', 'av-dot'), link((who ? who + ': ' : '') + (x.Summary || x.Type || 'Interaction'), x.url), el('span', 'av-pill', [x.Type, fmtShort(x.d)].filter(Boolean).join(' · ')));
       recentList.append(li);
     }
-    if (!inter.length) recentList.append(el('li', 'av-empty', 'No interactions logged yet.'));
+    if (!inter.length && !crmQ.pending.length) recentList.append(el('li', 'av-empty', 'No interactions logged yet.'));
 
     const cb = $('#sv-circle-bars'); cb.replaceChildren();
     const circles = d3.rollups(people.flatMap((p) => (p.circles.length ? p.circles : ['No circle']).map((c) => ({ c, over: p.state === 'over' }))), (v) => ({ n: v.length, over: v.filter((x) => x.over).length }), (x) => x.c)
@@ -946,6 +1154,7 @@
   }
 
   const render = () => {
+    try { refreshQueue(); } catch (e) { console.error(e); }
     try { if (visible('view-travel')) renderTravel(); } catch (e) { console.error(e); }
     try { if (visible('view-health')) renderHealth(); } catch (e) { console.error(e); }
     try { if (visible('view-social')) renderSocial(); } catch (e) { console.error(e); }

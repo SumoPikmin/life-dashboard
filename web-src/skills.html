@@ -575,6 +575,8 @@ window.SkillTree = (() => {
     },
     shown() { render(); pull(false); },
     openTab(id) { branchSel = id; },
+    openSettings,
+    token: () => token,
     redraw: render,
   };
 })();

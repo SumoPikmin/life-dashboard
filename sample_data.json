@@ -560,7 +560,8 @@
     "date:Birthday:start": "1990-10-25",
     "Preferred Contact": "[\"Call\"]",
     "Location": "",
-    "Notes": ""
+    "Notes": "",
+    "Cadence Days": 7
    },
    {
     "url": "https://app.notion.com/p/samplepb",
@@ -575,7 +576,8 @@
     "date:Birthday:start": "",
     "Preferred Contact": "[\"Text\"]",
     "Location": "",
-    "Notes": ""
+    "Notes": "",
+    "Cadence Days": 30
    },
    {
     "url": "https://app.notion.com/p/samplepc",
@@ -590,7 +592,8 @@
     "date:Birthday:start": "1992-11-30",
     "Preferred Contact": "[\"Text\"]",
     "Location": "",
-    "Notes": ""
+    "Notes": "",
+    "Cadence Days": 90
    },
    {
     "url": "https://app.notion.com/p/samplepd",
@@ -605,7 +608,8 @@
     "date:Birthday:start": "",
     "Preferred Contact": "[\"Meet up\"]",
     "Location": "",
-    "Notes": ""
+    "Notes": "",
+    "Cadence Days": 14
    },
    {
     "url": "https://app.notion.com/p/samplepe",
@@ -620,7 +624,8 @@
     "date:Birthday:start": "",
     "Preferred Contact": "[\"Text\"]",
     "Location": "",
-    "Notes": ""
+    "Notes": "",
+    "Cadence Days": 365
    }
   ],
   "interactions": [

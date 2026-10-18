@@ -7,7 +7,9 @@ PBKDF2-SHA256), the same browser format as the Garmin dashboard.
 Environment:
   NOTION_TOKEN        internal integration secret, connected to the Life Wiki page
   DASHBOARD_PASSWORD  password the page asks for
-  SKILLTREE_GIST      id of the private gist holding skilltree.json (the page saves unlocks there)
+  SKILLTREE_GIST      id of the private gist holding skilltree.json (the page saves unlocks there) and
+                      crm-queue.json (contacts logged on the page, sealed with the dashboard key; the build
+                      turns them into Interactions in Notion)
   SKILLTREE_JSON      fallback: the Skill Tree app's export (JSON text)
   SKILLTREE_FILE      or a path to that export, for local builds
 
@@ -282,23 +284,107 @@ def diagnose() -> None:
 
 
 # ---------------------------------------------------------------- Skill Tree
-def read_gist(gist_id: str) -> dict | None:
+_gist_cache: dict[str, dict] = {}
+
+
+def gist_file(gist_id: str, name: str) -> str | None:
     # A secret gist is readable by id without signing in (the Actions GITHUB_TOKEN gets 403 on gists).
-    headers = {"Accept": "application/vnd.github+json", "User-Agent": "life-dashboard-build"}
-    try:
+    if gist_id not in _gist_cache:
+        headers = {"Accept": "application/vnd.github+json", "User-Agent": "life-dashboard-build"}
         with urllib.request.urlopen(urllib.request.Request(f"https://api.github.com/gists/{gist_id}", headers=headers), timeout=30) as res:
-            g = json.load(res)
-        f = (g.get("files") or {}).get("skilltree.json")
-        if not f:
-            return None
-        raw = f["content"]
-        if f.get("truncated") and f.get("raw_url"):
-            with urllib.request.urlopen(urllib.request.Request(f["raw_url"], headers={"User-Agent": "life-dashboard-build"}), timeout=30) as res:
-                raw = res.read().decode()
-        return json.loads(raw)
+            _gist_cache[gist_id] = json.load(res).get("files") or {}
+    f = _gist_cache[gist_id].get(name)
+    if not f:
+        return None
+    raw = f["content"]
+    if f.get("truncated") and f.get("raw_url"):
+        with urllib.request.urlopen(urllib.request.Request(f["raw_url"], headers={"User-Agent": "life-dashboard-build"}), timeout=30) as res:
+            raw = res.read().decode()
+    return raw
+
+
+def read_gist(gist_id: str) -> dict | None:
+    try:
+        raw = gist_file(gist_id, "skilltree.json")
+        return json.loads(raw) if raw else None
     except (urllib.error.URLError, ValueError) as e:
         print(f"Could not read the skill tree gist ({e}); falling back to the export")
         return None
+
+
+# ---------------------------------------------------------------- contacts logged on the page
+CRM_QUEUE = "crm-queue.json"
+CRM_TYPES = {"Hang out", "Call", "Video", "Text", "Voice note", "Social", "Gift", "Other"}
+CRM_SUMMARY = {"Hang out": "Hung out", "Call": "Called", "Video": "Video call", "Text": "Texted", "Voice note": "Voice note",
+               "Social": "Social media", "Gift": "Sent a gift", "Other": "Contacted"}
+REF_RE = re.compile(r"\(ref ([a-z0-9]{6,16})\)")
+
+
+def sync_crm_queue(password: str) -> dict:
+    """Create an Interaction in Notion for every contact logged on the page that isn't there yet.
+
+    The page appends {ref, at, box} entries to crm-queue.json in the gist; box is the contact sealed with the
+    dashboard key (same AES-GCM key as data.enc), so the unlisted gist never holds names or notes in the clear.
+    Each Interaction gets "(ref …)" in its Notes, which makes this safe to re-run: the page drops entries once a
+    sync reports them as done. Logs are public, so only counts are printed.
+    """
+    gist_id = os.environ.get("SKILLTREE_GIST", "").strip()
+    if not gist_id:
+        return {"synced": []}
+    try:
+        raw = gist_file(gist_id, CRM_QUEUE)
+        entries = (json.loads(raw).get("entries") or []) if raw else []
+    except (urllib.error.URLError, ValueError, AttributeError):
+        print("crm_queue=unreadable")
+        return {"synced": []}
+    if not entries:
+        return {"synced": []}
+    try:
+        existing = query_rows(INTERACTIONS)
+    except NotionError as e:
+        print(f"crm_queue={len(entries)} kept: Interactions not readable ({e.code})")
+        return {"synced": []}
+    done = {m for r in existing for m in REF_RE.findall(r.get("Notes") or "")}
+    key = AESGCM(hashlib.pbkdf2_hmac("sha256", password.encode(), deployment_salt(), PBKDF2_ITERATIONS, dklen=32))
+    created = failed = bad = 0
+    refused = None
+    for e in entries:
+        ref = str(e.get("ref") or "")
+        if not re.fullmatch(r"[a-z0-9]{6,16}", ref) or ref in done:
+            continue
+        try:
+            sealed = base64.b64decode(e["box"])
+            c = json.loads(key.decrypt(sealed[:12], sealed[12:], None))
+            person = re.search(r"([0-9a-f]{32})$", str(c.get("person") or "").replace("-", "")).group(1)
+            day = datetime.strptime(str(c.get("date"))[:10], "%Y-%m-%d").date().isoformat()
+        except Exception:  # sealed with another password, or malformed
+            bad += 1
+            continue
+        kind = c.get("type") if c.get("type") in CRM_TYPES else "Other"
+        note = str(c.get("note") or "").strip()[:1800]
+        props = {
+            "Summary": {"title": [{"text": {"content": (note[:100] if note else CRM_SUMMARY[kind])}}]},
+            "Type": {"select": {"name": kind}},
+            "Date": {"date": {"start": day}},
+            "Person": {"relation": [{"id": person}]},
+            "Notes": {"rich_text": [{"text": {"content": (note + "\n" if len(note) > 100 else "") + f"Logged from the dashboard (ref {ref})"}}]},
+        }
+        try:
+            notion("POST", "/pages", {"parent": {"type": "data_source_id", "data_source_id": INTERACTIONS[2]}, "properties": props})
+            created += 1
+            done.add(ref)
+        except NotionError as err:
+            failed += 1
+            if err.code in (403, 404):
+                refused = err.code
+                break
+    waiting = sum(1 for e in entries if str(e.get("ref") or "") not in done)
+    print(f"crm_queue={len(entries)} created={created} waiting={waiting} failed={failed} unreadable={bad}")
+    if refused == 403:
+        print("Notion refused to create Interactions (403): give the integration the 'Insert content' capability. The queue is kept.")
+    elif refused == 404:
+        print("Notion can't see the Interactions database or a person (404). The queue is kept.")
+    return {"synced": sorted(str(e.get("ref")) for e in entries if str(e.get("ref") or "") in done)}
 
 
 def load_skill_export() -> dict | None:
@@ -342,6 +428,7 @@ def collect(sample: bool) -> dict:
     if sample:
         payload = json.loads((ROOT / "sample_data.json").read_text(encoding="utf-8"))
         payload["generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        payload["sources"].setdefault("crm", {"gist": os.environ.get("SKILLTREE_GIST", "").strip() or None, "synced": []})
         return payload
     export = load_skill_export()
     try:
@@ -354,12 +441,14 @@ def collect(sample: bool) -> dict:
             "finance": finance_page(FINANCE_PAGE),
             "plan": finance_page(PLAN_PAGE),
         }
+        crm = sync_crm_queue(os.environ.get("DASHBOARD_PASSWORD", ""))  # before reading the CRM, so new contacts show
         for key, src in (("people", PEOPLE), ("interactions", INTERACTIONS)):
             try:
                 sources[key] = query_rows(src)
             except NotionError as e:  # the CRM is optional: the rest of the dashboard still builds
                 print(f"Could not read {src[0]} ({e.code}); the Social tab will be empty")
                 sources[key] = []
+        sources["crm"] = {"gist": os.environ.get("SKILLTREE_GIST", "").strip() or None, **crm}
         training = next((r for r in sources["projects"] if re.search(r"train", r.get("Name") or "", re.I)), None)
         sources["training"] = page_structure(training["url"].rsplit("/", 1)[-1]) if training else {"tables": [], "lines": {}}
     except NotionError as e:

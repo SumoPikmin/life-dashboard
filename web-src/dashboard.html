@@ -9,19 +9,43 @@
   .lw a:hover { text-decoration-color: currentColor; }
   .lw-tint { background: color-mix(in oklab, var(--a, var(--a-none)) 8%, var(--color-panel)); border: 1px solid color-mix(in oklab, var(--a, var(--a-none)) 22%, var(--color-border-line)); }
 
-  .lw-hero { display: flex; flex-wrap: wrap; gap: var(--cds-gap-lg) var(--cds-gap-xl); align-items: start; }
-  .lw-brief-card { flex: 1 1 20rem; max-width: 32rem; gap: var(--cds-gap-sm); }
-  .lw-brief-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-sm); }
-  .lw-brief { display: grid; }
-  .lw-brief-row { display: grid; grid-template-columns: 1.9rem minmax(0, 1fr); gap: 1px .7rem; align-items: start; padding: .7rem 0; border-top: 1px dashed var(--color-border-line); color: inherit; text-decoration: none !important; }
-  .lw-brief-row:first-child { border-top: 0; padding-top: .2rem; }
-  a.lw-brief-row:hover .lw-brief-v { text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 30%, transparent); text-underline-offset: 3px; }
-  .lw-brief-ic { grid-row: span 2; width: 1.9rem; height: 1.9rem; border-radius: 9px; display: grid; place-items: center; color: var(--a); background: color-mix(in oklab, var(--a) 15%, transparent); }
-  .lw-brief-ic svg { width: 1.05rem; height: 1.05rem; }
-  .lw-brief-k { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); letter-spacing: .03em; }
-  .lw-brief-k.is-warn { color: var(--color-warn); }
-  .lw-brief-v { font-weight: var(--cds-font-weight-medium); line-height: 1.4; min-width: 0; overflow-wrap: anywhere; }
-  .lw-brief-v small { display: block; font-weight: 400; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.45; margin-top: 1px; }
+  .lw-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--cds-gap-lg) var(--cds-gap-xl); align-items: start; }
+  .lw-hero .lw-story { min-width: 0; }
+  @media (max-width: 760px) { .lw-hero { grid-template-columns: minmax(0, 1fr); } }
+  .lw-week { margin: 0; width: 17.5rem; max-width: 100%; padding: var(--cds-pad-md) var(--cds-pad-lg); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); display: grid; gap: .55rem; align-self: end; }
+  @media (max-width: 760px) { .lw-week { width: auto; } }
+  .lw-week-h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--cds-gap-sm); }
+  .lw-week-h strong { font-size: var(--cds-font-size-caption); letter-spacing: .06em; text-transform: uppercase; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); }
+  .lw-week-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+  .lw-wd { display: grid; justify-items: center; gap: 4px; font-size: .6875rem; color: var(--color-fg-muted); }
+  .lw-wd-bar { width: 100%; height: 2.5rem; border-radius: 6px; background: var(--a-health); }
+  .lw-wd-bar.is-other { background: color-mix(in oklab, var(--a-health) 38%, transparent); }
+  .lw-wd-bar.is-rest { background: transparent; box-shadow: inset 0 0 0 1.5px var(--color-border-line); }
+  .lw-wd.is-past .lw-wd-bar { opacity: .4; }
+  .lw-wd.is-today .lw-wd-l { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+  .lw-wd.is-today .lw-wd-bar { box-shadow: 0 0 0 2px var(--color-panel), 0 0 0 3.5px var(--color-fg); }
+  .lw-wd.is-today .lw-wd-bar.is-rest { box-shadow: inset 0 0 0 1.5px var(--color-border-line), 0 0 0 2px var(--color-panel), 0 0 0 3.5px var(--color-fg); }
+  .lw-wd-dots { display: flex; gap: 2px; height: .4rem; }
+  .lw-wd-dots i { width: .4rem; height: .4rem; border-radius: 50%; background: var(--a); }
+  .lw-week-s { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.4; }
+  .lw-week-key { display: flex; flex-wrap: wrap; gap: 2px .7rem; font-size: .6875rem; color: var(--color-fg-muted); }
+  .lw-week-key span { display: inline-flex; align-items: center; gap: .3rem; }
+  .lw-week-key i { width: .55rem; height: .55rem; border-radius: 2px; background: var(--a-health); }
+  .lw-week-key i.is-other { background: color-mix(in oklab, var(--a-health) 38%, transparent); }
+  .lw-week-key i.is-rest { background: transparent; box-shadow: inset 0 0 0 1.2px var(--color-fg-muted); }
+  .lw-week-key i.is-dot { border-radius: 50%; background: var(--color-fg-muted); width: .4rem; height: .4rem; }
+  .lw-brief { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15.5rem), 1fr)); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); overflow: hidden; }
+  .lw-bcol { padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: .5rem; align-content: start; min-width: 0; box-shadow: -1px 0 0 var(--color-border-line), 0 -1px 0 var(--color-border-line); }
+  .lw-bcol-h { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin: 0 0 .1rem; font-size: var(--cds-font-size-caption); letter-spacing: .06em; text-transform: uppercase; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); }
+  .lw-bcol-h a { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .lw-bcol ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+  .lw-bi { display: flex; align-items: center; gap: .5rem; min-width: 0; font-size: .9rem; line-height: 1.35; }
+  .lw-bi-dot { flex: none; width: .5rem; height: .5rem; border-radius: 50%; background: var(--a, var(--a-none)); }
+  .lw-bi-t { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lw-bi-m { flex: none; margin-left: auto; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .lw-bi-m.is-warn { color: var(--color-warn); }
+  .lw-bi .cl-btn { flex: none; }
+  .lw-bcol .cl-pending { margin-top: .1rem; }
   .lw-compare { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); padding: var(--cds-pad-md) var(--cds-pad-lg); }
   .lw-compare summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem var(--cds-gap-md); }
   .lw-compare summary .lw-h3::before { content: "\25B8"; display: inline-block; width: 1em; color: var(--color-fg-muted); transition: transform var(--cds-dur-slow); }
@@ -239,10 +263,12 @@
         <span class="lw-principle-text dash-skeleton">—</span>
       </figure>
     </div>
-    <aside class="lw-card lw-brief-card" id="lw-brief" aria-label="Today">
-      <div class="lw-brief-head"><span class="lw-principle-label">Today</span><span class="lw-note" id="lw-brief-day"></span></div>
-      <div class="lw-brief" id="lw-brief-list"></div>
-    </aside>
+    <figure class="lw-week" id="lw-week" aria-label="This week at a glance"></figure>
+    <div class="lw-brief" id="lw-brief">
+      <section class="lw-bcol" id="lw-b-today"></section>
+      <section class="lw-bcol" id="lw-b-next"></section>
+      <section class="lw-bcol" id="lw-b-reach"></section>
+    </div>
   </header>
 
   <section class="lw-stats" id="lw-stats" aria-label="Headline figures"></section>
@@ -1016,72 +1042,93 @@ dash.calc('dates', {
     }
   }
 
-  /* Today: the training session, tasks, the next date and who to call, each linking to where it lives. */
-  const ICON = {
-    train: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-5 4 10 2.5-5H21"/></svg>',
-    rest: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>',
-    task: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.4 2.4 4.6-5"/></svg>',
-    date: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10h16M9 3.5v4M15 3.5v4"/></svg>',
-    people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="16.5" cy="9.5" r="2.4"/><path d="M15.5 14.2A4.6 4.6 0 0 1 20.5 19"/></svg>',
-    cake: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16v-7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2z"/><path d="M4 15.5c2 1.3 4 1.3 6 0s4-1.3 6 0 3 1 4 .5M12 11V8M12 5.5v-.01"/></svg>',
-  };
+  /* Top right: this week's training rhythm (from the Training Plan) with dated items and birthdays as dots. */
+  const RUN = /run|lauf|tempo|interval|threshold|long|race|jog|fartlek|stride/i;
+  function week() {
+    const box = $('#lw-week');
+    const wk = window.lifeWeek ? window.lifeWeek() : null;
+    box.hidden = !wk || !wk.days.some((d) => d.session || d.plan);
+    if (box.hidden) return;
+    const dated = dash.data('dates').status === 'ok' ? dash.data('dates').data.map((r) => ({ ...r, d: parseDay(r.date) })) : [];
+    const crm = window.lifeCRM ? window.lifeCRM() : [];
+    const head = el('div', 'lw-week-h');
+    head.append(el('strong', '', 'This week'), el('span', 'lw-note', wk.week || ''));
+    const grid = el('div', 'lw-week-days');
+    let runs = 0, other = 0;
+    for (const d of wk.days) {
+      const kind = /rest/i.test(d.session) && !d.plan ? 'rest' : RUN.test(d.session + ' ' + d.plan) ? 'run' : d.session && d.session !== '—' ? 'other' : 'rest';
+      if (kind === 'run') runs++; else if (kind === 'other') other++;
+      const col = el('div', 'lw-wd' + (+d.date === +t ? ' is-today' : d.date < t ? ' is-past' : ''));
+      col.title = d3.utcFormat('%a %-d %b')(d.date) + ': ' + (kind === 'rest' ? 'rest' : [d.session, d.plan].filter(Boolean).join(' · '));
+      const dots = el('span', 'lw-wd-dots');
+      for (const r of dated.filter((r) => r.d && +r.d === +d.date).slice(0, 3)) { const i = paint(el('i'), r.area); i.title = r.label; dots.append(i); }
+      for (const p of crm.filter((p) => p.birthday && +p.birthday === +d.date)) { const i = paint(el('i'), 'Social'); i.title = p.name + '\u2019s birthday'; dots.append(i); }
+      col.append(el('span', 'lw-wd-l', d.day.slice(0, 1)), el('span', 'lw-wd-bar' + (kind === 'run' ? '' : ' is-' + kind)), dots);
+      grid.append(col);
+    }
+    const key = el('div', 'lw-week-key');
+    for (const [cls, label] of [['', 'run'], ['is-other', 'other training'], ['is-rest', 'rest'], ['is-dot', 'dated']]) { const k = el('span'); const i = el('i'); if (cls) i.className = cls; k.append(i, document.createTextNode(label)); key.append(k); }
+    box.replaceChildren(head, grid, el('span', 'lw-week-s', plural(runs, 'run', 'runs') + ' · ' + other + ' other · ' + (7 - runs - other) + ' rest' + (wk.km ? ' · ' + wk.km : '')), key);
+  }
+
+  /* Under the quote: Today, Next up, Reach out. One line per item, each linking to where it lives. */
+  const rel = (n) => (n === 0 ? 'today' : n === 1 ? 'tomorrow' : 'in ' + n + ' d');
   function brief() {
-    const box = $('#lw-brief-list');
-    if (hold(box, state('items'))) return;
-    box.classList.remove('dash-skeleton');
-    $('#lw-brief-day').textContent = d3.utcFormat('%A')(t);
-    const row = (icon, area, k, v, sub, href, warn) => {
-      const r = paint(el(href ? 'a' : 'div', 'lw-brief-row'), area);
-      if (href) {
-        r.href = href;
-        if (href.startsWith('#') && document.querySelector(href)) r.addEventListener('click', (e) => { e.preventDefault(); jump(href); });
-      }
-      const ic = el('span', 'lw-brief-ic'); ic.innerHTML = ICON[icon];
-      const val = el('span', 'lw-brief-v', v); if (sub) val.append(el('small', '', sub));
-      r.append(ic, el('span', 'lw-brief-k' + (warn ? ' is-warn' : ''), k), val);
-      box.append(r);
+    const cols = { today: $('#lw-b-today'), next: $('#lw-b-next'), reach: $('#lw-b-reach') };
+    if (state('items') !== 'ok') { Object.values(cols).forEach((c) => { c.replaceChildren(); c.classList.add('dash-skeleton'); }); return; }
+    Object.values(cols).forEach((c) => c.classList.remove('dash-skeleton'));
+    const col = (box, title, href, hrefLabel) => {
+      const h = el('h3', 'lw-bcol-h', title);
+      if (href) { const a = el('a', '', hrefLabel); a.href = href; if (href.startsWith('#') && document.querySelector(href)) a.addEventListener('click', (e) => { e.preventDefault(); jump(href); }); h.append(a); }
+      const ul = el('ul'); box.replaceChildren(h, ul); return ul;
+    };
+    const item = (ul, area, text, url, meta, warn, extra) => {
+      const li = paint(el('li', 'lw-bi'), area);
+      const tx = url && url.startsWith('#') ? Object.assign(el('a', 'lw-bi-t', text), { href: url }) : link(text, url, 'lw-bi-t');
+      li.append(el('span', 'lw-bi-dot'), tx);
+      if (meta) li.append(el('span', 'lw-bi-m' + (warn ? ' is-warn' : ''), meta));
+      if (extra) li.append(extra);
+      ul.append(li); return li;
     };
 
-    // Training
-    const tr = window.lifeToday ? window.lifeToday() : null;
-    if (tr && (tr.session || tr.plan)) {
-      const rest = /rest/i.test(tr.session) && !tr.plan;
-      row(rest ? 'rest' : 'train', 'Health & Fitness', 'Training · ' + tr.day, rest ? 'Rest day' : tr.plan || tr.session,
-        [tr.plan && tr.session ? tr.session : '', tr.notes && tr.notes !== '—' ? tr.notes : '', tr.week].filter(Boolean).join(' · '), '#health');
+    // Today: training, then daily and P1 tasks
+    let ul = col(cols.today, 'Today · ' + d3.utcFormat('%a')(t), '#agenda', 'tasks →');
+    const wk = window.lifeWeek ? window.lifeWeek() : null;
+    const td = wk && wk.days.find((d) => +d.date === +t);
+    if (td && (td.session || td.plan)) {
+      const rest = /rest/i.test(td.session) && !td.plan;
+      item(ul, 'Health & Fitness', rest ? 'Rest day' : td.plan || td.session, '#health', rest ? '' : td.plan ? td.session : td.notes && td.notes !== '—' ? td.notes : '');
     }
-
-    // Tasks: everything daily plus this week's P1s
     const items = dash.data('items').data;
-    const open = items.filter((x) => x.kind === 'task' && (x.status === 'Daily' || (x.status === 'Weekly' && x.scope === 'P1')));
-    const daily = open.filter((x) => x.status === 'Daily'), p1 = open.filter((x) => x.status === 'Weekly');
-    if (open.length) {
-      const names = [...p1, ...daily].map((x) => x.name);
-      row('task', p1.length ? (p1[0].area) : daily[0].area, [daily.length ? plural(daily.length, 'daily task', 'daily tasks') : '', p1.length ? p1.length + ' P1 this week' : ''].filter(Boolean).join(' · '),
-        names.slice(0, 3).join(' · ') + (names.length > 3 ? ' +' + (names.length - 3) : ''), '', '#agenda', p1.length > 0);
-    } else row('task', 'Unassigned', 'Tasks', 'Nothing daily or P1 this week', '', '#agenda');
+    const rankP = { P1: 0, P2: 1, P3: 2 };
+    const tasks = items.filter((x) => x.kind === 'task' && (x.status === 'Daily' || (x.status === 'Weekly' && x.scope === 'P1')))
+      .sort((a, b) => (a.status === 'Weekly' ? -1 : 0) - (b.status === 'Weekly' ? -1 : 0) || (rankP[a.scope] ?? 9) - (rankP[b.scope] ?? 9));
+    for (const x of tasks.slice(0, 4)) item(ul, x.area, x.name, x.url, x.status === 'Weekly' ? 'P1 this week' : 'daily', x.status === 'Weekly');
+    if (tasks.length > 4) item(ul, 'Unassigned', '+' + (tasks.length - 4) + ' more', '#agenda');
+    if (!ul.children.length) item(ul, 'Unassigned', 'Nothing daily or P1 this week', '');
 
-    // The next dated item
-    if (state('dates') === 'ok') {
-      const next = dash.data('dates').data.map((r) => ({ ...r, d: parseDay(r.date) })).filter((r) => r.d && r.d >= t)[0];
-      if (next) {
-        const n = daysBetween(t, next.d);
-        row('date', next.area, 'Next up · ' + (n === 0 ? 'today' : n === 1 ? 'tomorrow' : 'in ' + n + ' days'), next.label, fmtLong(next.d) + (next.area !== 'Unassigned' ? ' · ' + next.area : ''), '#agenda', n <= 3);
-      }
-    }
+    // Next up: the next three dated items
+    ul = col(cols.next, 'Next up', '#agenda', '90 days →');
+    const next = state('dates') === 'ok' ? dash.data('dates').data.map((r) => ({ ...r, d: parseDay(r.date) })).filter((r) => r.d && r.d >= t).slice(0, 3) : [];
+    for (const r of next) { const n = daysBetween(t, r.d); item(ul, r.area, r.label, r.url, rel(n), n <= 3); }
+    if (!next.length) item(ul, 'Unassigned', 'Nothing dated coming up', '');
 
-    // Personal CRM
+    // Reach out: most overdue first, a ✓ to log the contact, then birthdays
+    ul = col(cols.reach, 'Reach out', '#social', 'Social →');
     const crm = window.lifeCRM ? window.lifeCRM() : [];
-    if (crm.length) {
-      const over = crm.filter((p) => p.state === 'over').sort((a, b) => (b.over ?? 0) - (a.over ?? 0));
-      if (over.length) row('people', 'Social', 'Reach out · ' + over.length + ' overdue', over.slice(0, 3).map((p) => p.name).join(', ') + (over.length > 3 ? ' +' + (over.length - 3) : ''),
-        (over[0].over ? over.slice(0, 3).map((p) => p.over).filter(Boolean).join(', ') + ' days overdue' : '') + (over[0].pref.length ? ' · ' + over[0].name + ' prefers ' + over[0].pref.join(' / ').toLowerCase() : ''), '#social', true);
-      else row('people', 'Social', 'Reach out', 'Everyone is on track', crm.filter((p) => p.state === 'soon').length ? crm.filter((p) => p.state === 'soon').length + ' due soon' : '', '#social');
-      const bd = crm.filter((p) => p.birthday && daysBetween(t, p.birthday) <= 14).sort((a, b) => a.birthday - b.birthday);
-      if (bd.length) {
-        const n = daysBetween(t, bd[0].birthday);
-        row('cake', 'Social', 'Birthday · ' + (n === 0 ? 'today' : n === 1 ? 'tomorrow' : 'in ' + n + ' days'), bd.map((p) => p.name).slice(0, 2).join(', '), fmtShort(bd[0].birthday) + (bd.length > 2 ? ' · +' + (bd.length - 2) + ' more' : ''), '#social', n <= 2);
-      }
+    const log = window.lifeCRMLog;
+    const due = crm.filter((p) => p.state === 'over' || p.waiting).sort((a, b) => (a.waiting ? 1 : 0) - (b.waiting ? 1 : 0) || (b.over ?? 0) - (a.over ?? 0));
+    const soon = crm.filter((p) => p.state === 'soon' && !p.waiting).sort((a, b) => (a.due || 0) - (b.due || 0));
+    for (const p of [...due, ...soon].slice(0, 3)) {
+      const meta = p.waiting && p.state !== 'over' ? '' : p.state === 'over' ? (p.over ? p.over + ' d over' : 'overdue') : p.due ? 'due ' + rel(daysBetween(t, p.due)) : 'due soon';
+      item(ul, 'Social', p.name, p.url, meta, p.state === 'over', log && log.enabled() ? log.tick(p) : null);
     }
+    for (const p of crm.filter((p) => p.birthday && daysBetween(t, p.birthday) <= 14).sort((a, b) => a.birthday - b.birthday).slice(0, 2)) {
+      const n = daysBetween(t, p.birthday);
+      item(ul, 'Social', '\uD83C\uDF82 ' + p.name, p.url, rel(n), n <= 2);
+    }
+    if (!ul.children.length) item(ul, 'Social', crm.length ? 'Everyone is on track' : 'No Personal CRM data', '#social');
+    if (log && log.pending().length) { const pn = el('p', 'cl-pending'); log.pendingNote(pn); cols.reach.append(pn); }
   }
 
   // Remember whether the comparison panel is open.
@@ -1091,6 +1138,6 @@ dash.calc('dates', {
     d.addEventListener('toggle', () => { try { localStorage.setItem('life-compare-open', d.open ? '1' : '0'); } catch (_) {} });
   })();
 
-  dash.onData(() => { header(); brief(); figures(); donut(); map(); detail(); tasks(); insights(); dates(); });
+  dash.onData(() => { header(); week(); brief(); figures(); donut(); map(); detail(); tasks(); insights(); dates(); });
 })();
 </script>
