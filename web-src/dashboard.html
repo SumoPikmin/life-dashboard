@@ -108,16 +108,29 @@
   .lw-task-col { display: grid; gap: var(--cds-gap-sm); align-content: start; }
   .lw-task-col-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-sm); padding-bottom: var(--cds-pad-xs); border-bottom: 1px solid var(--color-border-line); }
   .lw-task-col-head strong { font-weight: var(--cds-font-weight-medium); }
-  .lw-task { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 2px var(--cds-gap-sm); align-items: baseline; padding: var(--cds-pad-sm) 0; border-bottom: 1px dashed var(--color-border-line); }
+  .lw-task { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px var(--cds-gap-sm); align-items: baseline; padding: .7rem 0; line-height: 1.4; border-bottom: 1px dashed var(--color-border-line); }
   .lw-task:last-child { border-bottom: 0; }
   .lw-task .lw-dot { transform: translateY(-1px); }
-  .lw-task-meta { grid-column: 2 / -1; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); overflow-wrap: anywhere; }
+  .lw-task-meta { grid-column: 2 / -1; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); overflow-wrap: anywhere; line-height: 1.5; }
+  .lw-task .lw-name { font-weight: var(--cds-font-weight-medium); }
   .lw-task-area { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); white-space: nowrap; }
   .lw-later { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .lw-later summary { cursor: pointer; }
   .lw-later ul { list-style: none; margin: .4rem 0 0; padding: 0; display: grid; gap: 3px; }
   .lw-groups { display: grid; gap: var(--cds-gap-md); }
-  .lw-group { display: grid; gap: var(--cds-gap-sm); }
+  .lw-group { display: grid; gap: .6rem; }
+  #lw-insights, #lw-dates { gap: 1.4rem; }
+  .lw-point { display: grid; gap: 5px; padding: .7rem .85rem; border-radius: 10px; background: color-mix(in oklab, var(--color-fg) 3%, var(--color-panel)); border-left: 3px solid var(--cds-chart-muted); }
+  .lw-point[data-level="warn"] { border-left-color: var(--color-warn); }
+  .lw-point[data-level="ok"] { border-left-color: var(--color-ok); }
+  .lw-point-top { display: flex; align-items: baseline; justify-content: space-between; gap: var(--cds-gap-sm); }
+  .lw-point-top strong { font-weight: var(--cds-font-weight-medium); line-height: 1.35; }
+  .lw-point-area { display: inline-flex; align-items: center; gap: .3rem; flex: none; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); white-space: nowrap; }
+  .lw-point-area .lw-dot { width: .5rem; height: .5rem; }
+  .lw-point-detail { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.5; }
+  .lw-point-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
+  .lw-point-chip { font-size: var(--cds-font-size-caption); line-height: 1.7; padding: 0 .55rem; border-radius: 999px; color: inherit; text-decoration: none !important; background: color-mix(in oklab, var(--a, var(--color-fg)) 12%, transparent); }
+  a.lw-point-chip:hover { background: color-mix(in oklab, var(--a, var(--color-fg)) 22%, transparent); }
   .lw-group-head { display: flex; align-items: center; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); letter-spacing: .03em; color: var(--color-fg-muted); }
   .lw-group-head::after { content: ""; flex: 1; height: 1px; background: var(--color-border-line); }
   .lw-group-head i { width: .55rem; height: .55rem; border-radius: 2px; background: var(--g, var(--cds-chart-muted)); flex: none; }
@@ -128,7 +141,7 @@
   .lw-detail-head { padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-xs); background: color-mix(in oklab, var(--a) 16%, var(--color-panel)); border-bottom: 1px solid color-mix(in oklab, var(--a) 30%, var(--color-border-line)); }
   .lw-detail-title { display: flex; align-items: center; gap: var(--cds-gap-sm); justify-content: space-between; }
   .lw-detail-title h3 { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); line-height: 1.1; }
-  .lw-detail-body { padding: var(--cds-pad-lg); display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--cds-gap-lg); align-items: start; background: var(--color-panel); }
+  .lw-detail-body { padding: var(--cds-pad-lg) var(--cds-pad-xl); display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--cds-gap-lg); align-items: start; background: var(--color-panel); }
   .lw-block.is-wide, .lw-detail-body > .lw-note { grid-column: 1 / -1; }
   .lw-list.is-cards { grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: var(--cds-gap-sm); }
   a.lw-fig { color: inherit; text-decoration: none; position: relative; transition: background var(--cds-dur-slow); }
@@ -136,7 +149,8 @@
   a.lw-fig:focus-visible { outline: 2px solid var(--a-finance); outline-offset: -2px; }
   .lw-fig-go { font-size: var(--cds-font-size-caption); color: var(--a-finance); font-weight: var(--cds-font-weight-medium); }
   .lw-block { display: grid; gap: var(--cds-gap-sm); }
-  .lw-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--cds-gap-sm); align-content: start; }
+  .lw-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .8rem; align-content: start; }
+  .lw-item { line-height: 1.4; }
   .lw-proj { display: grid; gap: var(--cds-gap-xs); padding: var(--cds-pad-md); border-radius: calc(var(--cds-radius) * .8); border: 1px solid color-mix(in oklab, var(--a) 25%, var(--color-border-line)); background: color-mix(in oklab, var(--a) 5%, var(--color-panel)); min-width: 0; }
   .lw-proj-top { display: flex; align-items: baseline; gap: var(--cds-gap-sm); min-width: 0; }
   .lw-name { min-width: 0; overflow-wrap: anywhere; font-weight: var(--cds-font-weight-medium); }
@@ -384,35 +398,40 @@ dash.calc('insights', {
   description: 'Rules over projects, goals and tasks: gaps between goals and projects, missing next actions, unsorted tasks, budgets.',
   inputs: ['items', 'areas'],
   fn: (items, areas) => {
+    // Each point: a short title, one line of detail, and the items it is about as chips.
     const out = [];
-    const add = (level, area, text, theme) => out.push({ id: 'i' + out.length, level, area, text, theme });
+    const chip = (x) => ({ name: x.name, url: x.url || '', area: x.area || '' });
+    const add = (level, area, title, detail, theme, chips) => out.push({ id: 'i' + out.length, level, area, title, detail, theme, chips: chips || [], text: title + (detail ? ': ' + detail : '') });
     const s = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
     const main = areas.filter((a) => a.area !== 'Unassigned');
-    for (const a of main) {
-      const waiting = a.goals_idea + a.goals_hold;
-      if (a.goals_active > 0 && a.projects === 0) add('warn', a.area, a.area + ' has ' + s(a.goals_active, 'active goal') + ' but no project carrying it.', 'Plans');
-      else if (a.projects === 0 && a.goals_active === 0 && waiting > 0) add('info', a.area, a.area + ' has nothing active, with ' + s(waiting, 'idea') + ' waiting on the Impossible List.', 'Balance');
-    }
     const goals = items.filter((i) => i.kind === 'goal');
-    for (const g of goals.filter((g) => g.status === 'Active' && g.links === 0)) add('warn', g.area, g.name + ' is an active goal with no project linked.', 'Plans');
-    const nyIdeas = goals.filter((g) => g.scope === 'Next Year' && g.status === 'Idea');
-    if (nyIdeas.length) {
-      const one = new Set(nyIdeas.map((g) => g.area)).size === 1 ? nyIdeas[0].area : '';
-      add('warn', one, s(nyIdeas.length, 'next-year goal') + ' still marked Idea: ' + nyIdeas.map((g) => g.name).join('; ') + '.', 'Plans');
-    }
     const projects = items.filter((i) => i.kind === 'project');
-    for (const p of projects.filter((p) => !p.next)) add('warn', p.area, p.name + ' has no next action.', 'Housekeeping');
-    for (const p of projects.filter((p) => p.area === 'Unassigned')) add('info', '', p.name + ' has no life area on the projects board.', 'Housekeeping');
     const tasks = items.filter((i) => i.kind === 'task' && i.status !== 'Done');
-    const unsorted = tasks.filter((t) => t.area === 'Unassigned').length;
-    if (unsorted) add('info', '', unsorted + ' of ' + tasks.length + ' open tasks have no life area.', 'Housekeeping');
-    const capture = tasks.filter((t) => t.status === 'Capture').length;
-    if (capture >= 5) add('info', '', capture + ' items are sitting in Capture, waiting to be sorted.', 'Housekeeping');
+
+    const noProject = goals.filter((g) => g.status === 'Active' && g.links === 0);
+    if (noProject.length) add('warn', noProject.length === 1 ? noProject[0].area : '', s(noProject.length, 'active goal') + ' without a project', 'Link each to a project, or start one, so it has a plan and a next action.', 'Plans', noProject.map(chip));
+    const nyIdeas = goals.filter((g) => g.scope === 'Next Year' && g.status === 'Idea');
+    if (nyIdeas.length) add('warn', new Set(nyIdeas.map((g) => g.area)).size === 1 ? nyIdeas[0].area : '', s(nyIdeas.length, 'next-year goal') + ' not started', 'Still marked Idea: decide whether each one is in for next year.', 'Plans', nyIdeas.map(chip));
+    const goalNoProj = main.filter((a) => a.goals_active > 0 && a.projects === 0);
+    for (const a of goalNoProj) add('warn', a.area, a.area + ': goals but no project', s(a.goals_active, 'active goal') + ' and nothing carrying them yet.', 'Plans');
+
+    const noNext = projects.filter((p) => !p.next);
+    if (noNext.length) add('warn', noNext.length === 1 ? noNext[0].area : '', s(noNext.length, 'project') + ' without a next action', 'Add one concrete next step to each.', 'Housekeeping', noNext.map(chip));
+    const noArea = projects.filter((p) => p.area === 'Unassigned');
+    if (noArea.length) add('info', '', s(noArea.length, 'project') + ' without a life area', 'Set the Area on the projects board so it shows up in the right place.', 'Housekeeping', noArea.map(chip));
+    const unsorted = tasks.filter((t) => t.area === 'Unassigned');
+    if (unsorted.length) add('info', '', s(unsorted.length, 'task') + ' without a life area', unsorted.length + ' of ' + tasks.length + ' open tasks in the Task Planner.', 'Housekeeping', unsorted.slice(0, 6).map(chip).concat(unsorted.length > 6 ? [{ name: '+' + (unsorted.length - 6) + ' more', url: '', area: '' }] : []));
+    const capture = tasks.filter((t) => t.status === 'Capture');
+    if (capture.length >= 5) add('info', '', s(capture.length, 'item') + ' in Capture', 'Waiting to be sorted into Daily, Weekly or On-Hold.', 'Housekeeping');
+
+    const quiet = main.filter((a) => a.projects === 0 && a.goals_active === 0 && a.goals_idea + a.goals_hold > 0);
+    if (quiet.length) add('info', quiet.length === 1 ? quiet[0].area : '', s(quiet.length, 'area') + ' with ideas but nothing active', 'Each has ideas on the Impossible List, but no project or active goal.', 'Balance', quiet.map((a) => ({ name: a.area + ' · ' + s(a.goals_idea + a.goals_hold, 'idea'), url: '', area: a.area })));
     const ideas = main.map((a) => [a.area, a.goals_idea]).sort((x, y) => y[1] - x[1]);
     const allIdeas = main.reduce((t, a) => t + a.goals_idea, 0);
-    if (ideas[0] && ideas[0][1]) add('info', ideas[0][0], ideas[0][0] + ' holds ' + ideas[0][1] + ' of your ' + allIdeas + ' Impossible List ideas.', 'Balance');
+    if (ideas[0] && ideas[0][1]) add('info', ideas[0][0], 'Most of your ideas are in ' + ideas[0][0], ideas[0][1] + ' of ' + allIdeas + ' Impossible List ideas.', 'Balance');
+
     const budget = goals.filter((g) => g.scope === 'Next Year' && g.status !== 'Done' && g.status !== 'Archived').reduce((t, g) => t + g.budget, 0);
-    if (budget) add('ok', 'Finance', 'Next-year goals add up to €' + budget.toLocaleString('en') + ' in budgets, about €' + Math.round(budget / 12).toLocaleString('en') + ' a month to set aside.', 'Money');
+    if (budget) add('ok', 'Finance', '€' + budget.toLocaleString('en') + ' budgeted for next year', 'About €' + Math.round(budget / 12).toLocaleString('en') + ' a month to set aside. Details in Finance.', 'Money');
     const rank = { warn: 0, info: 1, ok: 2 };
     return out.sort((a, b) => rank[a.level] - rank[b.level]);
   },
@@ -858,12 +877,21 @@ dash.calc('dates', {
       head.append(el('i'), document.createTextNode(label + ' · ' + list.length));
       group.append(head);
       for (const r of list) {
-        const row = el('div', 'lw-insight');
-        const f = el('span', 'lw-flag'); f.dataset.level = r.level;
-        const body = el('div');
-        body.append(el('div', '', r.text));
-        if (r.area) { const a = el('div', 'lw-insight-area'); a.append(dot(r.area), document.createTextNode(r.area)); body.append(a); }
-        row.append(f, body);
+        const row = el('div', 'lw-point'); row.dataset.level = r.level;
+        const top = el('div', 'lw-point-top');
+        top.append(el('strong', '', r.title || r.text));
+        if (r.area) { const a = el('span', 'lw-point-area'); a.append(dot(r.area), document.createTextNode(SHORT[r.area] || r.area)); top.append(a); }
+        row.append(top);
+        if (r.detail) row.append(el('div', 'lw-point-detail', r.detail));
+        if (r.chips && r.chips.length) {
+          const chips = el('div', 'lw-point-chips');
+          for (const x of r.chips) {
+            const c = x.url ? link(x.name, x.url, 'lw-point-chip') : el('span', 'lw-point-chip', x.name);
+            if (x.area) paint(c, x.area);
+            chips.append(c);
+          }
+          row.append(chips);
+        }
         group.append(row);
       }
       box.append(group);
