@@ -54,10 +54,27 @@
   .lw-fold-dots { display: inline-flex; gap: 3px; }
   .lw-fold-dots .lw-dot { width: .5rem; height: .5rem; }
 
-  /* Energy vs ideas donut */
-  .lw-donut-wrap { flex: 1 1 17rem; max-width: 24rem; margin: 0 auto; display: grid; gap: var(--cds-gap-sm); justify-items: center; }
-  .lw-donut { position: relative; width: 100%; min-height: 15rem; }
-  .lw-donut svg { display: block; margin: 0 auto; overflow: visible; }
+  /* Two shares per area, mirrored: inner measure grows left, outer measure grows right, one scale. */
+  .lw-donut-wrap { flex: 1 1 20rem; max-width: 30rem; margin: 0; display: grid; gap: var(--cds-gap-sm); align-content: start; }
+  .lw-donut { position: relative; width: 100%; min-height: 12rem; }
+  .lw-bf { display: grid; gap: 3px; }
+  .lw-bf-head, .lw-bf-row { display: grid; grid-template-columns: minmax(0, 1fr) 5.75rem minmax(0, 1fr); gap: var(--cds-gap-sm); align-items: center; }
+  .lw-bf-head { font-size: .6875rem; color: var(--color-fg-muted); letter-spacing: .03em; padding: 0 var(--cds-pad-sm) 2px; }
+  .lw-bf-hl { text-align: right; } .lw-bf-hr { text-align: left; }
+  .lw-bf-row { font: inherit; color: inherit; cursor: pointer; background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 5px var(--cds-pad-sm); text-align: left; }
+  .lw-bf-row:hover { background: color-mix(in oklab, var(--a) 7%, transparent); }
+  .lw-bf-row:focus-visible { outline: 2px solid var(--a); outline-offset: 1px; }
+  .lw-bf-row.is-current { border-color: color-mix(in oklab, var(--a) 45%, var(--color-border-line)); background: color-mix(in oklab, var(--a) 6%, var(--color-panel)); }
+  .lw-bf-side { display: flex; align-items: center; gap: 6px; min-width: 0; height: 1rem; }
+  .lw-bf-side.is-left { justify-content: flex-end; }
+  .lw-bf-side i { display: block; height: .7rem; border-radius: 4px; background: var(--a); min-width: 2px; }
+  .lw-bf-side.is-left i { border-radius: 4px 2px 2px 4px; }
+  .lw-bf-side.is-right i { opacity: .4; border-radius: 2px 4px 4px 2px; }
+  .lw-bf-v { flex: none; font-size: .6875rem; color: var(--color-fg-muted); font-variant-numeric: tabular-nums; min-width: 2.2em; }
+  .lw-bf-side.is-left .lw-bf-v { text-align: right; }
+  .lw-bf-name { display: flex; align-items: center; justify-content: center; gap: 5px; font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); white-space: nowrap; overflow: hidden; }
+  .lw-bf-name .lw-dot { width: .5rem; height: .5rem; }
+  .lw-bf-row.is-gap .lw-bf-name::after { content: "\25C6"; font-size: .55rem; color: var(--color-warn); }
   .lw-donut-key { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .lw-donut-key span { display: inline-flex; align-items: center; gap: .35rem; }
   .lw-donut-key i { width: .9rem; height: .55rem; border-radius: 2px; display: inline-block; }
@@ -172,8 +189,8 @@
       <div class="lw-lenses" id="lw-lenses" role="tablist" aria-label="Compare"></div>
       <div class="lw-donut" id="lw-donut" role="img"></div>
       <div class="lw-donut-key">
-        <span><i style="background: var(--color-fg); opacity: .75"></i><span id="lw-key-in"></span></span>
-        <span><i style="background: var(--color-fg); opacity: .3"></i><span id="lw-key-out"></span></span>
+        <span><i style="background: var(--color-fg); opacity: .75"></i>Left: <span id="lw-key-in"></span></span>
+        <span><i style="background: var(--color-fg); opacity: .3"></i>Right: <span id="lw-key-out"></span></span>
       </div>
       <p class="lw-donut-gap" id="lw-donut-gap"></p>
     </figure>
@@ -438,6 +455,7 @@ dash.calc('dates', {
     Career: 'var(--a-career)', Learning: 'var(--a-learning)', 'Home & Admin': 'var(--a-home)',
   };
   const color = (a) => HUE[a] || 'var(--a-none)';
+  const SHORT = { 'Health & Fitness': 'Health', 'Travel & Adventure': 'Travel', 'Home & Admin': 'Home' };
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const paint = (node, area) => { node.style.setProperty('--a', color(area)); return node; };
   const dot = (area) => paint(el('span', 'lw-dot'), area);
@@ -730,65 +748,52 @@ dash.calc('dates', {
     if (hold(box, state('areas'))) { gapLine.textContent = ''; return; }
     box.classList.remove('dash-skeleton');
     const all = dash.data('areas').data;
-    const rows = all.filter((r) => r.area !== 'Unassigned');
     const lens = LENSES.find((l) => l.id === lensId) || LENSES[0];
     const ctx = lensContext();
-    const nowOf = (r) => lens.innerOf(r, ctx);
-    const ideaOf = (r) => lens.outerOf(r, ctx);
-    const totalNow = d3.sum(rows, nowOf), totalIdeas = d3.sum(rows, ideaOf);
+    const leftOf = (r) => lens.innerOf(r, ctx);
+    const rightOf = (r) => lens.outerOf(r, ctx);
+    const rows = all.filter((r) => r.area !== 'Unassigned' && (leftOf(r) || rightOf(r)));
+    const totalL = d3.sum(rows, leftOf), totalR = d3.sum(rows, rightOf);
     const cur = currentArea(all);
     lensTabs(lens);
-    $('#lw-key-in').textContent = 'Inner: ' + lens.inner;
-    $('#lw-key-out').textContent = 'Outer: ' + lens.outer;
-    box.setAttribute('aria-label', lens.inner + ' compared with ' + lens.outer.toLowerCase() + ', by life area');
-    const W = Math.max(200, Math.min(box.clientWidth || 300, 300)), R = W / 2 - 4;
-    const svg = d3.select(box).append('svg').attr('width', W).attr('height', W).attr('viewBox', '0 0 ' + W + ' ' + W);
-    const g = svg.append('g').attr('transform', 'translate(' + W / 2 + ',' + W / 2 + ')');
-    const pie = d3.pie().sort(null).value((d) => d.value).padAngle(0.014);
-    const arc = d3.arc().cornerRadius(3);
-    const rings = [
-      { inner: R * 0.5, outer: R * 0.8, opacity: 1, data: rows.map((r) => ({ r, value: nowOf(r) })).filter((d) => d.value) },
-      { inner: R * 0.85, outer: R, opacity: 0.45, data: rows.map((r) => ({ r, value: ideaOf(r) })).filter((d) => d.value) },
-    ];
-    const tipBox = el('div', 'lw-tip'); tipBox.hidden = true; box.append(tipBox);
-    for (const ring of rings) {
-      if (!ring.data.length) {
-        g.append('circle').attr('r', (ring.inner + ring.outer) / 2).style('fill', 'none').style('stroke', 'var(--cds-chart-grid)').style('stroke-width', ring.outer - ring.inner);
-        continue;
-      }
-      g.append('g').selectAll('path').data(pie(ring.data)).join('path')
-        .attr('d', (d) => arc({ ...d, innerRadius: ring.inner, outerRadius: ring.outer }))
-        .style('fill', (d) => color(d.data.r.area)).style('fill-opacity', ring.opacity)
-        .style('stroke', (d) => (d.data.r.area === cur ? 'var(--color-fg)' : 'none')).style('stroke-width', 1.5)
-        .style('cursor', 'pointer')
-        .on('mouseenter', (e, d) => {
-          const r = d.data.r;
-          tipBox.replaceChildren(el('div', 'lw-tip-h', r.area),
-            el('div', '', lens.inner + ': ' + lens.fmt(nowOf(r)) + (totalNow ? ' (' + FMT.pct(nowOf(r) / totalNow) + ')' : '')),
-            el('div', '', lens.outer + ': ' + ideaOf(r) + (totalIdeas ? ' (' + FMT.pct(ideaOf(r) / totalIdeas) + ')' : '')));
-          tipBox.hidden = false;
-        })
-        .on('mousemove', (e) => {
-          const b = box.getBoundingClientRect();
-          tipBox.style.left = Math.max(0, Math.min(e.clientX - b.left + 12, b.width - tipBox.offsetWidth)) + 'px';
-          tipBox.style.top = (e.clientY - b.top + 14) + 'px';
-        })
-        .on('mouseleave', () => { tipBox.hidden = true; })
-        .on('click', (e, d) => { const r = d.data.r; if (isFolded(r)) foldOpen = true; select(r.area); });
-    }
-    g.append('text').attr('y', 6).attr('text-anchor', 'middle')
-      .style('fill', 'var(--color-fg)').style('font-family', 'var(--font-anthropic-serif)').style('font-size', 'calc(var(--cds-font-size-title) * 1.15)')
-      .style('font-variant-numeric', 'tabular-nums').text(lens.fmt(totalNow));
-    g.append('text').attr('y', 24).attr('text-anchor', 'middle')
-      .style('fill', 'var(--color-fg-muted)').style('font-size', '0.6875rem').text(lens.centre);
-    // The biggest mismatch between an area's share of the outer ring and its share of the inner one.
-    if (!totalNow || !totalIdeas) { gapLine.textContent = lens.empty; return; }
-    const gaps = rows.filter((r) => ideaOf(r) >= lens.minOuter)
-      .map((r) => ({ r, gap: ideaOf(r) / totalIdeas - nowOf(r) / totalNow }))
-      .sort((a, b) => b.gap - a.gap);
+    $('#lw-key-in').textContent = lens.inner + (totalL ? ' · ' + lens.fmt(totalL) : '');
+    $('#lw-key-out').textContent = lens.outer + (totalR ? ' · ' + d3.format(',')(totalR) : '');
+    box.setAttribute('aria-label', lens.inner + ' compared with ' + lens.outer.toLowerCase() + ', share per life area');
+
+    const share = (v, tot) => (tot ? v / tot : 0);
+    const max = d3.max(rows, (r) => Math.max(share(leftOf(r), totalL), share(rightOf(r), totalR))) || 1;
+    // The biggest mismatch between the two shares.
+    const gaps = rows.filter((r) => rightOf(r) >= lens.minOuter || leftOf(r) > 0)
+      .map((r) => ({ r, gap: share(rightOf(r), totalR) - share(leftOf(r), totalL) }))
+      .sort((x, y) => Math.abs(y.gap) - Math.abs(x.gap));
     const top = gaps[0];
-    gapLine.textContent = top && top.gap > 0.1
-      ? top.r.area + ' is ' + FMT.pct(ideaOf(top.r) / totalIdeas) + ' of ' + lens.outerPhrase + ' but ' + FMT.pct(nowOf(top.r) / totalNow) + ' of ' + lens.innerPhrase + '.'
+
+    const chart = el('div', 'lw-bf');
+    const head = el('div', 'lw-bf-head');
+    head.append(el('span', 'lw-bf-hl', lens.inner), el('span'), el('span', 'lw-bf-hr', lens.outer));
+    chart.append(head);
+    for (const r of rows) {
+      const L = leftOf(r), R = rightOf(r), sl = share(L, totalL), sr = share(R, totalR);
+      const row = paint(el('button', 'lw-bf-row' + (r.area === cur ? ' is-current' : '') + (top && top.r === r && Math.abs(top.gap) > 0.1 ? ' is-gap' : '')), r.area);
+      row.type = 'button';
+      row.title = r.area + ': ' + lens.inner + ' ' + lens.fmt(L) + ' (' + FMT.pct(sl) + ') · ' + lens.outer + ' ' + R + ' (' + FMT.pct(sr) + ')';
+      const left = el('span', 'lw-bf-side is-left');
+      const lb = el('i'); lb.style.width = (sl / max) * 100 + '%'; if (!L) lb.hidden = true;
+      left.append(el('span', 'lw-bf-v', L ? FMT.pct(sl) : '—'), lb);
+      const name = el('span', 'lw-bf-name'); name.append(dot(r.area), el('span', '', SHORT[r.area] || r.area));
+      const right = el('span', 'lw-bf-side is-right');
+      const rb = el('i'); rb.style.width = (sr / max) * 100 + '%'; if (!R) rb.hidden = true;
+      right.append(rb, el('span', 'lw-bf-v', R ? FMT.pct(sr) : '—'));
+      row.append(left, name, right);
+      row.addEventListener('click', () => { if (isFolded(r)) foldOpen = true; select(r.area); });
+      chart.append(row);
+    }
+    if (!rows.length) chart.append(el('p', 'lw-note', lens.empty));
+    box.replaceChildren(chart);
+
+    if (!totalL || !totalR) { gapLine.textContent = lens.empty; return; }
+    gapLine.textContent = top && Math.abs(top.gap) > 0.1
+      ? top.r.area + ' is ' + FMT.pct(share(rightOf(top.r), totalR)) + ' of ' + lens.outerPhrase + ' but ' + FMT.pct(share(leftOf(top.r), totalL)) + ' of ' + lens.innerPhrase + '.'
       : lens.even;
   }
 
