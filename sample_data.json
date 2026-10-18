@@ -302,6 +302,195 @@
      ]
     }
    ]
+  },
+  "training": {
+   "url": "https://app.notion.com/p/sampletraining",
+   "lines": {
+    "callout": [
+     "What this plan is for (2027):",
+     "Sample: spring 10K race",
+     "Now: sample block — Tue quality run, Sun long run."
+    ],
+    "Weekly structure": [
+     "5 sessions, Monday rest."
+    ],
+    "Rules": [
+     "Sample rule: easy days stay easy."
+    ],
+    "Running Benchmarks": [
+     "Sample: 5K in 28:00"
+    ]
+   },
+   "tables": [
+    {
+     "heading": "Weekly structure",
+     "header": true,
+     "rows": [
+      [
+       "Day",
+       "Session",
+       "Notes"
+      ],
+      [
+       "Mon",
+       "Rest",
+       "—"
+      ],
+      [
+       "Tue",
+       "Quality run",
+       "Tempo or intervals"
+      ],
+      [
+       "Wed",
+       "Bouldering",
+       "Normal"
+      ],
+      [
+       "Thu",
+       "Easy run",
+       "Relaxed"
+      ],
+      [
+       "Fri",
+       "Rest",
+       "—"
+      ],
+      [
+       "Sat",
+       "Gym",
+       "Strength"
+      ],
+      [
+       "Sun",
+       "Long run",
+       "Easy pace"
+      ]
+     ]
+    },
+    {
+     "heading": "Running supplement — Tue & Thu",
+     "header": true,
+     "rows": [
+      [
+       "Exercise",
+       "Sets × reps",
+       "Cue"
+      ],
+      [
+       "Calf raise",
+       "2 × 15",
+       "Slow"
+      ]
+     ]
+    },
+    {
+     "heading": "Running Benchmarks",
+     "header": true,
+     "rows": [
+      [
+       "Run Type",
+       "Intensity",
+       "Pace Range"
+      ],
+      [
+       "Recovery",
+       "Z2",
+       "6:40/km"
+      ],
+      [
+       "Tempo",
+       "Threshold",
+       "5:50/km"
+      ]
+     ]
+    },
+    {
+     "heading": "Bologna half — week by week",
+     "header": true,
+     "rows": [
+      [
+       "Week",
+       "Phase",
+       "Starts (Mon)",
+       "Run km",
+       "Focus",
+       "Tue · quality",
+       "Thu · run or Hyrox",
+       "Sun · long",
+       "Note"
+      ],
+      [
+       "1",
+       "Base",
+       "2026-10-12",
+       "20 km",
+       "",
+       "Sample: 5 × 1 min fast",
+       "Sample: 5 km easy",
+       "Sample: 10 km easy",
+       "Sample note one."
+      ],
+      [
+       "2",
+       "Base",
+       "2026-10-19",
+       "24 km",
+       "",
+       "Sample: 3 × 6 min threshold",
+       "Sample: 6 km easy",
+       "Sample: 12 km easy",
+       "Sample note two."
+      ],
+      [
+       "3",
+       "Build",
+       "2026-10-26",
+       "18 km",
+       "Lighter",
+       "Sample: 2 × 8 min threshold",
+       "Sample: swim",
+       "Sample: 9 km easy",
+       "Sample note three."
+      ],
+      [
+       "4",
+       "Race week",
+       "2026-11-02",
+       "15 km",
+       "Race",
+       "Sample: 3 × 1 km",
+       "Sample: 4 km easy",
+       "Race: sample 10K",
+       "Sample race note."
+      ]
+     ]
+    },
+    {
+     "heading": "Bologna half — pace zones",
+     "header": true,
+     "rows": [
+      [
+       "Zone",
+       "Wk 1–2",
+       "Wk 3–4",
+       "Feel"
+      ],
+      [
+       "Easy",
+       "6:40",
+       "6:35",
+       "Chatty"
+      ],
+      [
+       "Threshold",
+       "5:40",
+       "5:35",
+       "Comfortably hard"
+      ]
+     ]
+    }
+   ]
   }
  },
  "skilltree": {

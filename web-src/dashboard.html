@@ -13,10 +13,14 @@
   .lw-eyebrow { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); letter-spacing: .04em; }
   .lw-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: calc(var(--cds-font-size-title) * 1.35); line-height: 1.05; text-wrap: balance; }
   .lw-story { flex: 1.4 1 24rem; min-width: 0; display: grid; gap: var(--cds-gap-md); align-content: start; }
-  .lw-takeaway { margin: 0; max-width: 62ch; line-height: 1.55; }
-  .lw-principle { margin: 0; max-width: 40rem; padding: var(--cds-pad-md) var(--cds-pad-lg); border-radius: var(--cds-radius); display: grid; gap: var(--cds-gap-xs); }
-  .lw-principle-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
-  .lw-principle-text { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-heading); line-height: 1.35; min-height: 1.35em; }
+  .lw-principle { margin: var(--cds-gap-sm) 0 0; max-width: 44rem; padding: var(--cds-pad-lg) var(--cds-pad-xl); border-radius: var(--cds-radius); display: grid; gap: var(--cds-gap-sm); border-left: 4px solid var(--a) !important; }
+  .lw-principle-label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); letter-spacing: .06em; text-transform: uppercase; font-weight: var(--cds-font-weight-medium); }
+  .lw-principle-text { font-family: var(--font-anthropic-serif); font-weight: 500; font-size: calc(var(--cds-font-size-title) * 1.05); line-height: 1.2; min-height: 1.2em; text-wrap: balance; }
+  .lw-lenses { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+  .lw-lens { font: inherit; font-size: .75rem; cursor: pointer; padding: .15rem .6rem; border-radius: 999px; border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg-muted); }
+  .lw-lens:hover { color: var(--color-fg); }
+  .lw-lens[aria-selected="true"] { color: var(--color-fg); border-color: var(--color-fg-muted); background: color-mix(in oklab, var(--color-fg) 7%, var(--color-panel)); }
+  .lw-lens:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
 
   .lw-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
   .lw-fig { padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: 2px; align-content: start; box-shadow: -1px 0 0 var(--color-border-line), 0 -1px 0 var(--color-border-line); }
@@ -159,17 +163,17 @@
     <div class="lw-story">
       <span class="lw-eyebrow" id="lw-today"></span>
       <h1 class="lw-title">Life Wiki Dashboard</h1>
-      <p class="lw-takeaway dash-skeleton">—</p>
       <figure class="lw-principle lw-tint" style="--a: var(--a-learning)">
         <span class="lw-principle-label">Principle of the day</span>
         <span class="lw-principle-text dash-skeleton">—</span>
       </figure>
     </div>
     <figure class="lw-donut-wrap" id="energy">
-      <div class="lw-donut" id="lw-donut" role="img" aria-label="Where your energy goes compared with where your ideas are, by life area"></div>
+      <div class="lw-lenses" id="lw-lenses" role="tablist" aria-label="Compare"></div>
+      <div class="lw-donut" id="lw-donut" role="img"></div>
       <div class="lw-donut-key">
-        <span><i style="background: var(--color-fg); opacity: .75"></i>Inner: doing now</span>
-        <span><i style="background: var(--color-fg); opacity: .3"></i>Outer: Impossible List ideas</span>
+        <span><i style="background: var(--color-fg); opacity: .75"></i><span id="lw-key-in"></span></span>
+        <span><i style="background: var(--color-fg); opacity: .3"></i><span id="lw-key-out"></span></span>
       </div>
       <p class="lw-donut-gap" id="lw-donut-gap"></p>
     </figure>
@@ -494,14 +498,6 @@ dash.calc('dates', {
   const select = (area) => { selected = area; dash.setParams({ area }); };
 
   function header() {
-    const p = $('.lw-takeaway');
-    if (state('summary', 'insights') === 'ok') {
-      const d = dash.data('summary').data[0];
-      const warn = dash.data('insights').data.find((r) => r.level === 'warn');
-      p.classList.remove('dash-skeleton');
-      p.textContent = d.projects + ' projects are running across ' + d.project_areas + ' life areas, carrying ' + d.goals_active + ' active goals. ' +
-        (warn ? 'First thing to look at: ' + warn.text : 'Nothing needs attention right now.');
-    }
     const q = $('.lw-principle-text');
     const w = dash.data('wiki');
     const rows = w.status === 'ok' ? w.data.filter((r) => r.kind === 'principle') : [];
@@ -735,10 +731,16 @@ dash.calc('dates', {
     box.classList.remove('dash-skeleton');
     const all = dash.data('areas').data;
     const rows = all.filter((r) => r.area !== 'Unassigned');
-    const nowOf = (r) => r.projects + r.goals_active + r.tasks_open;
-    const ideaOf = (r) => r.goals_idea + r.goals_hold;
+    const lens = LENSES.find((l) => l.id === lensId) || LENSES[0];
+    const ctx = lensContext();
+    const nowOf = (r) => lens.innerOf(r, ctx);
+    const ideaOf = (r) => lens.outerOf(r, ctx);
     const totalNow = d3.sum(rows, nowOf), totalIdeas = d3.sum(rows, ideaOf);
     const cur = currentArea(all);
+    lensTabs(lens);
+    $('#lw-key-in').textContent = 'Inner: ' + lens.inner;
+    $('#lw-key-out').textContent = 'Outer: ' + lens.outer;
+    box.setAttribute('aria-label', lens.inner + ' compared with ' + lens.outer.toLowerCase() + ', by life area');
     const W = Math.max(200, Math.min(box.clientWidth || 300, 300)), R = W / 2 - 4;
     const svg = d3.select(box).append('svg').attr('width', W).attr('height', W).attr('viewBox', '0 0 ' + W + ' ' + W);
     const g = svg.append('g').attr('transform', 'translate(' + W / 2 + ',' + W / 2 + ')');
@@ -762,8 +764,8 @@ dash.calc('dates', {
         .on('mouseenter', (e, d) => {
           const r = d.data.r;
           tipBox.replaceChildren(el('div', 'lw-tip-h', r.area),
-            el('div', '', 'Now: ' + [plural(r.projects, 'project', 'projects'), plural(r.goals_active, 'goal', 'goals'), plural(r.tasks_open, 'task', 'tasks')].join(', ') + (totalNow ? ' (' + FMT.pct(nowOf(r) / totalNow) + ' of your effort)' : '')),
-            el('div', '', 'Ideas: ' + ideaOf(r) + (totalIdeas ? ' (' + FMT.pct(ideaOf(r) / totalIdeas) + ' of your list)' : '')));
+            el('div', '', lens.inner + ': ' + lens.fmt(nowOf(r)) + (totalNow ? ' (' + FMT.pct(nowOf(r) / totalNow) + ')' : '')),
+            el('div', '', lens.outer + ': ' + ideaOf(r) + (totalIdeas ? ' (' + FMT.pct(ideaOf(r) / totalIdeas) + ')' : '')));
           tipBox.hidden = false;
         })
         .on('mousemove', (e) => {
@@ -776,18 +778,63 @@ dash.calc('dates', {
     }
     g.append('text').attr('y', 6).attr('text-anchor', 'middle')
       .style('fill', 'var(--color-fg)').style('font-family', 'var(--font-anthropic-serif)').style('font-size', 'calc(var(--cds-font-size-title) * 1.15)')
-      .style('font-variant-numeric', 'tabular-nums').text(totalNow);
+      .style('font-variant-numeric', 'tabular-nums').text(lens.fmt(totalNow));
     g.append('text').attr('y', 24).attr('text-anchor', 'middle')
-      .style('fill', 'var(--color-fg-muted)').style('font-size', '0.6875rem').text('things in motion');
-    // The biggest mismatch between an area's share of ideas and its share of current effort.
-    const gaps = rows.filter((r) => ideaOf(r) >= 3)
-      .map((r) => ({ r, gap: (totalIdeas ? ideaOf(r) / totalIdeas : 0) - (totalNow ? nowOf(r) / totalNow : 0) }))
+      .style('fill', 'var(--color-fg-muted)').style('font-size', '0.6875rem').text(lens.centre);
+    // The biggest mismatch between an area's share of the outer ring and its share of the inner one.
+    if (!totalNow || !totalIdeas) { gapLine.textContent = lens.empty; return; }
+    const gaps = rows.filter((r) => ideaOf(r) >= lens.minOuter)
+      .map((r) => ({ r, gap: ideaOf(r) / totalIdeas - nowOf(r) / totalNow }))
       .sort((a, b) => b.gap - a.gap);
     const top = gaps[0];
     gapLine.textContent = top && top.gap > 0.1
-      ? top.r.area + ' holds ' + FMT.pct(ideaOf(top.r) / totalIdeas) + ' of your ideas but ' + FMT.pct(totalNow ? nowOf(top.r) / totalNow : 0) + ' of what you are doing now.'
-      : 'Your effort is spread roughly in line with your ideas.';
+      ? top.r.area + ' is ' + FMT.pct(ideaOf(top.r) / totalIdeas) + ' of ' + lens.outerPhrase + ' but ' + FMT.pct(nowOf(top.r) / totalNow) + ' of ' + lens.innerPhrase + '.'
+      : lens.even;
   }
+
+  /* Ways to read the donut: each compares two shares per life area (inner ring vs outer ring). */
+  const nextYearOpen = (g) => g.kind === 'goal' && g.scope === 'Next Year' && g.status !== 'Done' && g.status !== 'Archived';
+  const LENSES = [
+    { id: 'money', tab: 'Money vs dreams', inner: 'Next-year budget', outer: 'Impossible List ideas', centre: 'budgeted for next year', fmt: (v) => FMT.eur(Math.round(v)), minOuter: 3,
+      innerOf: (r, c) => c.budget[r.area] || 0, outerOf: (r) => r.goals_idea + r.goals_hold,
+      innerPhrase: 'next year’s budget', outerPhrase: 'your ideas', even: 'Your money for next year is spread roughly like your ideas.', empty: 'Add budgets to next year’s goals to compare.' },
+    { id: 'done', tab: 'Done vs open', inner: 'Done', outer: 'Still open', centre: 'list items done', fmt: (v) => String(v), minOuter: 3,
+      innerOf: (r) => r.goals_done, outerOf: (r) => r.goals_idea + r.goals_hold + r.goals_active,
+      innerPhrase: 'what you have done', outerPhrase: 'what is still open', even: 'What you have done matches where your open list is.', empty: 'Nothing marked Done on the Impossible List yet.' },
+    { id: 'week', tab: 'This week vs this year', inner: 'Tasks this week', outer: 'Next-year goals', centre: 'tasks this week', fmt: (v) => String(v), minOuter: 1,
+      innerOf: (r) => r.tasks_open, outerOf: (r) => r.next_year,
+      innerPhrase: 'this week’s tasks', outerPhrase: 'next year’s goals', even: 'This week’s tasks line up with next year’s goals.', empty: 'Add life areas to your tasks to compare.' },
+    { id: 'skills', tab: 'Skills vs dreams', inner: 'Skill XP earned', outer: 'Impossible List ideas', centre: 'skill XP', fmt: (v) => d3.format(',')(v), minOuter: 3,
+      innerOf: (r, c) => c.xp[r.area] || 0, outerOf: (r) => r.goals_idea + r.goals_hold,
+      innerPhrase: 'your skill XP', outerPhrase: 'your ideas', even: 'Your skills are spread roughly like your ideas.', empty: 'The skill tree is still loading.' },
+    { id: 'effort', tab: 'Effort vs dreams', inner: 'Doing now', outer: 'Impossible List ideas', centre: 'things in motion', fmt: (v) => String(v), minOuter: 3,
+      innerOf: (r) => r.projects + r.goals_active + r.tasks_open, outerOf: (r) => r.goals_idea + r.goals_hold,
+      innerPhrase: 'what you are doing now', outerPhrase: 'your ideas', even: 'Your effort is spread roughly in line with your ideas.', empty: 'Nothing active yet.' },
+  ];
+  let lensId = 'money';
+  try { lensId = localStorage.getItem('life-donut-lens') || 'money'; } catch (_) {}
+  const BRANCH_AREA = { fitness: 'Health & Fitness', travel: 'Travel & Adventure', finance: 'Finance', social: 'Social', language: 'Learning' };
+  function lensContext() {
+    const items = dash.data('items').status === 'ok' ? dash.data('items').data : [];
+    const budget = {};
+    for (const g of items.filter(nextYearOpen)) budget[g.area] = (budget[g.area] || 0) + g.budget;
+    const xp = {};
+    for (const [id, area] of Object.entries(BRANCH_AREA)) {
+      const b = window.SkillTree && window.SkillTree.branch(id);
+      if (b) xp[area] = d3.sum(b.tracks, (t2) => t2.xp);
+    }
+    return { budget, xp };
+  }
+  function lensTabs(lens) {
+    const box = $('#lw-lenses'); box.replaceChildren();
+    for (const l of LENSES) {
+      const b = el('button', 'lw-lens', l.tab); b.type = 'button';
+      b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(l.id === lens.id));
+      b.addEventListener('click', () => { lensId = l.id; try { localStorage.setItem('life-donut-lens', l.id); } catch (_) {} donut(); });
+      box.append(b);
+    }
+  }
+  window.addEventListener('skilltree', () => { if (lensId === 'skills') donut(); });
 
   function insights() {
     const box = $('#lw-insights');

@@ -22,6 +22,7 @@ import base64
 import gzip
 import hashlib
 import json
+import re
 import os
 import shutil
 import sys
@@ -219,6 +220,38 @@ def finance_page(page_id: str) -> dict:
     return {"budgets": budgets, "tables": tables, "url": page_url(page_id)}
 
 
+def page_structure(page_id: str, skip: tuple[str, ...] = ("archive",)) -> dict:
+    """Tables, text lines and the callout of a page, each grouped under the heading above it.
+    Sections whose heading contains a word in `skip` are left out (e.g. an Archive toggle)."""
+    tables, lines = [], {}
+
+    def cells(row: dict) -> list[str]:
+        return [plain(c) for c in row.get("table_row", {}).get("cells", [])]
+
+    def walk(blocks: list[dict], heading: str) -> None:
+        for b in blocks:
+            t = b["type"]
+            body = b.get(t, {})
+            text = plain(body.get("rich_text"))
+            if t in ("heading_1", "heading_2", "heading_3"):
+                heading = text
+                if any(k in heading.lower() for k in skip):
+                    continue
+            elif t == "callout":
+                if text.strip():
+                    lines.setdefault("callout", []).append(text)
+            elif t in ("paragraph", "bulleted_list_item", "numbered_list_item", "to_do", "quote") and text.strip():
+                lines.setdefault(heading, []).append(text)
+            if t == "table":
+                rows = [cells(r) for r in block_children(b["id"]) if r["type"] == "table_row"]
+                tables.append({"heading": heading, "header": bool(body.get("has_column_header")), "rows": rows})
+            elif b.get("has_children") and t not in ("child_page", "child_database", "table"):
+                walk(block_children(b["id"]), "callout" if t == "callout" else heading)
+
+    walk(block_children(page_id), "")
+    return {"tables": tables, "lines": lines, "url": page_url(page_id)}
+
+
 def diagnose() -> None:
     """Say what the integration can see. Counts and yes/no only: the Actions log of a public repo is public."""
     def visible(path: str) -> str:
@@ -314,6 +347,8 @@ def collect(sample: bool) -> dict:
             "finance": finance_page(FINANCE_PAGE),
             "plan": finance_page(PLAN_PAGE),
         }
+        training = next((r for r in sources["projects"] if re.search(r"train", r.get("Name") or "", re.I)), None)
+        sources["training"] = page_structure(training["url"].rsplit("/", 1)[-1]) if training else {"tables": [], "lines": {}}
     except NotionError as e:
         print(e)
         diagnose()
@@ -338,6 +373,8 @@ def main() -> None:
     skills = sum(len(t["nodes"]) for b in (tree.get("config") or {}).get("branches", []) for t in b["tracks"])
     print(f"projects={len(s['projects'])} goals={len(s['goals'])} tasks={len(s['tasks'])} "
           f"wiki_chars={len(s['wiki']['text'])} skills={skills} gist={'yes' if payload.get('skill_gist') else 'no'}")
+    tr = s.get("training") or {}
+    print(f"training_tables={[t.get('heading') for t in tr.get('tables') or []]} training_sections={list((tr.get('lines') or {}).keys())}")
     fin = s.get("finance") or {}
     print(f"savings_goals={len(s.get('savings') or [])} budgets={len(fin.get('budgets') or [])} "
           f"finance_tables={len(fin.get('tables') or [])} travel_table={'yes' if any('travel' in (t.get('heading') or '').lower() for t in fin.get('tables') or []) else 'no'} "

@@ -74,7 +74,7 @@
     document.querySelectorAll('.side-link').forEach((a) => {
       if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
-    document.title = { skills: 'Skill tree', finance: 'Finance', travel: 'Travel', health: 'Health & sports' }[view] || 'Life Wiki Dashboard';
+    document.title = { skills: 'Skill tree', finance: 'Finance', travel: 'Travel', health: 'Health & fitness' }[view] || 'Life Wiki Dashboard';
     if (!booted) return;
     if (view === 'skills') window.SkillTree.shown(); else window.dash.redraw();
     window.scrollTo(0, 0);

@@ -1,7 +1,7 @@
   </section>
   <section class="view" id="view-travel" data-view="travel" hidden>
 <style>
-  /* Shared by the Travel and Health & sports views. */
+  /* Shared by the Travel and Health & fitness views. */
   .av { --a-health: #e0614f; --a-travel: #e3923a; --a-finance: #3a9b68; --a-social: #d25d93; --a-career: #4a7fd0; --a-learning: #8a66d1; --a-home: #7f8a9b;
     display: grid; gap: var(--cds-gap-xl); min-width: 0; }
   .av a { color: inherit; text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 25%, transparent); text-underline-offset: 3px; }
@@ -67,6 +67,39 @@
   .av-chips { display: flex; flex-wrap: wrap; gap: 4px; }
   .av-chip { font-size: var(--cds-font-size-caption); line-height: 1.7; padding: 0 var(--cds-pad-sm); border-radius: 999px; background: color-mix(in oklab, var(--a) 14%, transparent); }
   .av-empty { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+
+  /* Training: this week, the block, paces, plan */
+  .tr-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--cds-gap-xs); }
+  @media (max-width: 900px) { .tr-days { grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr)); } }
+  .tr-day { display: grid; gap: 4px; align-content: start; padding: var(--cds-pad-sm) var(--cds-pad-md); border-radius: 10px; border: 1px solid var(--color-border-line); background: var(--color-panel); min-width: 0; min-height: 6.5rem; }
+  .tr-day.is-past { opacity: .55; }
+  .tr-day.is-today { border-color: var(--a); box-shadow: inset 0 3px 0 var(--a); background: color-mix(in oklab, var(--a) 7%, var(--color-panel)); }
+  .tr-day.is-rest { background: color-mix(in oklab, var(--color-fg) 3%, transparent); }
+  .tr-day-h { display: flex; justify-content: space-between; gap: 4px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .tr-day-h strong { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+  .tr-day-s { font-weight: var(--cds-font-weight-medium); line-height: 1.3; overflow-wrap: anywhere; }
+  .tr-day-d { font-size: var(--cds-font-size-caption); line-height: 1.4; overflow-wrap: anywhere; }
+  .tr-day-d.is-plan { color: var(--color-fg); padding: 3px 6px; border-radius: 6px; background: color-mix(in oklab, var(--a) 12%, transparent); }
+  .tr-day-n { font-size: .6875rem; color: var(--color-fg-muted); line-height: 1.35; overflow-wrap: anywhere; }
+  .tr-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .tr-legend span { display: inline-flex; align-items: center; gap: .35rem; }
+  .tr-legend i { width: .7rem; height: .7rem; border-radius: 3px; display: inline-block; }
+  .tr-detail { display: grid; gap: var(--cds-gap-sm); padding-top: var(--cds-pad-sm); border-top: 1px solid var(--color-border-line); }
+  .tr-detail-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--cds-gap-xs) var(--cds-gap-md); }
+  .tr-detail-h strong { font-weight: var(--cds-font-weight-medium); font-size: var(--cds-font-size-heading); }
+  .tr-runs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: var(--cds-gap-sm); }
+  .tr-run { padding: var(--cds-pad-sm) var(--cds-pad-md); border-radius: 8px; background: color-mix(in oklab, var(--color-fg) 3.5%, transparent); font-size: var(--cds-font-size-caption); line-height: 1.45; }
+  .tr-run span { display: block; font-size: .6875rem; letter-spacing: .05em; color: var(--color-fg-muted); text-transform: uppercase; }
+  .tr-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); }
+  .tr-table th, .tr-table td { text-align: left; padding: .35rem .5rem; border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+  .tr-table th { color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); white-space: nowrap; }
+  .tr-table td.is-now, .tr-table th.is-now { background: color-mix(in oklab, var(--a) 12%, transparent); font-weight: var(--cds-font-weight-medium); }
+  .tr-scroll { overflow-x: auto; }
+  .tr-plan { display: grid; gap: var(--cds-gap-md); }
+  .tr-plan ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 3px; font-size: var(--cds-font-size-caption); line-height: 1.45; }
+  .tr-plan h3 { margin: 0; font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); letter-spacing: .03em; }
+  .tr-plan details summary { cursor: pointer; font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); }
+  .tr-goal { padding: var(--cds-pad-sm) var(--cds-pad-md); border-radius: 8px; background: color-mix(in oklab, var(--a) 8%, var(--color-panel)); font-size: var(--cds-font-size-caption); line-height: 1.5; }
 </style>
 
 <div class="av" id="travel-view" style="--a: var(--a-travel)">
@@ -105,12 +138,32 @@
   <header class="av-head">
     <div class="av-head-text">
       <span class="av-eyebrow">Life area</span>
-      <h1 class="av-title">Health &amp; sports</h1>
+      <h1 class="av-title">Health &amp; fitness</h1>
       <p class="av-lead" id="hv-lead">Loading…</p>
     </div>
     <a class="av-cta" href="https://sumopikmin.github.io/garmin-dashboard/" target="_blank" rel="noopener">Open Garmin dashboard ↗</a>
   </header>
-  <section class="av-strip" id="hv-strip" aria-label="Health and sports at a glance"></section>
+  <section class="av-strip" id="hv-strip" aria-label="Health and fitness at a glance"></section>
+  <section class="av-card" id="hv-week">
+    <div class="av-card-head"><h2 id="tr-week-title">This week</h2><span class="av-note" id="tr-week-note"></span></div>
+    <div class="tr-days" id="tr-days"></div>
+    <p class="av-note" id="tr-week-foot"></p>
+  </section>
+  <section class="av-card" id="hv-block">
+    <div class="av-card-head"><h2 id="tr-block-title">Training block</h2><div class="tr-legend" id="tr-legend"></div></div>
+    <div class="av-chart" id="tr-block-chart" style="min-height: 9.5rem"></div>
+    <div class="tr-detail" id="tr-detail"></div>
+  </section>
+  <div class="av-grid">
+    <section class="av-card" id="hv-paces">
+      <div class="av-card-head"><h2>Paces</h2><span class="av-note" id="tr-pace-note"></span></div>
+      <div id="tr-paces"></div>
+    </section>
+    <section class="av-card" id="hv-plan">
+      <div class="av-card-head"><h2>Plan, rules and routines</h2><a class="av-note" id="tr-plan-link" href="#" target="_blank" rel="noopener">Training Plan in Notion ↗</a></div>
+      <div class="tr-plan" id="tr-plan"></div>
+    </section>
+  </div>
   <section class="av-projects" id="hv-projects"></section>
   <div class="av-grid">
     <section class="av-card" id="hv-races">
@@ -411,6 +464,149 @@
   }
 
   // ---------------------------------------------------------------- Health
+  // ---------------------------------------------------------------- Training (Health & fitness)
+  const PHASE_HUE = { base: '#4a7fd0', build: '#3a9b68', 'race-specific': '#e3923a', specific: '#e3923a', race: '#8a66d1', 'race week': '#8a66d1' };
+  const phaseHue = (p) => PHASE_HUE[String(p || '').toLowerCase()] || PHASE_HUE[String(p || '').toLowerCase().split(' ')[0]] || 'var(--a-health)';
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  let pickedWeek = null;
+  const trTable = (tr, re) => (tr.tables || []).find((x) => re.test(x.heading || ''));
+  const split = (tb) => (tb.header ? { head: tb.rows[0], rows: tb.rows.slice(1) } : { head: [], rows: tb.rows });
+  const colOf = (head, re, fb) => { const i = head.findIndex((h) => re.test(h)); return i >= 0 ? i : fb; };
+  const tableEl = (head, rows, nowCol) => {
+    const wrap = el('div', 'tr-scroll'); const tb = el('table', 'tr-table');
+    const thead = el('thead'); const hr = el('tr');
+    head.forEach((h, i) => { const th = el('th', i === nowCol ? 'is-now' : '', h); hr.append(th); });
+    thead.append(hr);
+    const tbody = el('tbody');
+    for (const r of rows) { const trr = el('tr'); r.forEach((c, i) => trr.append(el('td', i === nowCol ? 'is-now' : '', c))); tbody.append(trr); }
+    tb.append(thead, tbody); wrap.append(tb); return wrap;
+  };
+
+  function blockWeeks(tr) {
+    const tb = trTable(tr, /week by week/i);
+    if (!tb) return { weeks: [], title: '' };
+    const { head, rows } = split(tb);
+    const c = { n: colOf(head, /^week/i, 0), phase: colOf(head, /phase/i, 1), start: colOf(head, /start/i, 2), km: colOf(head, /km/i, 3), focus: colOf(head, /focus/i, 4),
+      tue: colOf(head, /tue/i, 5), thu: colOf(head, /thu/i, 6), sun: colOf(head, /sun/i, 7), note: colOf(head, /note/i, 8) };
+    const weeks = rows.map((r) => {
+      const start = parseDay(r[c.start]);
+      const nums = (r[c.km] || '').match(/\d+(?:[.,]\d+)?/g) || [];
+      return { n: clean(r[c.n]), phase: clean(r[c.phase]), start, km: clean(r[c.km]), kmMax: nums.length ? Math.max(...nums.map(Number)) : 0, focus: clean(r[c.focus]),
+        tue: clean(r[c.tue]), thu: clean(r[c.thu]), sun: clean(r[c.sun]), note: clean(r[c.note]) };
+    }).filter((w) => w.start);
+    return { weeks, title: clean(tb.heading).replace(/\s*[—–-]\s*week by week/i, '') };
+  }
+
+  function renderTraining() {
+    const tr = data('training');
+    if (!tr) return;
+    const { weeks, title } = blockWeeks(tr);
+    const current = weeks.find((w) => t >= w.start && days(w.start, t) < 7);
+    const next = weeks.find((w) => w.start > t);
+    const ws = trTable(tr, /weekly (structure|rhythm)/i);
+    const base = ws ? split(ws).rows : [];
+    const lines = tr.lines || {};
+
+    // This week
+    const monday = new Date(t); monday.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7));
+    const daysBox = $('#tr-days'); daysBox.replaceChildren();
+    const planFor = { Tue: current && current.tue, Thu: current && current.thu, Sun: current && current.sun };
+    DAYS.forEach((d, i) => {
+      const date = new Date(monday); date.setUTCDate(monday.getUTCDate() + i);
+      const row = base.find((r) => (r[0] || '').trim().slice(0, 3).toLowerCase() === d.toLowerCase()) || [];
+      const session = clean(row[1]) || '—', notes = clean(row[2]);
+      const box = el('div', 'tr-day' + (+date === +t ? ' is-today' : date < t ? ' is-past' : '') + (/rest/i.test(session) ? ' is-rest' : ''));
+      const h = el('div', 'tr-day-h'); h.append(el('strong', '', d), el('span', '', +date === +t ? 'Today' : fmtShort(date)));
+      box.append(h, el('div', 'tr-day-s', session));
+      if (planFor[d]) box.append(el('div', 'tr-day-d is-plan', planFor[d]));
+      if (notes && notes !== '—') box.append(el('div', 'tr-day-n', notes));
+      daysBox.append(box);
+    });
+    if (!base.length) daysBox.append(el('p', 'av-empty', 'Add a "Weekly structure" table to your Training Plan page.'));
+    $('#tr-week-title').textContent = current ? 'This week · ' + (title ? title + ' week ' : 'Week ') + current.n + ' of ' + weeks.length : 'This week';
+    $('#tr-week-note').textContent = current ? [current.phase, current.focus, current.km].filter(Boolean).join(' · ')
+      : next ? (title || 'Next block') + ' starts ' + fmtLong(next.start) + ' (in ' + Math.ceil(days(t, next.start) / 7) + ' weeks)' : '';
+    $('#tr-week-foot').textContent = current && current.note ? 'This week: ' + current.note : (lines['Weekly structure'] || []).join(' ');
+
+    // The block
+    const chart = $('#tr-block-chart'); chart.replaceChildren();
+    const det = $('#tr-detail'); det.replaceChildren();
+    $('#tr-block-title').textContent = title ? title + ' block' : 'Training block';
+    const legend = $('#tr-legend'); legend.replaceChildren();
+    for (const ph of [...new Set(weeks.map((w) => w.phase))]) { const s = el('span'); const i = el('i'); i.style.background = phaseHue(ph); s.append(i, document.createTextNode(ph)); legend.append(s); }
+    if (!weeks.length) { chart.append(el('p', 'av-empty', 'Add a "… week by week" table to your Training Plan page to see the block here.')); return renderPlan(tr, null); }
+    if (!pickedWeek || !weeks.some((w) => w.n === pickedWeek)) pickedWeek = (current || next || weeks[weeks.length - 1]).n;
+    const W = Math.max(280, chart.clientWidth || 700), H = 150, pad = { t: 18, b: 22 };
+    const x = d3.scaleBand(weeks.map((w) => w.n), [4, W - 4]).padding(0.22);
+    const y = d3.scaleLinear([0, d3.max(weeks, (w) => w.kmMax) || 1], [H - pad.b, pad.t]);
+    const svg = d3.select(chart).append('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+    svg.append('line').attr('x1', 4).attr('x2', W - 4).attr('y1', H - pad.b).attr('y2', H - pad.b).style('stroke', 'var(--cds-chart-axis)');
+    const g = svg.selectAll('g.wk').data(weeks).join('g').attr('class', 'wk').style('cursor', 'pointer')
+      .on('click', (e, w) => { pickedWeek = w.n; renderTraining(); });
+    g.append('rect').attr('x', (w) => x(w.n)).attr('width', x.bandwidth()).attr('y', (w) => y(w.kmMax)).attr('height', (w) => H - pad.b - y(w.kmMax)).attr('rx', 4)
+      .style('fill', (w) => phaseHue(w.phase)).style('fill-opacity', (w) => (w === current ? 1 : w.start < t ? 0.35 : 0.75))
+      .style('stroke', (w) => (w.n === pickedWeek ? 'var(--color-fg)' : 'none')).style('stroke-width', 1.5);
+    g.append('text').attr('x', (w) => x(w.n) + x.bandwidth() / 2).attr('y', H - 7).attr('text-anchor', 'middle')
+      .style('fill', (w) => (w === current ? 'var(--color-fg)' : 'var(--color-fg-muted)')).style('font-size', '0.6875rem').style('font-weight', (w) => (w === current ? 600 : 400)).text((w) => 'W' + w.n);
+    if (x.bandwidth() > 22) g.append('text').attr('x', (w) => x(w.n) + x.bandwidth() / 2).attr('y', (w) => y(w.kmMax) - 4).attr('text-anchor', 'middle')
+      .style('fill', 'var(--color-fg-muted)').style('font-size', '0.625rem').text((w) => (w.focus ? w.focus : w.kmMax));
+    if (current) {
+      const px = x(current.n) + x.bandwidth() * Math.min(1, days(current.start, t) / 7);
+      svg.append('line').attr('x1', px).attr('x2', px).attr('y1', pad.t - 8).attr('y2', H - pad.b).style('stroke', 'var(--color-fg)').style('stroke-dasharray', '3 2');
+      svg.append('text').attr('x', px).attr('y', pad.t - 10).attr('text-anchor', 'middle').style('fill', 'var(--color-fg)').style('font-size', '0.625rem').text('today');
+    }
+    const w = weeks.find((x2) => x2.n === pickedWeek);
+    if (w) {
+      det.style.setProperty('--a', phaseHue(w.phase));
+      const h = el('div', 'tr-detail-h');
+      const end = new Date(w.start); end.setUTCDate(w.start.getUTCDate() + 6);
+      h.append(el('strong', '', 'Week ' + w.n + (w === current ? ' · this week' : '')), el('span', 'av-note', [fmtShort(w.start) + '–' + fmtShort(end), w.phase, w.focus, w.km].filter(Boolean).join(' · ')));
+      const runs = el('div', 'tr-runs');
+      for (const [k, v] of [['Tue · quality', w.tue], ['Thu · run or Hyrox', w.thu], ['Sun · long', w.sun]]) { if (!v) continue; const r = el('div', 'tr-run'); r.append(el('span', '', k), document.createTextNode(v)); runs.append(r); }
+      det.append(h, runs);
+      if (w.note) det.append(el('p', 'av-note', w.note));
+    }
+    renderPlan(tr, current || next || null, weeks);
+  }
+
+  function renderPlan(tr, focusWeek, weeks) {
+    // Paces: the block's zones (current column marked) and your general run-type paces.
+    const pb = $('#tr-paces'); pb.replaceChildren();
+    const pz = trTable(tr, /pace zones/i);
+    if (pz) {
+      const { head, rows } = split(pz);
+      let nowCol = -1;
+      if (focusWeek) head.forEach((h, i) => { const m = h.match(/(\d+)\s*[–-]\s*(\d+)/); if (m && +focusWeek.n >= +m[1] && +focusWeek.n <= +m[2]) nowCol = i; });
+      $('#tr-pace-note').textContent = nowCol > 0 ? 'Marked: the paces for week ' + focusWeek.n : '';
+      pb.append(tableEl(head, rows, nowCol));
+    }
+    const rt = trTable(tr, /benchmark/i);
+    if (rt) { const { head, rows } = split(rt); pb.append(el('p', 'av-note', 'General run types'), tableEl(head, rows.filter((r) => r.some((c) => clean(c))), -1)); }
+    const bm = (tr.lines || {})[Object.keys(tr.lines || {}).find((k) => /benchmark/i.test(k))] || [];
+    if (bm.length) { const ul = el('ul'); bm.forEach((l) => ul.append(el('li', '', l))); const d = el('div', 'tr-plan'); d.append(el('h3', '', 'Benchmarks'), ul); pb.append(d); }
+    if (!pb.childElementCount) pb.append(el('p', 'av-empty', 'No pace tables on your Training Plan page.'));
+
+    // Goals, rules, supplement
+    const box = $('#tr-plan'); box.replaceChildren();
+    if (tr.url) $('#tr-plan-link').href = tr.url;
+    const L = tr.lines || {};
+    if (L.callout && L.callout.length) { const g = el('div', 'tr-goal'); L.callout.forEach((l, i) => g.append(i ? el('div', '', '• ' + l) : el('strong', '', l))); box.append(g); }
+    const listFor = (re, label) => {
+      const k = Object.keys(L).find((x2) => re.test(x2));
+      if (!k || !L[k].length) return;
+      const s = el('section'); s.append(el('h3', '', label || k)); const ul = el('ul'); L[k].forEach((l) => ul.append(el('li', '', l))); s.append(ul); box.append(s);
+    };
+    listFor(/^rules/i, 'Rules');
+    const sup = trTable(tr, /supplement/i);
+    if (sup) {
+      const d = el('details'); d.append(el('summary', '', sup.heading.replace(/\s*\(.*?\)/, '')));
+      const { head, rows } = split(sup); d.append(tableEl(head, rows, -1));
+      const k = Object.keys(L).find((x2) => /supplement/i.test(x2)); if (k) { const ul = el('ul'); L[k].forEach((l) => ul.append(el('li', '', l))); d.append(ul); }
+      box.append(d);
+    }
+    if (!box.childElementCount) box.append(el('p', 'av-empty', 'Nothing found on your Training Plan page yet.'));
+  }
+
   function renderHealth() {
     if (!(ok('items') && ok('dates'))) return;
     const items = data('items');
@@ -429,7 +625,7 @@
       if (day && day >= t && (d.area === area || RACE.test(d.label))) races.push({ when: day, label: d.label, url: d.url, exact: true });
     }
     const nowM = t.getUTCFullYear() * 12 + t.getUTCMonth();
-    for (const x of trips()) if (RACE.test(x.name) && x.span.b >= nowM) races.push({ when: new Date(Date.UTC(Math.floor(x.span.a / 12), x.span.a % 12, 1)), label: x.name, cost: x.raw, monthOnly: true });
+    for (const x of trips()) if (RACE.test(x.name) && x.span.a > nowM) races.push({ when: new Date(Date.UTC(Math.floor(x.span.a / 12), x.span.a % 12, 1)), label: x.name, cost: x.raw, monthOnly: true });
     races.sort((a, b) => a.when - b.when);
     const nextRace = races.find((r) => RACE.test(r.label) && !/\b(starts|ends)$/.test(r.label)) || null;
 
@@ -481,6 +677,7 @@
     goalGroups($('#hv-groups'), goals, (g) => (g.status === 'Active' ? 'Now' : g.status === 'Done' ? 'Done' : g.scope === 'Next Year' ? 'Next year' : g.scope === 'In 5 years' ? 'In 5 years' : g.scope === 'Big Vision' ? 'Big vision' : 'Someday'),
       ['Now', 'Next year', 'In 5 years', 'Big vision', 'Someday', 'Done']);
     skillBars($('#hv-skill-groups'), 'fitness', true);
+    renderTraining();
   }
 
   const render = () => {
