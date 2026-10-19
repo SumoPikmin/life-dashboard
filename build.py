@@ -43,7 +43,7 @@ PBKDF2_ITERATIONS = 600_000
 # The Life Wiki page and its databases: (name, database id, data source id).
 LIFE_WIKI_PAGE = "e52fc193f0954ba88c24c996b20e6182"
 PLAN_PAGE = "3fb328fe8334816ba515f1944627f287"      # Finance Plan 2027 (Tracking table: net worth, emergency fund)
-FINANCE_PAGE = "37b328fe83348121831ddc036d0fa17c"   # Life Wiki / Active Projects / Finance Plan 2027 / Finance
+FINANCE_PAGE = PLAN_PAGE                            # the Finance content now lives on Finance Plan 2027 itself
 PROJECTS = ("Active Projects", "99ac0a23807847ef911c4647ec92f2da", "d7e2eda4-a2e7-4373-80b0-c09440a11edb")
 GOALS = ("Impossible List", "b4cc061661b3469ab576f5e2facb9693", "3cdebe34-6799-462f-82c9-a1507dca1647")
 TASKS = ("Task Planner", "803e0b92530f4beea2f0a5c012bda99b", "7dcac3d2-944f-482a-9394-85a9e2e8b7a2")
@@ -418,6 +418,39 @@ def decrypt_from_browser_format(blob: dict, password: str) -> dict:
     return json.loads(gzip.decompress(AESGCM(key).decrypt(base64.b64decode(blob["iv"]), base64.b64decode(blob["ct"]), None)))
 
 
+# ---------------------------------------------------------------- savings goals = single source of truth for budgets
+GOAL_LINK = "Impossible List"   # relation on Savings Goals -> the goal a budget funds
+_MON = {m: i for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"])}
+
+
+def _when_key(when: str) -> int:
+    low = (when or "").lower()
+    y = re.search(r"(20\d\d)", low)
+    m = re.search(r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)", low)
+    return (int(y.group(1)) if y else 9999) * 12 + (_MON[m.group(1)] if m else (0 if "h1" in low else 6))
+
+
+def apply_savings_goals(sources: dict) -> None:
+    """Budgets come from Savings Goals: a goal linked from a savings row gets its Target as Budget,
+    and the trip plan (Travel/Finance tabs) is built from the savings rows instead of a hand-kept table."""
+    savings = sources.get("savings") or []
+    targets: dict[str, float] = {}
+    for s in savings:
+        for u in json.loads(s.get(GOAL_LINK) or "[]"):
+            targets[u] = targets.get(u, 0) + (s.get("Target") or 0)
+    for g in sources.get("goals") or []:
+        if g["url"] in targets:
+            g["Budget"] = f"€{targets[g['url']]:.0f}"
+    rows = [["When", "Trip", "Estimate (€)", "Category"]]
+    for s in sorted(savings, key=lambda s: _when_key(s.get("When") or "")):
+        if s.get("Target"):
+            rows.append([s.get("When") or "During 2027", s.get("Goal") or "", f"{s['Target']:.0f}", s.get("Category") or ""])
+    for page in (sources.get("finance"), sources.get("plan")):
+        if page is not None:
+            page["tables"] = [t for t in page.get("tables") or [] if "travel" not in (t.get("heading") or "").lower()]
+            page["tables"].append({"heading": "Travel Budget Jan 2027 – Dec 2027 (from Savings Goals)", "header": True, "rows": rows})
+
+
 def deployment_salt() -> bytes:
     """Stable per-site salt (not secret) so 'Remember me' survives rebuilds."""
     return base64.b64decode((ROOT / "salt.txt").read_text().strip())
@@ -449,6 +482,7 @@ def collect(sample: bool) -> dict:
                 print(f"Could not read {src[0]} ({e.code}); the Social tab will be empty")
                 sources[key] = []
         sources["crm"] = {"gist": os.environ.get("SKILLTREE_GIST", "").strip() or None, **crm}
+        apply_savings_goals(sources)
         training = next((r for r in sources["projects"] if re.search(r"train", r.get("Name") or "", re.I)), None)
         sources["training"] = page_structure(training["url"].rsplit("/", 1)[-1]) if training else {"tables": [], "lines": {}}
     except NotionError as e:
