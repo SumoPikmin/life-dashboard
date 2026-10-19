@@ -249,6 +249,15 @@
     const fin = ok('finance') ? dash.data('finance').data : { budgets: [], tables: [] };
     const plan = ok('plan') ? dash.data('plan').data : { budgets: [], tables: [] };
     const savings = ok('savings') ? dash.data('savings').data : [];
+    // Money put aside per goal: the Saved of every Savings Goals row linked to it (relation "Impossible List").
+    const savedFor = new Map();
+    for (const s of savings) {
+      let links = []; try { links = JSON.parse(s['Impossible List'] || '[]'); } catch (e) { links = []; }
+      for (const u of links) savedFor.set(u, (savedFor.get(u) || 0) + (Number(s.Saved) || 0));
+    }
+    const savedOf = (g) => savedFor.get(g.url) || 0;
+    const goalBar = (g, opts) => bar(g.name, savedOf(g), g.budget, { ...opts, url: g.url,
+      label: g.budget ? eur(savedOf(g)) + ' of ' + eur(g.budget) + (g.status === 'Idea' ? ' · idea' : '') : 'no budget' });
     const budgets = fin.budgets || [];
     if (budgetIdx == null || budgetIdx >= budgets.length) budgetIdx = Math.max(0, budgets.length - 1);
     const budget = budgets[budgetIdx];
@@ -340,12 +349,11 @@
         const go = el('a', 'fi-go', 'See the trip timeline in Travel →'); go.href = '#travel';
         tb.append(go);
       }
-      const gb = block(body, 'Next year’s travel goals');
-      const maxG = d3.max(travelGoals, (g) => g.budget) || 1;
-      for (const g of travelGoals) gb.append(bar(g.name, g.budget, maxG, { color: 'var(--p-travel)', url: g.url, label: g.budget ? eur(g.budget) + (g.status === 'Idea' ? ' · idea' : '') : 'no budget yet' }));
+      const gb = block(body, 'Next year’s travel goals · saved so far');
+      for (const g of travelGoals) gb.append(goalBar(g, { color: 'var(--p-travel)' }));
       if (!travelGoals.length) gb.append(el('p', 'fi-empty', 'No next-year travel goals.'));
       else {
-        const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Goal budgets'), el('span', '', eur(travelNeed) + ' · ' + eur(travelNeed / 12) + '/month')); gb.append(tot);
+        const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Saved / goal budgets'), el('span', '', eur(d3.sum(travelGoals, savedOf)) + ' of ' + eur(travelNeed) + ' · ' + eur(travelNeed / 12) + '/month')); gb.append(tot);
         if (hasPlan) gb.append(el('p', 'fi-note', 'These trips are part of the trip plan above, so the plan’s verdict is the one that counts.'));
         else if (budget) gb.append(el('p', 'fi-verdict ' + (travelGap > 0 ? 'is-warn' : 'is-ok'), travelGap > 0
           ? eur(travelGap) + ' a month short, about ' + eur(travelGap * 12) + ' over the year.'
@@ -357,12 +365,11 @@
     {
       const body = pillarHead($('#fi-other'), 'Other goals', otherNeed ? eur(otherNeed / 12) + '/month' : '—',
         otherNeed ? eur(otherNeed) + ' for next year · ' + (otherLine ? otherLines.map((x) => x.name + ' ' + eur(x.value) + '/mo').join(', ') + ' budgeted' : 'no budget line yet') : '');
-      const gb = block(body, 'Next year’s other goals');
-      const maxG = d3.max(otherGoals, (g) => g.budget) || 1;
-      for (const g of otherGoals) gb.append(bar(g.name, g.budget, maxG, { area: g.area, url: g.url, label: g.budget ? eur(g.budget) + (g.status === 'Idea' ? ' · idea' : '') : 'no budget yet' }));
+      const gb = block(body, 'Next year’s other goals · saved so far');
+      for (const g of otherGoals) gb.append(goalBar(g, { area: g.area }));
       if (!otherGoals.length) gb.append(el('p', 'fi-empty', 'No other next-year goals with a budget.'));
       else {
-        const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Needed'), el('span', '', eur(otherNeed) + ' · ' + eur(otherNeed / 12) + '/month')); gb.append(tot);
+        const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Saved / needed'), el('span', '', eur(d3.sum(otherGoals, savedOf)) + ' of ' + eur(otherNeed) + ' · ' + eur(otherNeed / 12) + '/month')); gb.append(tot);
         gb.append(el('p', 'fi-verdict ' + (otherGap > 0 ? 'is-warn' : 'is-ok'), otherLine
           ? (otherGap > 0 ? eur(otherGap) + ' a month short of what these need.' : 'Your budget lines cover these.')
           : 'Nothing in your budget is set aside for these. ' + eur(otherNeed / 12) + ' a month, or a sinking fund, would cover them.'));
