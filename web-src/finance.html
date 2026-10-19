@@ -75,6 +75,10 @@
   .fi-group-head span:last-child { margin-left: auto; font-variant-numeric: tabular-nums; }
   .fi-row { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); padding: 2px 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
   .fi-row.is-pillar { color: var(--color-fg); }
+  .fi-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--cds-gap-md); }
+  .fi .fi-tool { display: grid; gap: .45rem; align-content: start; padding: var(--cds-pad-md) var(--cds-pad-lg); border-radius: 10px; border: 1px solid color-mix(in oklab, var(--p) 25%, var(--color-border-line)); background: color-mix(in oklab, var(--p) 5%, var(--color-panel)); text-decoration: none; transition: border-color .15s, background .15s; }
+  .fi .fi-tool:hover { border-color: var(--p); background: color-mix(in oklab, var(--p) 10%, var(--color-panel)); }
+  .fi-tool-name { font-weight: var(--cds-font-weight-medium); }
   .fi-row.is-pillar span:first-child::before { content: ""; display: inline-block; width: .45rem; height: .45rem; border-radius: 2px; margin-right: .35rem; background: var(--p); }
 </style>
 
@@ -108,6 +112,23 @@
       <div class="fi-bars" id="fi-sub-list"></div>
     </section>
   </div>
+
+  <section class="fi-card" id="fi-retire" style="--p: var(--a-career)">
+    <div class="fi-card-head"><h2>Retirement</h2><span class="fi-note">Calculators for pension, early exit and withdrawals. They open on claude.ai.</span></div>
+    <div class="fi-tools">
+      <a class="fi-tool" href="https://claude.ai/artifact/R1yuS17ZCyUsHQQovRmWs7" target="_blank" rel="noopener">
+        <span class="fi-tool-name">Ruhestandsrechner ↗</span>
+        <span class="fi-note">Pension points year by year, net pension, the capital an early exit needs and the capital-gains tax on every withdrawal, for each scenario.</span>
+        <span class="fi-chips"><span class="fi-pill">Rentenpunkte</span><span class="fi-pill">Kapitalbedarf</span><span class="fi-pill">Abgeltungsteuer</span><span class="fi-pill">Vergleich</span></span>
+      </a>
+      <a class="fi-tool" href="https://claude.ai/artifact/ULy4KTBdHuBjStnB3Ve9kD" target="_blank" rel="noopener">
+        <span class="fi-tool-name">Entnahme-Backtest ↗</span>
+        <span class="fi-note">How each withdrawal strategy would have held up against historical returns, for every retirement path.</span>
+        <span class="fi-chips"><span class="fi-pill">Flex-Regel</span><span class="fi-pill">Backtest 1871–2022</span></span>
+      </a>
+    </div>
+    <p class="fi-note">Assumptions, scenarios, KVdR and open questions: <a href="https://app.notion.com/p/37b328fe83348121831ddc036d0fa17c" target="_blank" rel="noopener">Retirement strategies on your Finance page ↗</a></p>
+  </section>
 </div>
 
 <script>
