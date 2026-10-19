@@ -257,13 +257,17 @@ window.dash = (() => {
   <script>
   /* Brand card date + Social overdue badge. */
   (() => {
-    const d = new Date();
-    const u = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    u.setUTCDate(u.getUTCDate() + 4 - (u.getUTCDay() || 7));
-    const week = Math.ceil(((u - Date.UTC(u.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
-    document.getElementById('side-day').textContent = d.getDate();
-    document.getElementById('side-date').textContent = d.toLocaleDateString('en-GB', { weekday: 'long' }) +' \u00b7 week ' + week;
+    const stampDate = () => {
+      const d = new Date();
+      const u = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      u.setUTCDate(u.getUTCDate() + 4 - (u.getUTCDay() || 7));
+      const week = Math.ceil(((u - Date.UTC(u.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
+      document.getElementById('side-day').textContent = d.getDate();
+      document.getElementById('side-date').textContent = d.toLocaleDateString('en-GB', { weekday: 'long' }) + ' \u00b7 week ' + week;
+    };
+    stampDate();
     dash.onData(() => {
+      stampDate();
       const b = document.getElementById('side-badge-social');
       let n = 0;
       try { n = window.lifeCRM ? window.lifeCRM().filter((p) => p.state === 'over').length : 0; } catch (_) {}

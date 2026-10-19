@@ -277,7 +277,9 @@
     // One verdict: the most pressing gap, or that the plan holds.
     const lead = $('#fi-lead');
     const gaps = [];
-    if (budget && travelNeed && travelGap > 0) gaps.push('Next year’s travel goals need ' + eur(travelGap) + ' a month more than the Travel line gives (' + eur(travelLine) + ').');
+    const planPerMonth = travel && travel.trips.length && travel.months ? travel.total / travel.months : 0;
+    if (budget && planPerMonth && travelLine && planPerMonth > travelLine) gaps.push('Your trip plan costs ' + eur(planPerMonth - travelLine) + ' a month more than the Travel line gives (' + eur(travelLine) + ').');
+    else if (budget && !planPerMonth && travelNeed && travelGap > 0) gaps.push('Next year’s travel goals need ' + eur(travelGap) + ' a month more than the Travel line gives (' + eur(travelLine) + ').');
     if (otherNeed && otherLine < otherNeed / 12) gaps.push('Your other goals (' + otherGoals.map((g) => g.name.replace(/\s*\(.*?\)\s*/g, ' ').trim()).slice(0, 2).join(', ') + (otherGoals.length > 2 ? ', …' : '') + ') need ' + eur(otherNeed / 12 - otherLine) + ' a month that nothing in the budget covers.');
     if (gaps.length) { lead.dataset.level = 'warn'; lead.textContent = gaps.join(' '); }
     else { delete lead.dataset.level; lead.textContent = budget ? 'Your budget covers next year’s goals' + (saving ? ', and you save ' + eur(saving) + ' a month on top.' : '.') : 'Add a budget link to your Finance page to compare.'; }
@@ -324,27 +326,30 @@
     // Pillar 2: travel
     {
       const body = pillarHead($('#fi-travel'), 'Travel', budget ? eur(travelLine) + '/month' : '—', budget ? eur(travelLine * 12) + ' a year from the Travel line' : '');
-      const gb = block(body, 'Next year’s travel goals');
-      const maxG = d3.max(travelGoals, (g) => g.budget) || 1;
-      for (const g of travelGoals) gb.append(bar(g.name, g.budget, maxG, { color: 'var(--p-travel)', url: g.url, label: g.budget ? eur(g.budget) + (g.status === 'Idea' ? ' · idea' : '') : 'no budget yet' }));
-      if (!travelGoals.length) gb.append(el('p', 'fi-empty', 'No next-year travel goals.'));
-      else {
-        const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Needed'), el('span', '', eur(travelNeed) + ' · ' + eur(travelNeed / 12) + '/month')); gb.append(tot);
-        if (budget) gb.append(el('p', 'fi-verdict ' + (travelGap > 0 ? 'is-warn' : 'is-ok'), travelGap > 0
-          ? eur(travelGap) + ' a month short, about ' + eur(travelGap * 12) + ' over the year.'
-          : 'The Travel line covers these, with ' + eur(-travelGap * 12) + ' to spare over the year.'));
-      }
-      if (travel && travel.trips.length) {
-        // The trip-by-trip timeline lives on the Travel tab; here only what it costs per month.
+      const hasPlan = travel && travel.trips.length;
+      if (hasPlan) {
+        // The trip plan is what the Travel line really has to pay for; the timeline lives on the Travel tab.
         const tb = block(body, 'Trip plan');
         const perMonth = travel.months ? travel.total / travel.months : 0;
         const tot = el('div', 'fi-total');
         tot.append(el('span', '', plural(travel.trips.length, 'trip') + (travel.months ? ' over ' + travel.months + ' months' : '')), el('span', '', eur(travel.total) + (perMonth ? ' · ' + eur(perMonth) + '/month' : '')));
         tb.append(tot);
         if (perMonth && travelLine) tb.append(el('p', 'fi-verdict ' + (perMonth > travelLine ? 'is-warn' : 'is-ok'), perMonth > travelLine
-          ? 'The plan costs ' + eur(perMonth - travelLine) + ' a month more than the Travel line.' : 'The Travel line covers the trip plan.'));
+          ? 'The plan costs ' + eur(perMonth - travelLine) + ' a month more than the Travel line (' + eur(travelLine) + '). Save a little more or move a trip later.'
+          : 'The Travel line covers the whole trip plan.'));
         const go = el('a', 'fi-go', 'See the trip timeline in Travel →'); go.href = '#travel';
         tb.append(go);
+      }
+      const gb = block(body, 'Next year’s travel goals');
+      const maxG = d3.max(travelGoals, (g) => g.budget) || 1;
+      for (const g of travelGoals) gb.append(bar(g.name, g.budget, maxG, { color: 'var(--p-travel)', url: g.url, label: g.budget ? eur(g.budget) + (g.status === 'Idea' ? ' · idea' : '') : 'no budget yet' }));
+      if (!travelGoals.length) gb.append(el('p', 'fi-empty', 'No next-year travel goals.'));
+      else {
+        const tot = el('div', 'fi-total'); tot.append(el('span', '', 'Goal budgets'), el('span', '', eur(travelNeed) + ' · ' + eur(travelNeed / 12) + '/month')); gb.append(tot);
+        if (hasPlan) gb.append(el('p', 'fi-note', 'These trips are part of the trip plan above, so the plan’s verdict is the one that counts.'));
+        else if (budget) gb.append(el('p', 'fi-verdict ' + (travelGap > 0 ? 'is-warn' : 'is-ok'), travelGap > 0
+          ? eur(travelGap) + ' a month short, about ' + eur(travelGap * 12) + ' over the year.'
+          : 'The Travel line covers these, with ' + eur(-travelGap * 12) + ' to spare over the year.'));
       }
     }
 

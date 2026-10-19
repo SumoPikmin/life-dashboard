@@ -78,7 +78,7 @@
   .lw-stat-s.is-warn { color: var(--color-warn); } .lw-stat-s.is-ok { color: var(--color-ok); }
   .lw-stat-bar { height: .3rem; border-radius: 999px; background: color-mix(in oklab, var(--s, var(--color-fg)) 14%, transparent); overflow: hidden; margin-top: 3px; }
   .lw-stat-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--s, var(--color-fg)); }
-  .lw-agenda { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--cds-gap-xl); align-items: start; }
+  .lw-agenda { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--cds-gap-xl); align-items: start; }
   @media (max-width: 900px) { .lw-agenda { grid-template-columns: minmax(0, 1fr); } }
   .lw-themes { grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.5rem 2rem !important; }
   .lw-fold-sum { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.4; }
@@ -301,13 +301,13 @@
 
   <section class="lw-section" id="agenda">
     <div class="lw-section-head">
-      <h2 class="lw-h2">This week &amp; coming up</h2>
-      <span class="lw-note">Task Planner (P1 first) and dated items for the next 90 days</span>
+      <h2 class="lw-h2">This week’s tasks &amp; later dates</h2>
+      <span class="lw-note">Everything not already under Today and Next up</span>
     </div>
     <div class="lw-card lw-agenda">
       <div class="lw-tasks" id="lw-tasks"></div>
       <div class="lw-task-col" id="lw-upcoming">
-        <div class="lw-task-col-head"><strong>Coming up</strong><span class="lw-note">next 90 days</span></div>
+        <div class="lw-task-col-head"><strong>Later dates</strong><span class="lw-note">after Next up, within 90 days</span></div>
         <ul class="lw-list" id="lw-dates"></ul>
       </div>
     </div>
@@ -552,9 +552,15 @@ dash.calc('dates', {
     if (st === 'error') box.append(el('div', 'lw-fail', 'Failed to load'));
     return st !== 'ok';
   };
-  const t = today();
-  const isoWeek = (() => { const d = new Date(t); d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7)); return Math.ceil(((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7); })();
-  $('#lw-today').textContent = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(t) + ' · week ' + isoWeek;
+  // "Today" is re-read on every redraw, so a dashboard left open overnight moves on to the new day.
+  let t = today();
+  function stamp() {
+    t = today();
+    const d = new Date(t); d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    const isoWeek = Math.ceil(((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
+    $('#lw-today').textContent = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(t) + ' · week ' + isoWeek;
+  }
+  stamp();
 
   // ---------- hover tooltip shared by the map
   const tip = el('div', 'lw-tip'); tip.hidden = true;
@@ -601,10 +607,21 @@ dash.calc('dates', {
   function budgetLines() {
     const fin = dash.data('finance').status === 'ok' ? dash.data('finance').data : null;
     const b = fin && (fin.budgets || []).slice(-1)[0];
-    if (!b) return { travel: 0, saving: 0, savingItems: [] };
+    if (!b) return { travel: 0, other: 0, saving: 0, savingItems: [] };
     const items = b.groups.flatMap((g) => g.items);
     const save = b.groups.find((g) => /spar|sav/i.test(g.name));
-    return { travel: d3.sum(items.filter((x) => /travel|reise|urlaub/i.test(x.name)), (x) => x.value), saving: save ? save.value : 0, savingItems: save ? save.items : [] };
+    return { travel: d3.sum(items.filter((x) => /travel|reise|urlaub/i.test(x.name)), (x) => x.value), other: d3.sum(items.filter((x) => /hobb|sport|race|event/i.test(x.name)), (x) => x.value),
+      saving: save ? save.value : 0, savingItems: save ? save.items : [] };
+  }
+  /* Next-year goal budgets split like the Finance tab: travel goals against the Travel line, the rest against hobby/sport lines. */
+  function goalFunding() {
+    const lines = budgetLines();
+    const ny = dash.data('items').data.filter((g) => g.kind === 'goal' && g.scope === 'Next Year' && g.status !== 'Done' && g.status !== 'Archived');
+    const travel = d3.sum(ny.filter((g) => g.area === 'Travel & Adventure'), (g) => g.budget || 0);
+    const other = d3.sum(ny.filter((g) => g.area !== 'Travel & Adventure' && g.area !== 'Finance'), (g) => g.budget || 0);
+    const travelGap = Math.max(0, travel / 12 - lines.travel), otherGap = Math.max(0, other / 12 - lines.other);
+    const need = (travel + other) / 12, uncovered = travelGap + otherGap;
+    return { lines, travel, other, travelGap, otherGap, need, uncovered, covered: need ? Math.max(0, 1 - uncovered / need) : 1 };
   }
   const jump = (sel) => { const n = document.querySelector(sel); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
@@ -617,7 +634,7 @@ dash.calc('dates', {
     const lines = budgetLines();
     const nyIdeas = items.filter((x) => x.kind === 'goal' && x.scope === 'Next Year' && x.status === 'Idea').length;
     const p1 = items.filter((x) => x.kind === 'task' && x.scope === 'P1' && (x.status === 'Daily' || x.status === 'Weekly')).length;
-    const covered = d.next_year_budget ? Math.min(1, (lines.travel * 12) / d.next_year_budget) : 0;
+    const fund = goalFunding();
     const stats = [
       { label: 'Active projects', n: d.projects, sub: 'in ' + plural(d.project_areas, 'life area', 'life areas'), color: 'var(--a-career)', go: () => jump('#areas') },
       { label: 'Active goals', n: d.goals_active, sub: nyIdeas ? plural(nyIdeas, 'next-year goal', 'next-year goals') + ' not started' : 'every next-year goal started', cls: nyIdeas ? 'is-warn' : 'is-ok',
@@ -625,8 +642,8 @@ dash.calc('dates', {
       { label: 'This week', n: d.tasks_open, small: 'tasks', sub: [p1 ? p1 + ' P1' : '', d.tasks_capture ? d.tasks_capture + ' in Capture' : ''].filter(Boolean).join(' · ') || 'nothing urgent', color: 'var(--a-learning)', go: () => jump('#agenda') },
       { label: 'Impossible List', n: d.goals_done, small: 'of ' + d.goals_total + ' done', bar: d.done_share, sub: FMT.pct(d.done_share) + ' of your list', color: 'var(--a-travel)',
         go: () => { if (window.SkillTree && window.SkillTree.openTab) window.SkillTree.openTab('bucket'); location.hash = '#skills'; } },
-      { label: 'Next-year budget', n: FMT.eur(d.next_year_budget), sub: FMT.eur(d.monthly_saving) + '/month · ' + (lines.travel ? 'Travel line covers ' + FMT.pct(covered) : 'no Travel line'),
-        cls: covered < 1 ? 'is-warn' : 'is-ok', bar: covered, color: 'var(--a-finance)', go: () => { location.hash = '#finance'; } },
+      { label: 'Next-year budget', n: FMT.eur(d.next_year_budget), sub: FMT.eur(d.monthly_saving) + '/month · ' + (fund.uncovered >= 1 ? FMT.eur(Math.round(fund.uncovered)) + '/month not in the budget' : 'covered by your budget lines'),
+        cls: fund.uncovered >= 1 ? 'is-warn' : 'is-ok', bar: fund.covered, color: 'var(--a-finance)', go: () => { location.hash = '#finance'; } },
     ];
     box.replaceChildren();
     for (const x of stats) {
@@ -644,14 +661,16 @@ dash.calc('dates', {
     if (state('summary', 'items') !== 'ok') return [];
     const d = dash.data('summary').data[0];
     if (!d.next_year_budget) return [];
-    const lines = budgetLines();
-    const need = d.next_year_budget / 12, gap = need - lines.travel;
+    const f = goalFunding(), lines = f.lines;
+    const parts = [];
+    if (f.travel) parts.push(lines.travel ? 'Travel goals (' + FMT.eur(f.travel) + ') ' + (f.travelGap >= 1 ? 'are ' + FMT.eur(Math.round(f.travelGap)) + ' a month more than the Travel line (' + FMT.eur(lines.travel) + ').' : 'fit in the Travel line (' + FMT.eur(lines.travel) + ' a month).') : 'Travel goals (' + FMT.eur(f.travel) + ') have no Travel line yet.');
+    if (f.other) parts.push('Other goals (' + FMT.eur(f.other) + ') ' + (f.otherGap >= 1 ? (lines.other ? 'are ' + FMT.eur(Math.round(f.otherGap)) + ' a month more than your hobby/sport lines.' : 'have no budget line: ' + FMT.eur(Math.round(f.otherGap)) + ' a month, or a sinking fund, would cover them.') : 'fit in your hobby/sport lines.'));
     const top = dash.data('items').data.filter((g) => g.kind === 'goal' && g.scope === 'Next Year' && g.status !== 'Done' && g.status !== 'Archived' && g.budget)
       .sort((a, b) => b.budget - a.budget).slice(0, 4);
     return [{
-      level: lines.travel ? (gap > 0 ? 'warn' : 'ok') : 'info', area: 'Finance', theme: 'Money',
-      title: 'Next year’s goals need ' + FMT.eur(Math.round(need)) + ' a month',
-      detail: FMT.eur(d.next_year_budget) + ' in goal budgets. ' + (lines.travel ? 'The Travel line puts in ' + FMT.eur(lines.travel) + ' a month' + (gap > 0 ? ', ' + FMT.eur(Math.round(gap)) + ' short.' : ', which covers it.') : 'No Travel line in your budget yet.') +
+      level: f.uncovered >= 1 ? 'warn' : 'ok', area: 'Finance', theme: 'Money',
+      title: f.uncovered >= 1 ? FMT.eur(Math.round(f.uncovered)) + ' a month of next year’s goals isn’t budgeted' : 'Next year’s goals fit your budget',
+      detail: parts.join(' ') +
         (lines.saving ? ' Your ' + FMT.eur(lines.saving) + ' of saving stays for ' + lines.savingItems.map((x) => x.name).join(' and ') + '.' : ''),
       chips: top.map((g) => ({ name: g.name + ' · ' + FMT.eur(g.budget), url: g.url, area: g.area })),
     }];
@@ -978,7 +997,8 @@ dash.calc('dates', {
     box.classList.remove('dash-skeleton');
     const all = dash.data('items').data.filter((x) => x.kind === 'task' && x.status !== 'Done');
     const rankP = { P1: 0, P2: 1, P3: 2 };
-    for (const [status, label, note] of [['Daily', 'Daily', 'every day'], ['Weekly', 'This week', 'before Sunday']]) {
+    // Daily tasks are listed under Today in the briefing; this is the weekly review list.
+    for (const [status, label, note] of [['Weekly', 'This week', 'before Sunday']]) {
       const list = all.filter((x) => x.status === status).sort((a, b) => (rankP[a.scope] ?? 9) - (rankP[b.scope] ?? 9) || a.name.localeCompare(b.name));
       const col = el('div', 'lw-task-col');
       const head = el('div', 'lw-task-col-head');
@@ -1006,6 +1026,7 @@ dash.calc('dates', {
     }
   }
 
+  const NEXT_UP = 3;
   function dates() {
     const box = $('#lw-dates');
     if (hold(box, state('dates'))) return;
@@ -1013,8 +1034,8 @@ dash.calc('dates', {
     const rows = dash.data('dates').data
       .map((r) => ({ ...r, d: parseDay(r.date) }))
       .filter((r) => r.d && r.d >= t && daysBetween(t, r.d) <= 90)
-      .slice(0, 12);
-    if (!rows.length) { box.append(el('li', 'lw-note', 'Nothing dated in the next 90 days.')); return; }
+      .slice(NEXT_UP, NEXT_UP + 12);  // the first NEXT_UP are under Next up in the briefing
+    if (!rows.length) { box.append(el('li', 'lw-note', 'Nothing else dated in the next 90 days.')); return; }
     // Grouped by how soon.
     const bucket = (n) => (n <= 7 ? 'This week' : n <= 31 ? 'Next 30 days' : 'Later');
     const colors = { 'This week': 'var(--color-warn)', 'Next 30 days': 'var(--a-career)', Later: 'var(--cds-chart-axis)' };
@@ -1103,13 +1124,13 @@ dash.calc('dates', {
     const rankP = { P1: 0, P2: 1, P3: 2 };
     const tasks = items.filter((x) => x.kind === 'task' && (x.status === 'Daily' || (x.status === 'Weekly' && x.scope === 'P1')))
       .sort((a, b) => (a.status === 'Weekly' ? -1 : 0) - (b.status === 'Weekly' ? -1 : 0) || (rankP[a.scope] ?? 9) - (rankP[b.scope] ?? 9));
-    for (const x of tasks.slice(0, 4)) item(ul, x.area, x.name, x.url, x.status === 'Weekly' ? 'P1 this week' : 'daily', x.status === 'Weekly');
-    if (tasks.length > 4) item(ul, 'Unassigned', '+' + (tasks.length - 4) + ' more', '#agenda');
+    for (const x of tasks.slice(0, 6)) item(ul, x.area, x.name, x.url, x.status === 'Weekly' ? 'P1 this week' : 'daily', x.status === 'Weekly');
+    if (tasks.length > 6) item(ul, 'Unassigned', '+' + (tasks.length - 6) + ' more in the Task Planner', 'https://app.notion.com/p/803e0b92530f4beea2f0a5c012bda99b');
     if (!ul.children.length) item(ul, 'Unassigned', 'Nothing daily or P1 this week', '');
 
     // Next up: the next three dated items
-    ul = col(cols.next, 'Next up', '#agenda', '90 days →');
-    const next = state('dates') === 'ok' ? dash.data('dates').data.map((r) => ({ ...r, d: parseDay(r.date) })).filter((r) => r.d && r.d >= t).slice(0, 3) : [];
+    ul = col(cols.next, 'Next up', '#agenda', 'later →');
+    const next = state('dates') === 'ok' ? dash.data('dates').data.map((r) => ({ ...r, d: parseDay(r.date) })).filter((r) => r.d && r.d >= t).slice(0, NEXT_UP) : [];
     for (const r of next) { const n = daysBetween(t, r.d); item(ul, r.area, r.label, r.url, rel(n), n <= 3); }
     if (!next.length) item(ul, 'Unassigned', 'Nothing dated coming up', '');
 
@@ -1138,6 +1159,6 @@ dash.calc('dates', {
     d.addEventListener('toggle', () => { try { localStorage.setItem('life-compare-open', d.open ? '1' : '0'); } catch (_) {} });
   })();
 
-  dash.onData(() => { header(); week(); brief(); figures(); donut(); map(); detail(); tasks(); insights(); dates(); });
+  dash.onData(() => { stamp(); header(); week(); brief(); figures(); donut(); map(); detail(); tasks(); insights(); dates(); });
 })();
 </script>

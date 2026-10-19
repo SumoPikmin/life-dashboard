@@ -283,7 +283,8 @@
   const clean = (s) => String(s || '').replace(/\*\*/g, '').trim();
   const num = (s) => { const m = String(s || '').replace(/\*/g, '').replace(/(\d),(\d{3})/g, '$1$2').match(/-?\d+(?:[.,]\d+)?/); return m ? Number(m[0].replace(',', '.')) : null; };
   const parseDay = (s) => (s ? new Date(s.slice(0, 10) + 'T00:00:00Z') : null);
-  const now = new Date(); const t = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const todayUTC = () => { const n = new Date(); return new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())); };
+  let t = todayUTC();  // re-read on every render, see render()
   const days = (a, b) => Math.round((b - a) / 864e5);
   const fmtLong = d3.utcFormat('%-d %b %Y'), fmtShort = d3.utcFormat('%-d %b');
   const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, mai: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, okt: 9, nov: 10, dec: 11, dez: 11 };
@@ -392,10 +393,14 @@
     if (!groups.length) box.append(el('p', 'av-empty', 'Nothing on the Impossible List here yet.'));
   }
 
+  const BRANCH_NAMES = { travel: /travel|reise|adventure|abenteuer/i, fitness: /fitness|health|sport|gesund/i };
   function skillBars(box, branchId, asGroups) {
     box.replaceChildren();
-    const b = window.SkillTree && window.SkillTree.branch(branchId);
-    if (!b) { box.append(el('p', 'av-empty', 'The skill tree hasn’t loaded yet.')); return null; }
+    const ST = window.SkillTree, list = ST && ST.branches ? ST.branches() : null;
+    if (!list) { box.append(el('p', 'av-empty', 'The skill tree is still loading.')); return null; }
+    const re = BRANCH_NAMES[branchId], hit = list.find((x) => x.id === branchId) || (re && list.find((x) => re.test(x.id) || re.test(x.name)));
+    const b = hit && ST.branch(hit.id);
+    if (!b) { box.append(el('p', 'av-empty', 'Your skill tree has no branch for this area yet. Branches: ' + list.map((x) => x.name).join(', ') + '.')); return null; }
     for (const tr of b.tracks) {
       if (asGroups) {
         const g = el('div', 'av-group');
@@ -698,7 +703,9 @@
     const legend = $('#tr-legend'); legend.replaceChildren();
     for (const ph of [...new Set(weeks.map((w) => w.phase))]) { const s = el('span'); const i = el('i'); i.style.background = phaseHue(ph); s.append(i, document.createTextNode(ph)); legend.append(s); }
     if (!weeks.length) { chart.append(el('p', 'av-empty', 'Add a "… week by week" table to your Training Plan page to see the block here.')); return renderPlan(tr, null); }
-    if (!pickedWeek || !weeks.some((w) => w.n === pickedWeek)) pickedWeek = (current || next || weeks[weeks.length - 1]).n;
+    // The current week's sessions are already in "This week" above, so the detail starts on the week after.
+    const after = current && weeks[weeks.indexOf(current) + 1];
+    if (!pickedWeek || !weeks.some((w) => w.n === pickedWeek)) pickedWeek = (after || current || next || weeks[weeks.length - 1]).n;
     const W = Math.max(280, chart.clientWidth || 700), H = 150, pad = { t: 18, b: 22 };
     const x = d3.scaleBand(weeks.map((w) => w.n), [4, W - 4]).padding(0.22);
     const y = d3.scaleLinear([0, d3.max(weeks, (w) => w.kmMax) || 1], [H - pad.b, pad.t]);
@@ -723,7 +730,8 @@
       det.style.setProperty('--a', phaseHue(w.phase));
       const h = el('div', 'tr-detail-h');
       const end = new Date(w.start); end.setUTCDate(w.start.getUTCDate() + 6);
-      h.append(el('strong', '', 'Week ' + w.n + (w === current ? ' · this week' : '')), el('span', 'av-note', [fmtShort(w.start) + '–' + fmtShort(end), w.phase, w.focus, w.km].filter(Boolean).join(' · ')));
+      h.append(el('strong', '', 'Week ' + w.n + (w === current ? ' · this week' : w === after ? ' · next week' : '')), el('span', 'av-note', [fmtShort(w.start) + '–' + fmtShort(end), w.phase, w.focus, w.km].filter(Boolean).join(' · ')));
+      if (w === current) { det.append(h, el('p', 'av-note', 'This week’s sessions are in the week view above. Tap another bar to see that week.')); return renderPlan(tr, current, weeks); }
       const runs = el('div', 'tr-runs');
       for (const [k, v] of [['Tue · quality', w.tue], ['Thu · run or Hyrox', w.thu], ['Sun · long', w.sun]]) { if (!v) continue; const r = el('div', 'tr-run'); r.append(el('span', '', k), document.createTextNode(v)); runs.append(r); }
       det.append(h, runs);
@@ -743,7 +751,7 @@
       $('#tr-pace-note').textContent = nowCol > 0 ? 'Marked: the paces for week ' + focusWeek.n : '';
       pb.append(tableEl(head, rows, nowCol));
     }
-    const rt = trTable(tr, /benchmark/i);
+    const rt = pz ? null : trTable(tr, /benchmark/i);  // older run-type paces only when there are no block zones
     if (rt) { const { head, rows } = split(rt); pb.append(el('p', 'av-note', 'General run types'), tableEl(head, rows.filter((r) => r.some((c) => clean(c))), -1)); }
     const bm = (tr.lines || {})[Object.keys(tr.lines || {}).find((k) => /benchmark/i.test(k))] || [];
     if (bm.length) { const ul = el('ul'); bm.forEach((l) => ul.append(el('li', '', l))); const d = el('div', 'tr-plan'); d.append(el('h3', '', 'Benchmarks'), ul); pb.append(d); }
@@ -800,7 +808,7 @@
     const curWeek = weeks.find((w) => t >= w.start && days(w.start, t) < 7), nextWeek = weeks.find((w) => w.start > t);
     const hl = $('#hv-lead');
     hl.textContent = curWeek
-      ? 'This week: ' + (blockTitle || 'block') + ' week ' + curWeek.n + ' of ' + weeks.length + ' (' + [curWeek.phase, curWeek.km].filter(Boolean).join(', ') + '). Key sessions: Tue ' + curWeek.tue + '; Sun ' + curWeek.sun + '.'
+      ? 'This week: ' + (blockTitle || 'block') + ' week ' + curWeek.n + ' of ' + weeks.length + ' (' + [curWeek.phase, curWeek.km].filter(Boolean).join(', ') + ').'
       : nextWeek
         ? 'Before the ' + (blockTitle || 'next') + ' block starts on ' + fmtLong(nextWeek.start) + ' (in ' + Math.ceil(days(t, nextWeek.start) / 7) + ' weeks), follow your weekly structure below.'
         : training ? training.name + (te ? ' runs until ' + fmtLong(te) : '') + '.' : 'No training plan yet.';
@@ -832,6 +840,8 @@
     }
     if (!projects.length) pb.append(el('p', 'av-empty', 'No health project yet.'));
 
+    // Budgets come from the trip table as plain text such as "550 (480–650)"; add the euro signs.
+    const euroText = (c) => /€/.test(c) ? c : String(c).replace(/^\s*(\d[\d.,]*)/, '€$1').replace(/\((\d[\d.,]*)\s*[–-]\s*(\d[\d.,]*)\)/, '(€$1–$2)');
     const rl = $('#hv-race-list'); rl.replaceChildren();
     for (const r of realRaces.slice(0, 6)) {
       const card = el('div', 'hv-race');
@@ -840,7 +850,7 @@
       if (r.url) card.lastChild.classList.add('hv-race-name');
       const goal = goals.find((g) => g.status !== 'Done' && raceFor(g) === r);
       const inBlock = blockTitle && (blockTitle.match(/[A-Za-zÀ-ž]{5,}/g) || []).some((w) => r.label.toLowerCase().includes(w.toLowerCase()));
-      const meta = [(r.monthOnly ? d3.utcFormat('%B %Y')(r.when) : fmtLong(r.when)) + (r.cost ? ' · ' + r.cost : ''), goal ? 'Goal: ' + goal.name : '', inBlock ? 'Training: ' + blockTitle + ' block' : ''].filter(Boolean);
+      const meta = [(r.monthOnly ? d3.utcFormat('%B %Y')(r.when) : fmtLong(r.when)) + (r.cost ? ' · trip budget ' + euroText(r.cost) : ''), goal ? 'Goal: ' + goal.name : '', inBlock ? 'Training: ' + blockTitle + ' block' : ''].filter(Boolean);
       for (const m of meta) card.append(el('div', 'hv-race-meta', m));
       rl.append(card);
     }
@@ -1152,6 +1162,7 @@
   }
 
   const render = () => {
+    t = todayUTC();
     try { refreshQueue(); } catch (e) { console.error(e); }
     try { if (visible('view-travel')) renderTravel(); } catch (e) { console.error(e); }
     try { if (visible('view-health')) renderHealth(); } catch (e) { console.error(e); }

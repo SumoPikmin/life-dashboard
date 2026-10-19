@@ -115,7 +115,13 @@
   }
 
   $('#shell-lock').addEventListener('click', () => { forget(); location.reload(); });
-  setInterval(updateSync, 60000);
+  let shownDay = new Date().toDateString();
+  setInterval(() => {
+    updateSync();
+    // Past midnight: redraw so Today, the week and every countdown move on.
+    const day = new Date().toDateString();
+    if (day !== shownDay) { shownDay = day; dash.redraw(); }
+  }, 60000);
   setInterval(() => { if (!document.hidden) refresh(false); }, 10 * 60000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(false); });
   route();

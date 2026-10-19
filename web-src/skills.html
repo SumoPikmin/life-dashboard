@@ -549,6 +549,8 @@ window.SkillTree = (() => {
 
   return {
     /* Progress of one branch, for the Travel and Health tabs. */
+    /* Branch ids and names, so other tabs can find a branch by name. null until the tree has loaded. */
+    branches() { return config ? config.branches.map((x) => ({ id: x.id, name: x.name })) : null; },
     branch(id) {
       const b = config && config.branches.find((x) => x.id === id);
       if (!b) return null;
